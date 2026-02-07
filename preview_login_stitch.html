@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Quarks OS - Login (Stitch Generated)</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f4f40b", // Solar Amber/Yellow
+                        "petroleum": "#0F4C5C",
+                        "slate-dark": "#1e293b",
+                        "background-light": "#F1F5F9",
+                        "background-dark": "#0f172a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .form-input:focus {
+            border-color: #0F4C5C !important;
+            --tw-ring-color: #0F4C5C !important;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-6 transition-colors duration-300">
+<!-- Main Container -->
+<div class="w-full max-w-[480px]">
+<!-- Login Card -->
+<div class="bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 rounded-xl shadow-sm overflow-hidden p-8 md:p-12">
+<!-- Logo Section -->
+<div class="flex flex-col items-center mb-10">
+<div class="flex items-center gap-3 text-petroleum dark:text-primary mb-2">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1">solar_power</span>
+<h1 class="text-3xl font-bold tracking-tight">Quarks OS</h1>
+</div>
+<p class="text-petroleum/60 dark:text-slate-400 text-sm font-medium tracking-wide uppercase">Gestão Solar Inteligente</p>
+</div>
+<!-- Welcome Text -->
+<div class="mb-8 text-center">
+<h2 class="text-slate-dark dark:text-white text-2xl font-bold mb-2">Bem-vindo de volta</h2>
+<p class="text-slate-500 dark:text-slate-400 text-base">Acesse sua conta para continuar</p>
+</div>
+<!-- Form -->
+<form action="#" class="space-y-6">
+<!-- Email Input -->
+<div class="flex flex-col gap-2">
+<label class="text-slate-dark dark:text-slate-200 text-sm font-semibold" for="email">Email</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">mail</span>
+<input class="form-input w-full pl-12 pr-4 py-4 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-dark dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-petroleum/20 transition-all" id="email" placeholder="seu@email.com.br" type="email"/>
+</div>
+</div>
+<!-- Password Input -->
+<div class="flex flex-col gap-2">
+<label class="text-slate-dark dark:text-slate-200 text-sm font-semibold" for="password">Senha</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">lock</span>
+<input class="form-input w-full pl-12 pr-12 py-4 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-dark dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-petroleum/20 transition-all" id="password" placeholder="••••••••" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-petroleum dark:hover:text-primary transition-colors" type="button" onclick="togglePassword()">
+<span class="material-symbols-outlined text-xl" id="visibilityIcon">visibility</span>
+</button>
+</div>
+</div>
+<!-- Options Row -->
+<div class="flex items-center justify-between text-sm">
+<label class="flex items-center gap-2 cursor-pointer group">
+<input class="rounded border-slate-300 text-petroleum focus:ring-petroleum dark:bg-slate-800 dark:border-slate-700" type="checkbox"/>
+<span class="text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors">Lembrar-me</span>
+</label>
+<a class="text-petroleum dark:text-primary font-semibold hover:underline" href="#">Esqueceu a senha?</a>
+</div>
+<!-- Submit Button -->
+<button class="w-full bg-primary hover:bg-[#eaea0a] text-slate-dark font-bold py-4 rounded-full shadow-lg shadow-primary/20 transition-all transform active:scale-[0.98]" type="submit">
+                    Entrar
+                </button>
+</form>
+<!-- Footer Section -->
+<div class="mt-10 pt-8 border-t border-[#f5f5f0] dark:border-slate-800 text-center">
+<p class="text-slate-500 dark:text-slate-400 text-sm">
+                    Ainda não tem acesso? 
+                    <a class="text-petroleum dark:text-primary font-bold ml-1 hover:underline" href="#">Solicitar acesso</a>
+</p>
+</div>
+</div>
+<!-- Versioning/Help -->
+<div class="mt-8 flex justify-between items-center px-4">
+<span class="text-slate-400 dark:text-slate-600 text-xs font-medium">Quarks OS v1.3</span>
+<div class="flex gap-4">
+<a class="text-slate-400 dark:text-slate-600 text-xs hover:text-petroleum transition-colors" href="#">Suporte</a>
+<a class="text-slate-400 dark:text-slate-600 text-xs hover:text-petroleum transition-colors" href="#">Privacidade</a>
+</div>
+</div>
+</div>
+<!-- Theme Toggle (Visual only for demonstration) -->
+<div class="fixed bottom-6 right-6">
+<button class="p-3 bg-white dark:bg-slate-800 rounded-full shadow-md border border-[#E2E8F0] dark:border-slate-700 text-slate-dark dark:text-white flex items-center justify-center" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-symbols-outlined">contrast</span>
+</button>
+</div>
+
+<script>
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const visibilityIcon = document.getElementById('visibilityIcon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        visibilityIcon.textContent = 'visibility_off';
+    } else {
+        passwordInput.type = 'password';
+        visibilityIcon.textContent = 'visibility';
+    }
+}
+</script>
+</body></html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{ data.title }}</title>
+    <style>
+        body {
+            font-family: 'Helvetica', sans-serif;
+            color: #1E3A8A;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            border-bottom: 2px solid #F59E0B;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #1E3A8A;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            background: #F8FAFC;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .highlight {
+            color: #F59E0B;
+            font-weight: bold;
+        }
+
+        .metric-box {
+            display: inline-block;
+            width: 45%;
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #64748B;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>{{ data.title }}</h1>
+        <p>Cliente: <strong>{{ data.customer.name }}</strong> | {{ data.customer.city }}/{{ data.customer.state }}</p>
+    </div>
+
+    <div class="section">
+        <h2>☀️ Seu Sistema Solar</h2>
+        <div class="metric-box">Potência: <span class="highlight">{{ data.generation.system_size_kwp }} kWp</span></div>
+        <div class="metric-box">Geração Mensal: <span class="highlight">{{ data.generation.estimated_generation_monthly
+                }} kWh</span></div>
+        <div class="metric-box">Painéis: <span class="highlight">{{ data.generation.panels_count }}x</span> {{
+            data.kit_name }}</div>
+    </div>
+
+    <div class="section">
+        <h2>💰 Análise Financeira</h2>
+        <p>Economia Acumulada (25 anos): <span class="highlight">R$ {{ data.financials.total_savings_25y }}</span></p>
+        <p>Retorno sobre Investimento (ROI): <strong>{{ data.financials.roi_percentage }}%</strong></p>
+        <p>Payback Estimado: <strong>{{ data.financials.payback_years }} Anos</strong></p>
+    </div>
+
+    <div class="footer">
+        Gerado por Quarks OS - Tecnologia Solar
+    </div>
+</body>
+
+</html>

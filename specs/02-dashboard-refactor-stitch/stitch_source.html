@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Dashboard Quarks OS - Estilo Minimalista</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d97706", // Sophisticated Solar Gold (Amber-600)
+                        "primary-hover": "#b45309",
+                        "primary-light": "#fffbeb", // Amber-50
+                        "charcoal": "#111827", // Deep Charcoal (Gray-900)
+                        "charcoal-light": "#374151", // Gray-700
+                        "subtle": "#6b7280", // Gray-500
+                        "border-subtle": "#e5e7eb", // Gray-200
+                        "bg-surface": "#ffffff",
+                        "bg-subtle": "#f9fafb", // Gray-50
+                        "success": "#10b981",
+                        "blue-accent": "#3b82f6",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.375rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem"
+                    },
+                    boxShadow: {
+                        "sm": "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                        "DEFAULT": "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)",
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        /* ... (truncated styles would go here) ... */
+    </style>
+</head>
+
+<body class="flex h-screen bg-bg-screen font-body text-charcoal overflow-hidden antialiased">
+    <!-- Main content would be here -->
+
+    <!-- Extracted Right Sidebar (Copilot) from Fetch -->
+    <aside class="w-80 border-l border-border-subtle bg-white flex flex-col flex-shrink-0 z-20">
+        <div class="h-16 border-b border-border-subtle flex items-center justify-between px-4 flex-shrink-0">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-[24px]">smart_toy</span>
+                <span class="font-semibold text-sm tracking-wide">Copiloto Solar</span>
+            </div>
+            <button class="text-subtle hover:text-charcoal transition-colors">
+                <span class="material-symbols-outlined text-[20px]">more_vert</span>
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-bg-subtle/30 scrollbar-thin">
+            <!-- Assistant Message -->
+            <div class="flex gap-3">
+                <div
+                    class="w-8 h-8 rounded-full bg-primary-light border border-primary/20 flex items-center justify-center flex-shrink-0 text-primary">
+                    <span class="material-symbols-outlined text-[18px]">smart_toy</span>
+                </div>
+                <div class="flex flex-col gap-1 max-w-[90%]">
+                    <div
+                        class="bg-bg-subtle border border-border-subtle p-3 rounded-2xl rounded-tl-none text-sm text-charcoal shadow-sm flex items-center gap-2">
+                        <span class="relative flex h-2 w-2">
+                            <span
+                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                        </span>
+                        Elaborando proposta...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suggestion Chips -->
+            <div class="mt-auto flex flex-wrap gap-2 pt-4">
+                <button
+                    class="text-xs bg-white hover:bg-bg-subtle text-charcoal px-3 py-1.5 rounded-full border border-border-subtle transition-all hover:border-primary/30 shadow-sm">Adicionar
+                    Bateria</button>
+                <button
+                    class="text-xs bg-white hover:bg-bg-subtle text-charcoal px-3 py-1.5 rounded-full border border-border-subtle transition-all hover:border-primary/30 shadow-sm">Verificar
+                    Financiamento</button>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 border-t border-border-subtle bg-white">
+            <div class="relative">
+                <div class="flex items-center gap-2 absolute left-3 top-2.5">
+                    <button class="text-subtle hover:text-charcoal transition-colors p-0.5 hover:bg-bg-subtle rounded"
+                        title="Upload Bill">
+                        <span class="material-symbols-outlined text-[20px]">add_circle</span>
+                    </button>
+                </div>
+                <input
+                    class="w-full bg-bg-subtle border border-border-subtle rounded-xl py-2.5 pl-10 pr-10 text-sm text-charcoal placeholder-subtle focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-inner focus:bg-white"
+                    placeholder="Perguntar ao Copiloto..." type="text" />
+                <button
+                    class="absolute right-2 top-2 p-1 bg-primary hover:bg-primary-hover rounded-lg text-white transition-colors">
+                    <span class="material-symbols-outlined text-[16px] block">arrow_upward</span>
+                </button>
+            </div>
+            <p class="text-[10px] text-subtle text-center mt-2">IA pode cometer erros. Verifique dados críticos.</p>
+        </div>
+    </aside>
+</body>
+
+</html>

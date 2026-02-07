@@ -1,0 +1,17 @@
+{
+  "name": "quarks-os",
+  "version": "0.1.0",
+  "description": "Quarks OS - Solar CRM and Calculation Platform",
+  "main": "src/backend/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Antigravity",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "jsonwebtoken": "^9.0.3",
+    "react-icons": "^5.5.0",
+    "socket.io-client": "^4.8.3"
+  }
+}

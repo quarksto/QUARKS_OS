@@ -1,0 +1,325 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:postgres@localhost:5432/quarks"
+}
+
+// Enums
+enum Role {
+  INTEGRADOR
+  ENGENHARIA
+  COMERCIAL
+  ADMIN
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  PROPOSAL_SENT
+  NEGOTIATION
+  CLOSED_WON
+  CLOSED_LOST
+}
+
+enum ProposalStatus {
+  DRAFT
+  SENT
+  VIEWED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum ProjectStatus {
+  PLANNED          // Planejado
+  SURVEYING        // Em Vistoria
+  TECHNICAL_STUDY  // Estudo Técnico
+  APPROVED         // Aprovado p/ Instalação
+  INSTALLING       // Em Instalação
+  COMPLETED        // Concluído
+}
+
+// Global Users (RBAC)
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(INTEGRADOR)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  leads     Lead[]
+  proposals Proposal[]
+  projects  Project[]  @relation("AssignedTechnician")
+  auditLogs AuditLog[]
+  agentSessions AgentSession[]
+  messages  Message[]
+
+  @@map("users")
+}
+
+// CRM - Leads
+model Lead {
+  id             String     @id @default(uuid())
+  name           String
+  email          String?
+  phone          String?
+  consumption    Float      // Monthly average consumption in kWh
+  location       String?    // City/State or Zip
+  distributor    String?    // Energy distributor (Enel, Cemig, etc.)
+  status         LeadStatus @default(NEW)
+
+  // Qualificação solar
+  origin         String?    // Indicação, Facebook, Google, Site, Outro
+  cep            String?    // CEP para geocode e proposta
+  fullAddress    String?    // Endereço completo (rua, número, bairro)
+  roofType       String?    // Cerâmica, metalico, laje, etc.
+  connectionType String?    // Monofásico, bifásico, trifásico
+
+  ownerId        String
+  owner          User       @relation(fields: [ownerId], references: [id])
+
+  proposals      Proposal[]
+  projects       Project[]
+  messages       Message[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@map("leads")
+}
+
+// Solar Proposals
+model Proposal {
+  id             String         @id @default(uuid())
+  title          String
+  generationKwh  Float          // Monthly generation
+  systemSizeKwp  Float          // System size
+  totalPrice     Float
+  paybackYears   Float
+  savingsMonthly Float
+  status         ProposalStatus @default(DRAFT)
+  
+  leadId         String
+  lead           Lead           @relation(fields: [leadId], references: [id])
+  
+  creatorId      String
+  creator        User           @relation(fields: [creatorId], references: [id])
+  
+  kitId          String?
+  kit            Kit?           @relation(fields: [kitId], references: [id])
+
+  project        Project?
+
+  pdfUrl         String?        // Link to generated PDF
+  publicSlug     String?        @unique // Token for public client link (view/accept/reject)
+  
+  // Workflow fields
+  discountPercent   Float?         // Desconto aplicado (ex: 0.10 = 10%)
+  discountAbsolute  Float?         // Desconto absoluto em R$
+  notes             String?   @db.Text  // Observações do vendedor
+  version           Int       @default(1)
+  sentAt            DateTime?
+  viewedAt          DateTime?
+  acceptedAt        DateTime?
+  viewedInPublicAt  DateTime? // Renaming viewedAt to publicView for clarity if needed, but keeping for now
+  
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@map("proposals")
+}
+
+// Engineering - Projects
+model Project {
+  id             String        @id @default(uuid())
+  name           String
+  status         ProjectStatus @default(PLANNED)
+  technicalNotes String?       @db.Text
+  
+  // Geolocation for site survey
+  latitude       Float?
+  longitude      Float?
+
+  leadId         String
+  lead           Lead          @relation(fields: [leadId], references: [id])
+
+  proposalId     String?       @unique
+  proposal       Proposal?     @relation(fields: [proposalId], references: [id])
+
+  technicianId   String?
+  technician     User?         @relation("AssignedTechnician", fields: [technicianId], references: [id])
+
+  activities     ProjectActivity[]
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@map("projects")
+}
+
+model ProjectActivity {
+  id        String   @id @default(uuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id])
+  
+  action    String
+  details   String?  @db.Text
+  
+  createdAt DateTime @default(now())
+
+  @@map("project_activities")
+}
+
+// Energy Tariffs (Lookup)
+model Tariff {
+  id          String   @id @default(uuid())
+  distributor String
+  state       String
+  priceKwh    Float    // Price per kWh
+  validFrom   DateTime
+  validTo     DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([distributor, state])
+  @@map("tariffs")
+}
+
+// Commercial Core - Products & Pricing
+
+enum ProductType {
+  MODULE      // Painel
+  INVERTER    // Inversor
+  STRUCTURE   // Estrutura
+  CABLE       // Cabos
+  OTHER       // String box, conectores
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  sku         String      @unique
+  name        String
+  description String?
+  type        ProductType
+  costPrice   Float       // Custo base (sem impostos)
+  supplier    String?
+  specs       Json?       // JSON flexível para specs (ex: { power: 550, efficiency: 21.5 })
+  active      Boolean     @default(true)
+  
+  kits        KitItem[]
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  @@map("products")
+}
+
+model Kit {
+  id             String    @id @default(uuid())
+  name           String
+  description    String?
+  size_kwp       Float?    // System size in kWp (e.g. 5.5 for a 5.5kWp kit)
+  price          Float?    // Base price of kit (can be calculated from items or set directly)
+  active         Boolean   @default(true)
+  
+  items          KitItem[]
+  proposals      Proposal[]
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("kits")
+}
+
+model KitItem {
+  id        String  @id @default(uuid())
+  kitId     String
+  kit       Kit     @relation(fields: [kitId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int     @default(1)
+  
+  @@map("kit_items")
+}
+
+model PricingRule {
+  id           String   @id @default(uuid())
+  name         String
+  minPower     Float    // Potência mínima do sistema (0 = qualquer)
+  maxPower     Float    // Potência máxima
+  targetMargin Float    // Margem alvo (decimal, ex: 0.20 para 20%)
+  taxRate      Float    // Imposto estimado de saída (simples c/ difal mockado)
+  
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("pricing_rules")
+}
+
+// Audit Logs
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  resource  String
+  details   String?
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  createdAt DateTime @default(now())
+  
+  @@map("audit_logs")
+}
+
+// AI Copilot
+model AgentSession {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  context   Json?    // Stores active intent, draft IDs, etc.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  messages  AgentMessage[]
+
+  @@map("agent_sessions")
+}
+
+model AgentMessage {
+  id        String       @id @default(uuid())
+  sessionId String
+  session   AgentSession @relation(fields: [sessionId], references: [id])
+  role      String       // USER, ASSISTANT, SYSTEM
+  content   String       @db.Text
+  metadata  Json?        // Token usage, tool calls, etc.
+  createdAt DateTime     @default(now())
+
+  @@map("agent_messages")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  role      String   @default("USER") // USER (Salesperson), SYSTEM, LEAD (Customer)
+  
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id])
+  
+  senderId  String?
+  sender    User?    @relation(fields: [senderId], references: [id])
+  
+  isRead    Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+
+  @@map("messages")
+}

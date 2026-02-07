@@ -1,0 +1,7 @@
+{
+  "message": "Request failed with status code 500",
+  "response": {
+    "error": "[GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent: [401 Unauthorized] API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication [{\"@type\":\"type.googleapis.com/google.rpc.ErrorInfo\",\"reason\":\"CREDENTIALS_MISSING\",\"domain\":\"googleapis.com\",\"metadata\":{\"method\":\"google.ai.generativelanguage.v1beta.GenerativeService.GenerateContent\",\"service\":\"generativelanguage.googleapis.com\"}}]"
+  },
+  "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\QUARKS_OS\\src\\backend\\node_modules\\axios\\dist\\node\\axios.cjs:2086:12)\n    at IncomingMessage.handleStreamEnd (D:\\QUARKS_OS\\src\\backend\\node_modules\\axios\\dist\\node\\axios.cjs:3476:11)\n    at IncomingMessage.emit (node:events:520:35)\n    at endReadableNT (node:internal/streams/readable:1701:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)\n    at Axios.request (D:\\QUARKS_OS\\src\\backend\\node_modules\\axios\\dist\\node\\axios.cjs:4713:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async testCopilot (D:\\QUARKS_OS\\src\\backend\\verify_copilot_api.js:17:22)"
+}
