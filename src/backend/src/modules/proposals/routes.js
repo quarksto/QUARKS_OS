@@ -118,6 +118,32 @@ router.post('/public/:slug/reject', async (req, res) => {
     }
 });
 
+// POST /api/proposals/draft - Create new draft proposal
+router.post('/draft', authenticate, async (req, res) => {
+    try {
+        const ProposalDomain = require('../../agents/proposal-domain');
+        // Accept leadId, kitId, customItems, calculation, etc.
+        const { leadId, kitId, customItems, calculation, pricing, introduction, notes, paymentTerms } = req.body;
+
+        const proposal = await ProposalDomain.createDraft(
+            leadId,
+            calculation,
+            kitId,
+            customItems,
+            pricing,
+            introduction,
+            notes,
+            paymentTerms,
+            req.user.id
+        );
+
+        res.status(201).json(proposal);
+    } catch (error) {
+        console.error('[Proposals] Error creating draft:', error.message);
+        res.status(400).json({ error: error.message });
+    }
+});
+
 // GET /api/proposals - List with filters
 router.get('/', authenticate, async (req, res) => {
     try {
@@ -214,7 +240,8 @@ router.patch('/:id', authenticate, async (req, res) => {
     try {
         const allowed = [
             'title', 'totalPrice', 'discountPercent', 'discountAbsolute',
-            'notes', 'expiresAt', 'status'
+            'title', 'totalPrice', 'discountPercent', 'discountAbsolute',
+            'notes', 'expiresAt', 'status', 'introduction', 'paymentTerms'
         ];
         const data = {};
 
@@ -422,8 +449,15 @@ router.post('/:id/generate-pdf', authenticate, async (req, res) => {
                 distributor: proposal.lead.distributor || 'Distribuidora',
                 total_rate_with_taxes: 0.95
             },
+            tariff: {
+                distributor: proposal.lead.distributor || 'Distribuidora',
+                total_rate_with_taxes: 0.95
+            },
             kit_name: proposal.kit?.name || 'Kit Sob Medida',
-            integrator_name: 'Quarks Solar'
+            integrator_name: 'Quarks Solar',
+            introduction: proposal.introduction,
+            notes: proposal.notes,
+            payment_terms: proposal.paymentTerms
         };
 
         const response = await axios.post(`${pythonUrl}/generate/proposal`, proposalData);

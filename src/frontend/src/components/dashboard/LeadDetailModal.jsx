@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCopilot } from '../../context/CopilotContext';
-import api from '../../services/api';
+import api, { API_BASE } from '../../services/api';
 import { StandardAvatar } from '../ui/StandardAvatar';
 import { useNavigate } from 'react-router-dom';
 import { MdLocationOn, MdEdit, MdClose, MdEmail, MdBolt, MdAccountBalanceWallet, MdCalendarToday, MdChevronRight, MdDescription, MdPhone } from 'react-icons/md';
@@ -15,14 +15,141 @@ const STATUS_CONFIG = {
     CLOSED_LOST: { label: 'Perdido', color: 'border-slate-200 text-slate-400' },
 };
 
+const DocumentsTab = ({ leadId }) => {
+    const [files, setFiles] = useState([]);
+    const [uploading, setUploading] = useState(false);
+
+    useEffect(() => {
+        loadFiles();
+    }, [leadId]);
+
+    const loadFiles = async () => {
+        try {
+            const res = await api.get(`/documents/lead/${leadId}`);
+            setFiles(res.data);
+        } catch (error) {
+            console.error('Error loading files:', error);
+        }
+    };
+
+    const handleUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('leadId', leadId);
+
+        setUploading(true);
+        try {
+            await api.post('/documents/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            await loadFiles();
+        } catch (error) {
+            alert('Erro ao enviar arquivo');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleDownload = async (doc) => {
+        try {
+            // Initiate download
+            window.open(`${API_BASE}/documents/download/${doc.id}`, '_blank');
+        } catch (error) {
+            alert('Erro ao baixar arquivo');
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!confirm('Tem certeza que deseja excluir este arquivo?')) return;
+        try {
+            await api.delete(`/documents/${id}`);
+            setFiles(prev => prev.filter(f => f.id !== id));
+        } catch (error) {
+            alert('Erro ao excluir arquivo');
+        }
+    };
+
+    return (
+        <div className="h-full flex flex-col">
+            <div className="mb-6 flex justify-between items-center">
+                <h3 className="ds-title-section text-petroleum-800">Documentos do Lead</h3>
+                <div>
+                    <input
+                        type="file"
+                        id="file-upload"
+                        className="hidden"
+                        onChange={handleUpload}
+                        disabled={uploading}
+                    />
+                    <label
+                        htmlFor="file-upload"
+                        className={`cursor-pointer px-4 py-2 bg-blue-600 text-white text-xs font-bold uppercase rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                        {uploading ? 'Enviando...' : (
+                            <>
+                                <MdDescription size={16} />
+                                Upload de Arquivo
+                            </>
+                        )}
+                    </label>
+                </div>
+            </div>
+
+            {files.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-lg bg-slate-50">
+                    <MdDescription size={48} className="text-slate-300 mb-2" />
+                    <p className="text-slate-500 text-sm">Nenhum documento anexado.</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 gap-3">
+                    {files.map(file => (
+                        <div key={file.id} className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg hover:border-blue-300 transition-colors">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500">
+                                    <MdDescription size={20} />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-slate-900 truncate max-w-[200px]">{file.name}</p>
+                                    <p className="text-xs text-slate-400">{new Date(file.createdAt).toLocaleDateString()} • {(file.size / 1024).toFixed(1)} KB</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => handleDownload(file)}
+                                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                    title="Baixar"
+                                >
+                                    <MdDescription size={18} />
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(file.id)}
+                                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    title="Excluir"
+                                >
+                                    <MdClose size={18} />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
 export const LeadDetailModal = ({ isOpen, onClose, lead: initialLead }) => {
     const [lead, setLead] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [activeTab, setActiveTab] = useState('DETAILS'); // DETAILS | DOCUMENTS
     const { setContext, triggerAction, openSidebar } = useCopilot();
     const navigate = useNavigate();
 
     useEffect(() => {
         if (!isOpen || !initialLead?.id) return;
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
         setLead(initialLead);
         // Optimistic load, then fetch detailed
@@ -75,84 +202,106 @@ export const LeadDetailModal = ({ isOpen, onClose, lead: initialLead }) => {
                         </button>
                     </div>
                 </header>
+
+                {/* Tabs */}
+                <div className="px-8 border-b border-slate-100 bg-slate-50/50 flex gap-6">
+                    <button
+                        className={`py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'DETAILS' ? 'border-petroleum-600 text-petroleum-800' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                        onClick={() => setActiveTab('DETAILS')}
+                    >
+                        Detalhes
+                    </button>
+                    <button
+                        className={`py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'DOCUMENTS' ? 'border-petroleum-600 text-petroleum-800' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                        onClick={() => setActiveTab('DOCUMENTS')}
+                    >
+                        Documentos
+                    </button>
+                </div>
+
                 {/* Conteúdo - Grid de 2 Colunas */}
-                <div className="flex-1 overflow-y-auto p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <div className="flex-1 overflow-y-auto p-8">
+                    {activeTab === 'DETAILS' ? (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                            {/* COLUNA ESQUERDA: Dados */}
+                            <div className="flex flex-col gap-8">
+                                <div>
+                                    <h3 className="text-slate-400 text-xs font-bold uppercase tracking-[0.1em] mb-4">Informações de Contato</h3>
+                                    <div className="space-y-4">
+                                        <div className="flex items-start gap-4 p-4 rounded-lg bg-slate-50 border border-slate-100">
+                                            <FaEnvelope size={18} className="text-slate-400 mt-0.5" />
+                                            <div>
+                                                <p className="text-xs text-slate-500 font-bold uppercase">Email</p>
+                                                <p className="text-slate-900 font-medium">{lead.email}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-4 p-4 rounded-lg bg-slate-50 border border-slate-100">
+                                            <FaWhatsapp size={18} className="text-slate-400 mt-0.5" />
+                                            <div>
+                                                <p className="text-xs text-slate-500 font-bold uppercase">Celular / WhatsApp</p>
+                                                <p className="text-slate-900 font-medium">{lead.phone || '—'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                    {/* COLUNA ESQUERDA: Dados */}
-                    <div className="flex flex-col gap-8">
-                        <div>
-                            <h3 className="text-slate-400 text-xs font-bold uppercase tracking-[0.1em] mb-4">Informações de Contato</h3>
-                            <div className="space-y-4">
-                                <div className="flex items-start gap-4 p-4 rounded-lg bg-slate-50 border border-slate-100">
-                                    <FaEnvelope size={18} className="text-slate-400 mt-0.5" />
-                                    <div>
-                                        <p className="text-xs text-slate-500 font-bold uppercase">Email</p>
-                                        <p className="text-slate-900 font-medium">{lead.email}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-4 p-4 rounded-lg bg-slate-50 border border-slate-100">
-                                    <FaWhatsapp size={18} className="text-slate-400 mt-0.5" />
-                                    <div>
-                                        <p className="text-xs text-slate-500 font-bold uppercase">Celular / WhatsApp</p>
-                                        <p className="text-slate-900 font-medium">{lead.phone || '—'}</p>
+                                <div>
+                                    <h3 className="text-slate-400 text-xs font-bold uppercase tracking-[0.1em] mb-4">Dados Solares</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="p-4 rounded-lg border border-slate-200 bg-white">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <MdBolt size={20} className="text-amber-500" />
+                                                <span className="text-xs font-bold text-slate-500 uppercase">Consumo</span>
+                                            </div>
+                                            <p className="text-xl font-black text-slate-900">{lead.consumption || 0} kWh</p>
+                                        </div>
+                                        <div className="p-4 rounded-lg border border-slate-200 bg-white">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <MdAccountBalanceWallet size={20} className="text-blue-500" />
+                                                <span className="text-xs font-bold text-slate-500 uppercase">Fatura Anual Est.</span>
+                                            </div>
+                                            <p className="text-xl font-black text-slate-900">{formatCurrency((lead.consumption || 0) * 0.95 * 12)}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div>
-                            <h3 className="text-slate-400 text-xs font-bold uppercase tracking-[0.1em] mb-4">Dados Solares</h3>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 rounded-lg border border-slate-200 bg-white">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <MdBolt size={20} className="text-amber-500" />
-                                        <span className="text-xs font-bold text-slate-500 uppercase">Consumo</span>
+                            {/* COLUNA DIREITA: Histórico */}
+                            <div className="flex flex-col gap-8">
+                                <div>
+                                    <h3 className="text-slate-400 text-xs font-bold uppercase tracking-[0.1em] mb-4">Linha do Tempo</h3>
+                                    <div className="relative pl-4 border-l-2 border-slate-100 space-y-8">
+                                        {(lead.activity || []).slice(0, 3).map((act, i) => (
+                                            <div key={i} className="relative">
+                                                <div className="absolute -left-[21px] top-0.5 w-3 h-3 rounded-full border-2 border-white bg-slate-300"></div>
+                                                <p className="text-xs text-slate-400 mb-0.5">{act.timestamp ? new Date(act.timestamp).toLocaleDateString('pt-BR') : 'Recentemente'}</p>
+                                                <p className="text-sm font-medium text-slate-800">{act.description || 'Atividade registrada'}</p>
+                                            </div>
+                                        ))}
+                                        <div className="relative">
+                                            <div className="absolute -left-[21px] top-0.5 w-3 h-3 rounded-full border-2 border-white bg-green-500 shadow-sm"></div>
+                                            <p className="text-xs text-slate-400 mb-0.5">Hoje</p>
+                                            <p className="text-sm font-bold text-slate-900">Lead visualizado no Pipeline</p>
+                                        </div>
                                     </div>
-                                    <p className="text-xl font-black text-slate-900">{lead.consumption || 0} kWh</p>
                                 </div>
-                                <div className="p-4 rounded-lg border border-slate-200 bg-white">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <MdAccountBalanceWallet size={20} className="text-blue-500" />
-                                        <span className="text-xs font-bold text-slate-500 uppercase">Fatura Anual Est.</span>
+                                <div>
+                                    <h3 className="text-slate-400 text-xs font-bold uppercase tracking-[0.1em] mb-4">Próximas Tarefas</h3>
+                                    {/* Placeholder task */}
+                                    <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-100">
+                                        <MdCalendarToday size={18} className="text-slate-400" />
+                                        <div className="flex-1">
+                                            <p className="text-sm font-medium text-slate-900">Ligação de Follow-up</p>
+                                            <p className="text-xs text-slate-500">Amanhã • 10:00</p>
+                                        </div>
+                                        <MdChevronRight size={18} className="text-slate-300" />
                                     </div>
-                                    <p className="text-xl font-black text-slate-900">{formatCurrency((lead.consumption || 0) * 0.95 * 12)}</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    {/* COLUNA DIREITA: Histórico */}
-                    <div className="flex flex-col gap-8">
-                        <div>
-                            <h3 className="text-slate-400 text-xs font-bold uppercase tracking-[0.1em] mb-4">Linha do Tempo</h3>
-                            <div className="relative pl-4 border-l-2 border-slate-100 space-y-8">
-                                {(lead.activity || []).slice(0, 3).map((act, i) => (
-                                    <div key={i} className="relative">
-                                        <div className="absolute -left-[21px] top-0.5 w-3 h-3 rounded-full border-2 border-white bg-slate-300"></div>
-                                        <p className="text-xs text-slate-400 mb-0.5">{new Date(act.timestamp || Date.now()).toLocaleDateString('pt-BR')}</p>
-                                        <p className="text-sm font-medium text-slate-800">{act.description || 'Atividade registrada'}</p>
-                                    </div>
-                                ))}
-                                <div className="relative">
-                                    <div className="absolute -left-[21px] top-0.5 w-3 h-3 rounded-full border-2 border-white bg-green-500 shadow-sm"></div>
-                                    <p className="text-xs text-slate-400 mb-0.5">Hoje</p>
-                                    <p className="text-sm font-bold text-slate-900">Lead visualizado no Pipeline</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 className="text-slate-400 text-xs font-bold uppercase tracking-[0.1em] mb-4">Próximas Tarefas</h3>
-                            {/* Placeholder task */}
-                            <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-100">
-                                <MdCalendarToday size={18} className="text-slate-400" />
-                                <div className="flex-1">
-                                    <p className="text-sm font-medium text-slate-900">Ligação de Follow-up</p>
-                                    <p className="text-xs text-slate-500">Amanhã • 10:00</p>
-                                </div>
-                                <MdChevronRight size={18} className="text-slate-300" />
-                            </div>
-                        </div>
-                    </div>
+                    ) : (
+                        <DocumentsTab leadId={lead.id} />
+                    )}
                 </div>
 
                 <footer className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3 sticky bottom-0">

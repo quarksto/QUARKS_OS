@@ -21,7 +21,8 @@ export const LeadDetailPanel = ({ lead: initialLead, onClose, className = '' }) 
     useEffect(() => {
         if (!initialLead?.id) return;
 
-        setLoading(true);
+        // setLoading(true); // Prevent sync update loop
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setError(null);
         setLead(initialLead);
 

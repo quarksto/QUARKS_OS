@@ -17,7 +17,7 @@ import { useCopilot } from '../context/CopilotContext';
  * DashboardRefactored — DS v1, ref. specs/02-dashboard-refactor-stitch, docs/DASHBOARD_STITCH_MCP.md
  */
 export default function DashboardRefactored() {
-    const { metrics, pipeline, activity, funnel, loading } = useDashboardData();
+    const { metrics, pipeline, activity, funnel, energyBalance, loading } = useDashboardData();
     const { isOpen, toggleSidebar } = useCopilot();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [selectedLead, setSelectedLead] = useState(null);
@@ -74,7 +74,7 @@ export default function DashboardRefactored() {
                         />
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                            <ConsumptionChartWidget />
+                            <ConsumptionChartWidget data={energyBalance} />
                             <RecentActivityList
                                 activity={activity}
                                 loading={loading}

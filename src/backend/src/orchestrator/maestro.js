@@ -58,7 +58,7 @@ class MaestroAgent {
         return await this.agents['lead'].execute('CREATE_LEAD', leadData);
     }
 
-    async workflowCreateProposal({ leadId, consumption }) {
+    async workflowCreateProposal({ leadId, consumption, introduction, notes, paymentTerms }) {
         // Fluxo integrado ao catálogo (spec 06): Products, Kits, PricingRules.
         // 1. Get Lead Data
         if (!this.agents['lead']) throw new Error('Lead Agent not available');
@@ -86,25 +86,33 @@ class MaestroAgent {
             lead,
             calculation,
             kit: bestKit,
-            pricing
+            pricing,
+            introduction,
+            notes,
+            paymentTerms
         });
 
         return proposal;
     }
 
-    async workflowPreviewProposal({ customer, consumption, distributor }) {
+    async workflowPreviewProposal({ customer, consumption, distributor, kit, introduction, notes, paymentTerms }) {
         // 1. Calculate Generation (Python)
         if (!this.agents['calc']) throw new Error('Calc Agent not available');
         const calculation = await this.agents['calc'].execute('CALCULATE_GENERATION', { consumption: consumption });
 
         // 2. Select Kit (Node)
         if (!this.agents['product']) throw new Error('Product Agent not available');
-        const bestKit = await this.agents['product'].execute('FIND_BEST_KIT', calculation.systemSizeKwp ?? calculation.system_size_kwp ?? 5);
+
+        let selectedKit = reqPayload.kit;
+        // If no custom kit passed, find best preset
+        if (!selectedKit || (!selectedKit.id && !selectedKit.isCustom)) {
+            selectedKit = await this.agents['product'].execute('FIND_BEST_KIT', calculation.systemSizeKwp ?? calculation.system_size_kwp ?? 5);
+        }
 
         // 3. Pricing (Node)
         if (!this.agents['pricing']) throw new Error('Pricing Agent not available');
         const pricing = await this.agents['pricing'].execute('CALCULATE_PRICE', {
-            kit: bestKit,
+            kit: selectedKit,
             state: customer.state || 'SP',
             kWp: calculation.systemSizeKwp ?? calculation.system_size_kwp ?? 5
         });
@@ -152,13 +160,24 @@ class MaestroAgent {
                 total_rate_with_taxes: tariffData.price_kwh,
                 components: tariffData.flags // Passing flags as components for now to match schema
             },
-            kit_name: bestKit ? bestKit.name : "Kit Sob Medida",
+            kit_name: selectedKit ? selectedKit.name : "Kit Sob Medida",
+            introduction: introduction,
+            notes: notes,
+            payment_terms: paymentTerms,
             integrator_name: "Quarks Solar (Full Stack)"
         };
 
         // 6. Generate HTML Preview (Python)
-        // console.log('[Maestro] Payload to Python:', JSON.stringify(proposalData, null, 2));
-        return await this.agents['proposal'].generatePreview(proposalData);
+        const previewResult = await this.agents['proposal'].generatePreview(proposalData);
+
+        // Return both HTML and Pricing Data
+        return {
+            html_content: previewResult.html_content || previewResult, // handles both raw string or obj
+            pricing: {
+                total: pricing.totalPrice,
+                breakdown: pricing.breakdown
+            }
+        };
     }
 }
 const maestro = new MaestroAgent();

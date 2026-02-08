@@ -14,7 +14,7 @@ export const ProjectDetailModal = ({ isOpen, onClose, project: initialProject, o
     }, [initialProject]);
 
     const fetchFullProject = async (id) => {
-        setLoading(true);
+        // setLoading(true); // Avoid sync state update in effect
         try {
             const res = await api.get(`/projects/${id}`);
             setProject(res.data);

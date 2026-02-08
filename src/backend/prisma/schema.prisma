@@ -37,12 +37,12 @@ enum ProposalStatus {
 }
 
 enum ProjectStatus {
-  PLANNED          // Planejado
-  SURVEYING        // Em Vistoria
-  TECHNICAL_STUDY  // Estudo Técnico
-  APPROVED         // Aprovado p/ Instalação
-  INSTALLING       // Em Instalação
-  COMPLETED        // Concluído
+  PLANNED // Planejado
+  SURVEYING // Em Vistoria
+  TECHNICAL_STUDY // Estudo Técnico
+  APPROVED // Aprovado p/ Instalação
+  INSTALLING // Em Instalação
+  COMPLETED // Concluído
 }
 
 // Global Users (RBAC)
@@ -55,83 +55,134 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  leads     Lead[]
-  proposals Proposal[]
-  projects  Project[]  @relation("AssignedTechnician")
-  auditLogs AuditLog[]
-  agentSessions AgentSession[]
-  messages  Message[]
+  leads           Lead[]
+  proposals       Proposal[]
+  projects        Project[]         @relation("AssignedTechnician")
+  auditLogs       AuditLog[]
+  agentSessions   AgentSession[]
+  messages        Message[]
+  MessageTemplate MessageTemplate[]
 
   @@map("users")
 }
 
+// CRM - Clients (Post-Sales)
+model Client {
+  id        String   @id @default(uuid())
+  type      String   @default("PF") // PF or PJ
+  name      String
+  document  String?  @unique // CPF or CNPJ
+  email     String?  @unique
+  phone     String?
+  address   String?  // JSON or Full String
+  
+  leads     Lead[]
+  projects  Project[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("clients")
+}
+
 // CRM - Leads
 model Lead {
-  id             String     @id @default(uuid())
-  name           String
-  email          String?
-  phone          String?
-  consumption    Float      // Monthly average consumption in kWh
-  location       String?    // City/State or Zip
-  distributor    String?    // Energy distributor (Enel, Cemig, etc.)
-  status         LeadStatus @default(NEW)
+  id          String     @id @default(uuid())
+  name        String
+  email       String?
+  phone       String?
+  consumption Float // Monthly average consumption in kWh
+  location    String? // City/State or Zip
+  distributor String? // Energy distributor (Enel, Cemig, etc.)
+  status      LeadStatus @default(NEW)
+  
+  // Link to Client (Post-Sales)
+  clientId    String?
+  client      Client?    @relation(fields: [clientId], references: [id])
 
   // Qualificação solar
-  origin         String?    // Indicação, Facebook, Google, Site, Outro
-  cep            String?    // CEP para geocode e proposta
-  fullAddress    String?    // Endereço completo (rua, número, bairro)
-  roofType       String?    // Cerâmica, metalico, laje, etc.
-  connectionType String?    // Monofásico, bifásico, trifásico
 
-  ownerId        String
-  owner          User       @relation(fields: [ownerId], references: [id])
+  // Qualificação solar
+  origin         String? // Indicação, Facebook, Google, Site, Outro
+  cep            String? // CEP para geocode e proposta
+  fullAddress    String? // Endereço completo (rua, número, bairro)
+  roofType       String? // Cerâmica, metalico, laje, etc.
+  connectionType String? // Monofásico, bifásico, trifásico
 
-  proposals      Proposal[]
-  projects       Project[]
-  messages       Message[]
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id])
+
+  proposals Proposal[]
+  projects  Project[]
+  messages  Message[]
+  documents LeadDocument[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   @@map("leads")
+}
+
+model LeadDocument {
+  id        String   @id @default(uuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id])
+  name      String
+  path      String   // Local path or S3 URL
+  type      String   // MIME type
+  size      Int
+  createdAt DateTime @default(now())
+
+  @@map("lead_documents")
 }
 
 // Solar Proposals
 model Proposal {
   id             String         @id @default(uuid())
   title          String
-  generationKwh  Float          // Monthly generation
-  systemSizeKwp  Float          // System size
+  generationKwh  Float // Monthly generation
+  systemSizeKwp  Float // System size
   totalPrice     Float
-  paybackYears   Float
-  savingsMonthly Float
+  paybackYears   Float?
+  savingsMonthly Float?
   status         ProposalStatus @default(DRAFT)
-  
-  leadId         String
-  lead           Lead           @relation(fields: [leadId], references: [id])
-  
-  creatorId      String
-  creator        User           @relation(fields: [creatorId], references: [id])
-  
-  kitId          String?
-  kit            Kit?           @relation(fields: [kitId], references: [id])
 
-  project        Project?
+  // Pricing Snapshot (Snapshot dos custos no momento da criação)
+  hardwareCost    Float? // Custo total dos equipamentos
+  servicesCost    Float? // Custo total dos serviços
+  taxAmount       Float? // Valor monetário dos impostos estimados
+  marginAmount    Float? // Valor monetário da margem
+  servicesDetails Json?  // Detalhe { installation: 3000, engineering: 1500 }
+  pricingDetails  Json?  // Full BOM detail including item list and services
 
-  pdfUrl         String?        // Link to generated PDF
-  publicSlug     String?        @unique // Token for public client link (view/accept/reject)
-  
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id])
+
+  creatorId String
+  creator   User   @relation(fields: [creatorId], references: [id])
+
+  kitId String?
+  kit   Kit?    @relation(fields: [kitId], references: [id])
+
+  project Project?
+
+  pdfUrl     String? // Link to generated PDF
+  publicSlug String? @unique // Token for public client link (view/accept/reject)
+
   // Workflow fields
-  discountPercent   Float?         // Desconto aplicado (ex: 0.10 = 10%)
-  discountAbsolute  Float?         // Desconto absoluto em R$
-  notes             String?   @db.Text  // Observações do vendedor
-  version           Int       @default(1)
-  sentAt            DateTime?
-  viewedAt          DateTime?
-  acceptedAt        DateTime?
-  viewedInPublicAt  DateTime? // Renaming viewedAt to publicView for clarity if needed, but keeping for now
-  
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  discountPercent  Float? // Desconto aplicado (ex: 0.10 = 10%)
+  discountAbsolute Float? // Desconto absoluto em R$
+  notes            String?   @db.Text // Observações do vendedor
+  introduction     String?   @db.Text // Texto introdutório (personalizável)
+  paymentTerms     String?   @db.Text // Condições de pagamento (personalizável)
+  version          Int       @default(1)
+  sentAt           DateTime?
+  viewedAt         DateTime?
+  acceptedAt       DateTime?
+  viewedInPublicAt DateTime? // Renaming viewedAt to publicView for clarity if needed, but keeping for now
+  expiresAt        DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("proposals")
 }
@@ -142,36 +193,39 @@ model Project {
   name           String
   status         ProjectStatus @default(PLANNED)
   technicalNotes String?       @db.Text
-  
+
   // Geolocation for site survey
-  latitude       Float?
-  longitude      Float?
+  latitude  Float?
+  longitude Float?
 
-  leadId         String
-  lead           Lead          @relation(fields: [leadId], references: [id])
+  leadId String?
+  lead   Lead?   @relation(fields: [leadId], references: [id])
 
-  proposalId     String?       @unique
-  proposal       Proposal?     @relation(fields: [proposalId], references: [id])
+  proposalId String?   @unique
+  proposal   Proposal? @relation(fields: [proposalId], references: [id])
+  
+  clientId   String?
+  client     Client?   @relation(fields: [clientId], references: [id])
 
-  technicianId   String?
-  technician     User?         @relation("AssignedTechnician", fields: [technicianId], references: [id])
+  technicianId String?
+  technician   User?   @relation("AssignedTechnician", fields: [technicianId], references: [id])
 
-  activities     ProjectActivity[]
+  activities ProjectActivity[]
 
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("projects")
 }
 
 model ProjectActivity {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   projectId String
-  project   Project  @relation(fields: [projectId], references: [id])
-  
-  action    String
-  details   String?  @db.Text
-  
+  project   Project @relation(fields: [projectId], references: [id])
+
+  action  String
+  details String? @db.Text
+
   createdAt DateTime @default(now())
 
   @@map("project_activities")
@@ -179,15 +233,15 @@ model ProjectActivity {
 
 // Energy Tariffs (Lookup)
 model Tariff {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   distributor String
   state       String
-  priceKwh    Float    // Price per kWh
+  priceKwh    Float // Price per kWh
   validFrom   DateTime
   validTo     DateTime?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([distributor, state])
   @@map("tariffs")
@@ -196,11 +250,11 @@ model Tariff {
 // Commercial Core - Products & Pricing
 
 enum ProductType {
-  MODULE      // Painel
-  INVERTER    // Inversor
-  STRUCTURE   // Estrutura
-  CABLE       // Cabos
-  OTHER       // String box, conectores
+  MODULE // Painel
+  INVERTER // Inversor
+  STRUCTURE // Estrutura
+  CABLE // Cabos
+  OTHER // String box, conectores
 }
 
 model Product {
@@ -209,32 +263,32 @@ model Product {
   name        String
   description String?
   type        ProductType
-  costPrice   Float       // Custo base (sem impostos)
+  costPrice   Float // Custo base (sem impostos)
   supplier    String?
-  specs       Json?       // JSON flexível para specs (ex: { power: 550, efficiency: 21.5 })
+  specs       Json? // JSON flexível para specs (ex: { power: 550, efficiency: 21.5 })
   active      Boolean     @default(true)
-  
-  kits        KitItem[]
 
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  
+  kits KitItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("products")
 }
 
 model Kit {
-  id             String    @id @default(uuid())
-  name           String
-  description    String?
-  size_kwp       Float?    // System size in kWp (e.g. 5.5 for a 5.5kWp kit)
-  price          Float?    // Base price of kit (can be calculated from items or set directly)
-  active         Boolean   @default(true)
-  
-  items          KitItem[]
-  proposals      Proposal[]
-  
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  size_kwp    Float? // System size in kWp (e.g. 5.5 for a 5.5kWp kit)
+  price       Float? // Base price of kit (can be calculated from items or set directly)
+  active      Boolean @default(true)
+
+  items     KitItem[]
+  proposals Proposal[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("kits")
 }
@@ -246,38 +300,137 @@ model KitItem {
   productId String
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int     @default(1)
-  
+
   @@map("kit_items")
 }
 
 model PricingRule {
-  id           String   @id @default(uuid())
+  id           String @id @default(uuid())
   name         String
-  minPower     Float    // Potência mínima do sistema (0 = qualquer)
-  maxPower     Float    // Potência máxima
-  targetMargin Float    // Margem alvo (decimal, ex: 0.20 para 20%)
-  taxRate      Float    // Imposto estimado de saída (simples c/ difal mockado)
-  
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  minPower     Float // Potência mínima do sistema (0 = qualquer)
+  maxPower     Float // Potência máxima
+  targetMargin Float // Margem alvo (decimal, ex: 0.20 para 20%)
+  taxRate      Float // Imposto estimado de saída (simples c/ difal mockado)
+
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("pricing_rules")
 }
 
+// Services & Labor Costs
+enum ServiceType {
+  INSTALLATION
+  ENGINEERING
+  HOMOLOGATION
+  FREIGHT
+  INSURANCE
+  OTHER
+}
+
+enum ServicePriceType {
+  FIXED     // Valor fixo (ex: R$ 1500)
+  PER_WATT  // Valor por Wp (ex: R$ 0.80/Wp)
+  PER_KM    // Valor por Km de distância (ex: R$ 2.00/km)
+  PERCENT   // Percentual sobre o Hardware (ex: 5%)
+}
+
+model Service {
+  id          String      @id @default(uuid())
+  name        String
+  type        ServiceType
+  description String?
+  active      Boolean     @default(true)
+
+  prices ServicePrice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("services")
+}
+
+model ServicePrice {
+  id        String @id @default(uuid())
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  state    String? // UF (ex: MG, SP). Null = Nacional
+  minPower Float   @default(0)
+  maxPower Float   @default(99999)
+
+  priceType  ServicePriceType
+  priceValue Float // O valor em si (R$, %, etc)
+
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("service_prices")
+}
+
 // Audit Logs
 model AuditLog {
-  id        String   @id @default(uuid())
-  action    String
-  resource  String
-  details   String?
-  
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  
+  id       String  @id @default(uuid())
+  action   String
+  resource String
+  details  String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
   createdAt DateTime @default(now())
-  
+
   @@map("audit_logs")
+}
+
+model Message {
+  id     String @id @default(uuid())
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  senderType SenderType
+  senderId   String?
+  sender     User?      @relation(fields: [senderId], references: [id])
+
+  content     String
+  contentType ContentType @default(TEXT)
+  metadata    Json? // { proposalId, fileUrl, templateId, etc }
+
+  read   Boolean   @default(false)
+  readAt DateTime?
+  readBy String[] // IDs dos usuários que leram
+
+  replyToId String?
+  replyTo   Message?  @relation("replies", fields: [replyToId], references: [id])
+  replies   Message[] @relation("replies")
+
+  // Mentions Support
+  mentions String[] // IDs dos usuários mencionados
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([leadId, createdAt])
+  @@index([senderId])
+  @@map("messages")
+}
+
+model MessageTemplate {
+  id         String   @id @default(uuid())
+  name       String
+  content    String // Suporta variáveis: {{lead.name}}, {{user.name}}
+  category   String // follow-up, proposal, welcome
+  isActive   Boolean  @default(true)
+  usageCount Int      @default(0)
+  createdBy  String
+  creator    User     @relation(fields: [createdBy], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("message_templates")
 }
 
 // AI Copilot
@@ -285,11 +438,11 @@ model AgentSession {
   id        String   @id @default(uuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id])
-  context   Json?    // Stores active intent, draft IDs, etc.
+  context   Json? // Stores active intent, draft IDs, etc.
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  messages  AgentMessage[]
+
+  messages AgentMessage[]
 
   @@map("agent_sessions")
 }
@@ -298,28 +451,29 @@ model AgentMessage {
   id        String       @id @default(uuid())
   sessionId String
   session   AgentSession @relation(fields: [sessionId], references: [id])
-  role      String       // USER, ASSISTANT, SYSTEM
+  role      String // USER, ASSISTANT, SYSTEM
   content   String       @db.Text
-  metadata  Json?        // Token usage, tool calls, etc.
+  metadata  Json? // Token usage, tool calls, etc.
   createdAt DateTime     @default(now())
 
   @@map("agent_messages")
 }
 
-model Message {
-  id        String   @id @default(uuid())
-  content   String   @db.Text
-  role      String   @default("USER") // USER (Salesperson), SYSTEM, LEAD (Customer)
-  
-  leadId    String
-  lead      Lead     @relation(fields: [leadId], references: [id])
-  
-  senderId  String?
-  sender    User?    @relation(fields: [senderId], references: [id])
-  
-  isRead    Boolean  @default(false)
-  
-  createdAt DateTime @default(now())
+enum SenderType {
+  SYSTEM
+  USER
+  COPILOT
+  EXTERNAL
+}
 
-  @@map("messages")
+enum ContentType {
+  TEXT
+  PROPOSAL_CARD
+  STATUS_CHANGE
+  ACTIVITY
+  FILE
+  AUDIO
+  IMAGE
+  TEMPLATE
+  ALERT
 }

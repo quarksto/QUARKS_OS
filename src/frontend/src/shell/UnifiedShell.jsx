@@ -60,11 +60,13 @@ export const UnifiedShell = ({ children }) => {
 
     useEffect(() => {
         if (mode !== activeMode) {
+            // Intentional sync update to trigger transition animation
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsTransitioning(true);
             const timer = setTimeout(() => {
                 setActiveMode(mode);
                 setIsTransitioning(false);
-            }, 300);
+            }, 300); // 300ms transition duration matches CSS
             return () => clearTimeout(timer);
         }
     }, [mode, activeMode]);
@@ -77,9 +79,14 @@ export const UnifiedShell = ({ children }) => {
         <div className="relative h-screen w-screen overflow-hidden bg-canvas">
             <Transition
                 mounted={!isTransitioning}
-                transition="fade"
-                duration={300}
-                timingFunction="ease"
+                transition={{
+                    in: { opacity: 1, transform: 'scale(1) translateY(0)' },
+                    out: { opacity: 0, transform: 'scale(0.98) translateY(10px)' },
+                    common: { transitionProperty: 'opacity, transform' },
+                    transitionProperty: 'opacity, transform',
+                }}
+                duration={400}
+                timingFunction="cubic-bezier(0.4, 0, 0.2, 1)"
             >
                 {(styles) => (
                     <Box style={styles} className="h-full w-full">
@@ -90,12 +97,12 @@ export const UnifiedShell = ({ children }) => {
                 )}
             </Transition>
 
-            {/* Overlay de transição sutil */}
+            {/* Overlay de transição sutil com Glassmorphism */}
             <Transition mounted={isTransitioning} transition="fade" duration={200}>
                 {(styles) => (
                     <Box
                         style={styles}
-                        className="absolute inset-0 z-[200] bg-canvas/30 backdrop-blur-sm pointer-events-none"
+                        className="absolute inset-0 z-[200] bg-canvas/40 backdrop-blur-md border-t border-white/20 pointer-events-none"
                     />
                 )}
             </Transition>

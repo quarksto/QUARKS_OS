@@ -17,6 +17,9 @@ class ProposalData(BaseModel):
     tariff: TariffResponse
     kit_name: str = "Kit Solar Premium 550W"
     integrator_name: str = "Quarks Solar Integrators"
+    introduction: Optional[str] = None
+    notes: Optional[str] = None
+    payment_terms: Optional[str] = None
     
 class ProposalResponse(BaseModel):
     html_content: str

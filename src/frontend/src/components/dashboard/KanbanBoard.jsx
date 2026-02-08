@@ -235,6 +235,7 @@ const KanbanCard = ({ lead, onClick, onDragStart, isDragError, activeMenuId, onT
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const KanbanBoard = ({
     pipeline = {},
     onPipelineChange,
@@ -252,13 +253,18 @@ export const KanbanBoard = ({
     const [isFunnelSelectOpen, setIsFunnelSelectOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [activeMenuLeadId, setActiveMenuLeadId] = useState(null);
+    const [prevPipeline, setPrevPipeline] = useState(pipeline);
     const [dragOverColId, setDragOverColId] = useState(null);
     const [dragErrorLeadId, setDragErrorLeadId] = useState(null);
 
     const currentFunnel = useMemo(() => allFunnels.find(f => f.id === currentFunnelId) || allFunnels[0], [allFunnels, currentFunnelId]);
     const useExternalPipeline = typeof onPipelineChange === 'function';
 
-    useEffect(() => { if (!useExternalPipeline) setLocalPipeline(pipeline); }, [pipeline, useExternalPipeline]);
+    // Sync pipeline from props if changed (Render-time update pattern)
+    if (!useExternalPipeline && pipeline !== prevPipeline) {
+        setPrevPipeline(pipeline);
+        setLocalPipeline(pipeline);
+    }
 
     useEffect(() => {
         const handleClickOutside = () => { setActiveMenuLeadId(null); setIsFunnelSelectOpen(false); };
@@ -320,6 +326,7 @@ export const KanbanBoard = ({
         return true;
     };
 
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
     const filteredPipeline = useMemo(() => {
         const next = {};
         columns.forEach(col => next[col.id] = (pipelineData[col.id] || []).filter(passesFilters));

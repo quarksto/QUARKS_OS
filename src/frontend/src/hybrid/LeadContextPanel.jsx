@@ -44,9 +44,25 @@ export function LeadContextPanel({ lead, loading, onOpenDetail, onStatusChange, 
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-slate-500 p-6">
-        <span className="material-symbols-outlined animate-spin text-2xl mb-2">progress_activity</span>
-        <span className="text-xs uppercase tracking-widest font-bold text-slate-400">Orquestrando Dados...</span>
+      <div className="flex flex-col h-full bg-white font-sans overflow-hidden animate-pulse">
+        <div className="p-6 md:p-8 pb-4">
+          <div className="flex justify-between items-start mb-10">
+            <div className="space-y-3 flex-1">
+              <div className="h-4 bg-slate-100 rounded w-24" />
+              <div className="h-10 bg-slate-100 rounded w-3/4" />
+              <div className="h-4 bg-slate-100 rounded w-1/2" />
+            </div>
+            <div className="size-16 bg-slate-50 rounded-xl" />
+          </div>
+          <div className="grid grid-cols-3 gap-6 mb-8">
+            <div className="h-24 bg-slate-50 rounded-xl" />
+            <div className="h-24 bg-slate-50 rounded-xl" />
+            <div className="h-24 bg-slate-50 rounded-xl" />
+          </div>
+          <div className="h-32 bg-slate-900/5 rounded-2xl mb-8" />
+          <div className="h-8 bg-slate-50 rounded w-1/2 mb-6" />
+          <div className="h-64 bg-slate-50 rounded-xl" />
+        </div>
       </div>
     );
   }

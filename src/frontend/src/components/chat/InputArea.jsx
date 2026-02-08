@@ -1,10 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MdGridView, MdDescription, MdClose, MdAddCircle, MdMic, MdArrowUpward } from 'react-icons/md';
+import { MdGridView, MdDescription, MdClose, MdAddCircle, MdMic, MdArrowUpward, MdTextFormat } from 'react-icons/md';
+import MentionInput from '../shared/MentionInput';
+import TemplateSelector from '../shared/TemplateSelector';
+
+
 
 const InputArea = ({ onSend, disabled, activeContext }) => {
     const [text, setText] = useState('');
     const [file, setFile] = useState(null);
+    const [showTemplates, setShowTemplates] = useState(false);
     const fileInputRef = useRef(null);
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -77,16 +83,13 @@ const InputArea = ({ onSend, disabled, activeContext }) => {
                     accept="image/*,application/pdf,video/*,audio/*"
                 />
 
-                {/* Text Input */}
-                <input
-                    type="text"
+                {/* Text Input with Mentions */}
+                <MentionInput
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="Pergunte qualquer coisa..."
-                    className="flex-1 bg-transparent border-none outline-none focus:outline-none p-0 text-slate-800 placeholder:text-slate-400 focus:ring-0 text-[15px] font-normal leading-normal h-10"
                     disabled={disabled}
-                    autoComplete="off"
                 />
 
                 {/* Right Actions */}
@@ -102,7 +105,29 @@ const InputArea = ({ onSend, disabled, activeContext }) => {
                         </button>
                     )}
 
+                    {/* Template Button */}
+                    <button
+                        type="button"
+                        onClick={() => setShowTemplates(!showTemplates)}
+                        className={`flex w-10 h-10 shrink-0 items-center justify-center rounded-full transition-colors ${showTemplates ? 'bg-petroleum/10 text-petroleum' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600'}`}
+                        title="Templates de Mensagem"
+                        disabled={disabled}
+                    >
+                        <MdTextFormat size={20} />
+                    </button>
+
+                    {showTemplates && (
+                        <TemplateSelector
+                            onSelect={(template) => {
+                                setText(prev => prev + template.content);
+                                setShowTemplates(false);
+                            }}
+                            onClose={() => setShowTemplates(false)}
+                        />
+                    )}
+
                     {/* Send Button */}
+
                     {(text || file) && (
                         <button
                             type="submit"

@@ -1,0 +1,953 @@
+﻿
+>    7:35  error  
+React Hook "useState" 
+is called 
+conditionally. React 
+Hooks must be called 
+in the exact same 
+order in every 
+component render   rea
+ct-hooks/rules-of-hook
+s
+>   17:37  error  
+React Hook "useState" 
+is called 
+conditionally. React 
+Hooks must be called 
+in the exact same 
+order in every 
+component render   rea
+ct-hooks/rules-of-hook
+s
+>   27:5   error  
+React Hook 
+"useEffect" is called 
+conditionally. React 
+Hooks must be called 
+in the exact same 
+order in every 
+component render  reac
+t-hooks/rules-of-hooks
+>   41:24  error  
+React Hook "useMemo" 
+is called 
+conditionally. React 
+Hooks must be called 
+in the exact same 
+order in every 
+component render    re
+act-hooks/rules-of-hoo
+ks
+  
+  D:\QUARKS_OS\src\fro
+ntend\src\components\d
+ashboard\DashboardRigh
+tSidebar.jsx
+    9:41  warning  
+'isOpen' is defined 
+but never used. 
+Allowed unused args 
+must match /^_/u   
+no-unused-vars
+    9:49  warning  
+'onClose' is defined 
+but never used. 
+Allowed unused args 
+must match /^_/u  
+no-unused-vars
+  
+>    22:18  warning  
+'e' is defined but 
+never used. Allowed 
+unused caught errors 
+must match /^_/u      
+                      
+                      
+  no-unused-vars
+>   136:17  error    
+Fast refresh only 
+works when a file 
+only exports 
+components. Use a new 
+file to share 
+constants or 
+functions between 
+components  react-refr
+esh/only-export-compon
+ents
+  
+  D:\QUARKS_OS\src\fro
+ntend\src\components\d
+ashboard\KanbanBoard.j
+sx
+      1:47  warning  
+'useRef' is defined 
+but never used. 
+Allowed unused vars 
+must match /^[A-Z_]/u 
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                     
+no-unused-vars
+     67:11  warning  
+'segment' is assigned 
+a value but never 
+used. Allowed unused 
+vars must match 
+/^[A-Z_]/u            
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+no-unused-vars
+>   261:49  error    
+Error: Calling 
+setState 
+synchronously within 
+an effect can trigger 
+cascading renders
+  
+  Effects are 
+intended to 
+synchronize state 
+between React and 
+external systems such 
+as manually updating 
+the DOM, state 
+management libraries, 
+or other platform 
+APIs. In general, the 
+body of an effect 
+should do one or both 
+of the following:
+  * Update external 
+systems with the 
+latest state from 
+React.
+  * Subscribe for 
+updates from some 
+external system, 
+calling setState in a 
+callback function 
+when external state 
+changes.
+  
+>   323:38  error    
+Compilation Skipped: 
+Existing memoization 
+could not be preserved
+  
+  React Compiler has 
+skipped optimizing 
+this component 
+because the existing 
+manual memoization 
+could not be 
+preserved. The 
+inferred dependencies 
+did not match the 
+manually specified 
+dependencies, which 
+could cause the value 
+to change more or 
+less frequently than 
+expected. The 
+inferred dependency 
+was `passesFilters`, 
+but the source 
+dependencies were 
+[pipelineData, 
+columns, filters, 
+searchTerm]. Inferred 
+different dependency 
+than source.
+  
+    321 |     };
+    322 |
+>   132:113  error    
+Error: Cannot call 
+impure function 
+during render
+  
+  `Date.now` is an 
+impure function. 
+Calling an impure 
+function can produce 
+unstable results that 
+update unpredictably 
+when the component 
+happens to re-render. 
+(https://react.dev/ref
+erence/rules/component
+s-and-hooks-must-be-pu
+re#components-and-hook
+s-must-be-idempotent).
+  
+    130 |             
+                      
+  <div key={i} 
+className="relative">
+    131 |             
+                      
+      <div 
+className="absolute 
+-left-[21px] top-0.5 
+w-3 h-3 rounded-full 
+border-2 border-white 
+bg-slate-300"></div>
+>   24:9  error    
+Error: Calling 
+setState 
+synchronously within 
+an effect can trigger 
+cascading renders
+  
+  Effects are 
+intended to 
+synchronize state 
+between React and 
+external systems such 
+as manually updating 
+the DOM, state 
+management libraries, 
+or other platform 
+APIs. In general, the 
+body of an effect 
+should do one or both 
+of the following:
+  * Update external 
+systems with the 
+latest state from 
+React.
+  * Subscribe for 
+updates from some 
+external system, 
+calling setState in a 
+callback function 
+when external state 
+changes.
+  
+>   25 |         
+setError(null);
+    26 |         
+setLead(initialLead);
+    27 |  react-hooks/
+set-state-in-effect
+    42:8  warning  
+React Hook useEffect 
+has a missing 
+dependency: 
+'initialLead'. Either 
+include it or remove 
+the dependency array. 
+If 'setLead' needs 
+the current value of 
+'initialLead', you 
+can also switch to 
+useReducer instead of 
+useState and read 
+'initialLead' in the 
+reducer               
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                  reac
+t-hooks/exhaustive-dep
+s
+  
+  D:\QUARKS_OS\src\fro
+ntend\src\components\d
+ashboard\LeadListTable
+.jsx
+>    91:46  error    
+'setSearchTerm' is 
+not defined           
+                      
+                      
+       no-undef
+>   248:66  error    
+'setSearchTerm' is 
+not defined           
+                      
+                      
+       no-undef
+  
+  D:\QUARKS_OS\src\fro
+ntend\src\components\d
+ashboard\LeadQualifica
+tionForm.jsx
+    49:8  warning  
+React Hook useEffect 
+has a missing 
+dependency: 'lead'. 
+Either include it or 
+remove the dependency 
+array  react-hooks/exh
+austive-deps
+  
+  D:\QUARKS_OS\src\fro
+ntend\src\components\d
+ashboard\ProjectDetail
+Modal.jsx
+>   13:12  warning  
+'error' is assigned a 
+value but never used. 
+Allowed unused vars 
+must match /^[A-Z_]/u 
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                
+no-unused-vars
+>   18:9   error    
+Error: Calling 
+setState 
+synchronously within 
+an effect can trigger 
+cascading renders
+  
+  Effects are 
+intended to 
+synchronize state 
+between React and 
+external systems such 
+as manually updating 
+the DOM, state 
+management libraries, 
+or other platform 
+APIs. In general, the 
+body of an effect 
+should do one or both 
+of the following:
+  * Update external 
+systems with the 
+latest state from 
+React.
+  * Subscribe for 
+updates from some 
+external system, 
+calling setState in a 
+callback function 
+when external state 
+changes.
+  
+>   19 |         
+setError(null);
+    20 |         api.g
+et(`/leads/${lead.id}/
+solar`)
+    21 |             
+.then((res) => setInsi
+ghts(res.data))  react
+-hooks/set-state-in-ef
+fect
+  
+  D:\QUARKS_OS\src\fro
+ntend\src\components\s
+hared\ConnectionStatus
+.jsx
+    49:7  warning  
+'styles' is assigned 
+a value but never 
+used. Allowed unused 
+vars must match 
+/^[A-Z_]/u  
+no-unused-vars
+>   186:14  error    
+Fast refresh only 
+works when a file 
+only exports 
+components. Use a new 
+file to share 
+constants or 
+functions between 
+components  react-refr
+esh/only-export-compon
+ents
+  
+  D:\QUARKS_OS\src\fro
+ntend\src\contexts\Aut
+hContext.jsx
+>   25:17  error  
+Error: Cannot access 
+variable before it is 
+declared
+  
+  `logout` is 
+accessed before it is 
+declared, which 
+prevents the earlier 
+access from updating 
+when this value 
+changes over time.
+  
+    23 |             
+} catch (e) {
+>   24 |              
+   
+console.error("Auth 
+init error", e);
+  > 25 |              
+   logout();
+       |              
+   ^^^^^^ `logout` 
+accessed before it is 
+declared
+    26 |             }
+    27 |         }
+    28 |         
+setLoading(false);
+>   91:17  error  
+Fast refresh only 
+works when a file 
+only exports 
+components. Use a new 
+file to share 
+constants or 
+functions between 
+components            
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+               react-r
+efresh/only-export-com
+ponents
+  
+  D:\QUARKS_OS\src\fro
+ntend\src\contexts\Lay
+outContext.jsx
+    15:7   warning  
+'readCopilotOpen' is 
+assigned a value but 
+never used. Allowed 
+unused vars must 
+match /^[A-Z_]/u      
+                      
+     no-unused-vars
+>   32:21  error    
+Empty block statement 
+                      
+                      
+                      
+                      
+                  
+no-empty
+>   47:14  error    
+Fast refresh only 
+works when a file 
+only exports 
+components. Use a new 
+file to share 
+constants or 
+functions between 
+components  react-refr
+esh/only-export-compon
+ents
+  
+  D:\QUARKS_OS\src\fro
+ntend\src\hooks\useLea
+dsList.js
+>   40:9  error  
+Error: Calling 
+setState 
+synchronously within 
+an effect can trigger 
+cascading renders
+  
+  Effects are 
+intended to 
+synchronize state 
+between React and 
+external systems such 
+as manually updating 
+the DOM, state 
+management libraries, 
+or other platform 
+APIs. In general, the 
+body of an effect 
+should do one or both 
+of the following:
+  * Update external 
+systems with the 
+latest state from 
+React.
+  * Subscribe for 
+updates from some 
+external system, 
+calling setState in a 
+callback function 
+when external state 
+changes.
+  
+>    68:19  error    
+Empty block statement 
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                    
+no-empty
+    104:6   warning  
+React Hook useEffect 
+has a missing 
+dependency: 
+'selectedLead'. 
+Either include it or 
+remove the dependency 
+array                 
+                      
+                      
+                      
+                      
+                      
+  react-hooks/exhausti
+ve-deps
+    118:6   warning  
+React Hook useEffect 
+has missing 
+dependencies: 
+'leadIdFromUrl', 
+'searchParams', 
+'selectedLead', and 
+'setSearchParams'. 
+Either include them 
+or remove the 
+dependency array      
+                      
+                      
+                     r
+eact-hooks/exhaustive-
+deps
+    156:6   warning  
+React Hook useEffect 
+has a missing 
+dependency: 
+'selectedLead'. 
+Either include it or 
+remove the dependency 
+array                 
+                      
+                      
+                      
+                      
+                      
+  react-hooks/exhausti
+ve-deps
+    240:6   warning  
+React Hook useEffect 
+has a missing 
+dependency: 
+'currentLead'. Either 
+include it or remove 
+the dependency array  
+                      
+                      
+                      
+                      
+                      
+                  reac
+t-hooks/exhaustive-dep
+s
+    261:6   warning  
+React Hook useEffect 
+has a missing 
+dependency: 
+'selectedLead'. 
+Either include it or 
+remove the dependency 
+array. You can also 
+replace multiple 
+useState variables 
+with useReducer if 
+'setLeadDetail' needs 
+the current value of 
+'selectedLead'  react-
+hooks/exhaustive-deps
+>   63:14  warning  
+'e' is defined but 
+never used. Allowed 
+unused caught errors 
+must match /^_/u      
+            
+no-unused-vars
+    78:9   warning  
+'hasProposals' is 
+assigned a value but 
+never used. Allowed 
+unused vars must 
+match /^[A-Z_]/u  
+no-unused-vars
+  
+  D:\QUARKS_OS\src\fro
+ntend\src\modes\SalesM
+ode\QuickChatPanel.jsx
+>   20:9  error  
+Error: Calling 
+setState 
+synchronously within 
+an effect can trigger 
+cascading renders
+  
+  Effects are 
+intended to 
+synchronize state 
+between React and 
+external systems such 
+as manually updating 
+the DOM, state 
+management libraries, 
+or other platform 
+APIs. In general, the 
+body of an effect 
+should do one or both 
+of the following:
+  * Update external 
+systems with the 
+latest state from 
+React.
+  * Subscribe for 
+updates from some 
+external system, 
+calling setState in a 
+callback function 
+when external state 
+changes.
+  
+>   23 |             
+.catch(err => 
+console.error('Load 
+messages error:', 
+err))  react-hooks/set
+-state-in-effect
+  
+  D:\QUARKS_OS\src\fro
+ntend\src\pages\Dashbo
+ardRefactored.jsx
+    21:13  warning  
+'isOpen' is assigned 
+a value but never 
+used. Allowed unused 
+vars must match 
+/^[A-Z_]/u  
+no-unused-vars
+  
+  D:\QUARKS_OS\src\fro
+ntend\src\pages\Forgot
+PasswordPage.jsx
+>   16:26  error    
+Error: Calling 
+setState 
+synchronously within 
+an effect can trigger 
+cascading renders
+  
+  Effects are 
+intended to 
+synchronize state 
+between React and 
+external systems such 
+as manually updating 
+the DOM, state 
+management libraries, 
+or other platform 
+APIs. In general, the 
+body of an effect 
+should do one or both 
+of the following:
+  * Update external 
+systems with the 
+latest state from 
+React.
+  * Subscribe for 
+updates from some 
+external system, 
+calling setState in a 
+callback function 
+when external state 
+changes.
+  
+>    83:21  error    
+Error: Cannot access 
+variable before it is 
+declared
+  
+  `playNotification` 
+is accessed before it 
+is declared, which 
+prevents the earlier 
+access from updating 
+when this value 
+changes over time.
+  
+    81 |              
+   // Ou se for USER 
+mas em outra sess├úo? 
+Por enquanto 
+simplificamos:
+    82 |              
+   if (msg.role !== 
+'USER') {
+>    84:21  error    
+Error: Cannot access 
+variable before it is 
+declared
+  
+  `showBrowserNotifica
+tion` is accessed 
+before it is 
+declared, which 
+prevents the earlier 
+access from updating 
+when this value 
+changes over time.
+  
+    82 |              
+   if (msg.role !== 
+'USER') {
+    83 |              
+       
+playNotification();
+>   63:13  error    
+Error: Calling 
+setState 
+synchronously within 
+an effect can trigger 
+cascading renders
+  
+  Effects are 
+intended to 
+synchronize state 
+between React and 
+external systems such 
+as manually updating 
+the DOM, state 
+management libraries, 
+or other platform 
+APIs. In general, the 
+body of an effect 
+should do one or both 
+of the following:
+  * Update external 
+systems with the 
+latest state from 
+React.
+  * Subscribe for 
+updates from some 
+external system, 
+calling setState in a 
+callback function 
+when external state 
+changes.
+  
+> Ô£û 106 problems 
+(24 errors, 82 
+warnings)
+  
+
+

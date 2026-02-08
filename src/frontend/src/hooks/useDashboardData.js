@@ -19,22 +19,25 @@ export function useDashboardData() {
 
     const [activity, setActivity] = useState([]);
     const [funnel, setFunnel] = useState([]);
+    const [energyBalance, setEnergyBalance] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function loadData() {
             try {
-                const [kpisRes, pipelineRes, activityRes, funnelRes] = await Promise.all([
+                const [kpisRes, pipelineRes, activityRes, funnelRes, balanceRes] = await Promise.all([
                     api.get('/analytics/dashboard'),
                     api.get('/leads/pipeline'),
                     api.get('/analytics/activity').catch(() => ({ data: [] })),
-                    api.get('/analytics/funnel').catch(() => ({ data: [] }))
+                    api.get('/analytics/funnel').catch(() => ({ data: [] })),
+                    api.get('/analytics/energy-balance').catch(() => ({ data: [] }))
                 ]);
 
                 if (kpisRes.data) setMetrics(kpisRes.data);
                 if (pipelineRes.data) setPipeline(pipelineRes.data);
                 if (activityRes.data && Array.isArray(activityRes.data)) setActivity(activityRes.data);
                 if (funnelRes.data && Array.isArray(funnelRes.data)) setFunnel(funnelRes.data);
+                if (balanceRes.data && Array.isArray(balanceRes.data)) setEnergyBalance(balanceRes.data);
             } catch (error) {
                 console.error("Dashboard Data Error:", error);
             } finally {
@@ -47,5 +50,5 @@ export function useDashboardData() {
         return () => clearInterval(interval);
     }, []);
 
-    return { metrics, pipeline, activity, funnel, loading };
+    return { metrics, pipeline, activity, funnel, energyBalance, loading };
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useDashboardData } from './useDashboardData';
 
 /**
@@ -9,12 +9,10 @@ export function useLeadsList() {
     // Reuse the existing hook to fetch data.
     // In the future, this should call a dedicated endpoint api.get('/leads?page=1')
     const { pipeline, loading } = useDashboardData();
-    const [leadsList, setLeadsList] = useState([]);
 
-    useEffect(() => {
-        if (!pipeline) return;
+    const leadsList = useMemo(() => {
+        if (!pipeline) return [];
 
-        // Flatten the loop
         let allLeads = [];
 
         // Define status mapping if needed, or just use column keys
@@ -37,7 +35,7 @@ export function useLeadsList() {
         // Optional: Sort by created date or name
         // allLeads.sort(...)
 
-        setLeadsList(allLeads);
+        return allLeads;
     }, [pipeline]);
 
     return { leads: leadsList, loading };

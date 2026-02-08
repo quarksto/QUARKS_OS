@@ -6,7 +6,7 @@ import React, { useState } from 'react';
  * Implements the "Copiloto Solar" right sidebar found in the Stitch design reference 
  * (Quarks OS Sales Dashboard).
  */
-export const DashboardRightSidebar = ({ isOpen, onClose }) => {
+export const DashboardRightSidebar = ({ isOpen: _isOpen, onClose: _onClose }) => {
     // If not open, we might want to render null or a collapsed state.
     // For this design, we'll assume it's always visible if "Chat IA" is active, 
     // or we can toggle it. For now, we'll make it fixed width.

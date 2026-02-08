@@ -1,46 +1,76 @@
-const fs = require('fs');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+const AnalyticsDomainAgent = require('./src/agents/analytics-domain');
 
 async function main() {
-    console.log('--- Verifying Analytics Endpoints ---');
-    const baseUrl = 'http://localhost:3001/api/analytics';
+    console.log("🔍 Verifying Analytics Domain...");
+    const analytics = new AnalyticsDomainAgent();
 
-    // Helper to log error
-    const logError = (name, text) => {
-        console.error(`❌ ${name} Failed:`, text);
-        fs.writeFileSync('error_response.json', text);
+    // 1. Verify Dashboard Metrics (Deltas)
+    console.log("\n1. Testing GET_DASHBOARD_METRICS (Deltas)...");
+    const metrics = await analytics.execute('GET_DASHBOARD_METRICS', {});
+    console.log("Deltas:", metrics.deltas);
+
+    if (metrics.deltas && (metrics.deltas.leads !== null || metrics.deltas.revenue !== null)) {
+        console.log("✅ Deltas calculated successfully.");
+    } else {
+        console.error("❌ Deltas failed or null (might be expected if no data).");
     }
 
-    try {
-        console.log('Fetching Dashboard Metrics...');
-        const dashboardRes = await fetch(`${baseUrl}/dashboard`);
-        if (!dashboardRes.ok) {
-            const text = await dashboardRes.text();
-            logError('Dashboard', text);
-            throw new Error(text);
+    // 2. Verify Energy Balance
+    console.log("\n2. Testing GET_ENERGY_BALANCE...");
+
+    // Check if we need to seed data
+    const closedCount = await prisma.lead.count({ where: { status: 'CLOSED_WON' } });
+    if (closedCount === 0) {
+        console.log("⚠️ No CLOSED_WON leads found. Seeding one for testing...");
+        const seedLead = await prisma.lead.create({
+            data: {
+                name: "Analytics Test Client",
+                email: "analytics@test.com",
+                status: "CLOSED_WON",
+                consumption: 450,
+                proposals: {
+                    create: {
+                        name: "Test Proposal",
+                        title: "Test Proposal 10kW",
+                        totalPrice: 25000,
+                        systemSize: 10.5,
+                        generationKwh: 1200,
+                        payback: 3.5,
+                        savings: 150000,
+                        status: "ACCEPTED",
+                        products: "[]",
+                        monthlyProduction: "{}"
+                    }
+                }
+            }
+        });
+        console.log(`✅ Seeded Lead ID: ${seedLead.id}`);
+    }
+
+    const energyBalance = await analytics.execute('GET_ENERGY_BALANCE', {});
+    console.log("Energy Balance Data:", JSON.stringify(energyBalance, null, 2));
+
+    if (Array.isArray(energyBalance) && energyBalance.length === 6) {
+        const currentMonth = energyBalance[energyBalance.length - 1];
+        if (currentMonth.consumption > 0 || currentMonth.generation > 0) {
+            console.log("✅ Energy Balance returned valid data.");
+        } else {
+            console.log("⚠️ Energy Balance returned zeros (Ensure seeded data date is recent).");
         }
-        const metrics = await dashboardRes.json();
-        console.log('✅ Metrics:', metrics);
-        if (!metrics.hasOwnProperty('activeLeads')) throw new Error("Missing activeLeads");
-
-    } catch (err) {
-        // handled above
+    } else {
+        console.error("❌ Energy Balance structure invalid.");
     }
 
-    try {
-        console.log('\nFetching Sales Funnel...');
-        const funnelRes = await fetch(`${baseUrl}/funnel`);
-        if (!funnelRes.ok) {
-            const text = await funnelRes.text();
-            logError('Funnel', text);
-            throw new Error(text);
-        }
-        const funnel = await funnelRes.json();
-        console.log('✅ Funnel:', funnel);
-        if (!Array.isArray(funnel)) throw new Error("Funnel is not an array");
-
-    } catch (err) {
-        // handled above
-    }
+    console.log("\n✅ Verification Complete.");
 }
 
-main();
+main()
+    .catch(e => {
+        console.error(e);
+        process.exit(1);
+    })
+    .finally(async () => {
+        await prisma.$disconnect();
+    });

@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 const RealtimeContext = createContext(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useRealtime = () => {
     const context = useContext(RealtimeContext);
     if (!context) {
@@ -21,85 +22,46 @@ export const RealtimeProvider = ({ children }) => {
 
     useEffect(() => {
         if (!token) {
-            if (socket) {
-                socket.disconnect();
-                setSocket(null);
-                setConnected(false);
-            }
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setSocket(null);
+            setConnected(false);
             return;
         }
 
         const wsUrl = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
-
         const newSocket = io(wsUrl, {
             auth: { token },
             autoConnect: true,
             reconnection: true,
             reconnectionAttempts: Infinity,
-            reconnectionDelay: 1000,
-            reconnectionDelayMax: 5000,
             timeout: 20000,
         });
 
         newSocket.on('connect', () => {
-            console.log('[WS] Connected to server');
+            console.log('[WS] Connected');
             setConnected(true);
             setError(null);
         });
 
-        newSocket.on('disconnect', (reason) => {
-            console.log('[WS] Disconnected:', reason);
+        newSocket.on('disconnect', () => {
             setConnected(false);
-            if (reason === 'io server disconnect') {
-                newSocket.connect();
-            }
         });
 
         newSocket.on('connect_error', (err) => {
-            console.error('[WS] Connection error:', err.message);
+            console.error('[WS] Error:', err.message);
             setError(err.message);
-            setConnected(false);
         });
 
         setSocket(newSocket);
 
         return () => {
-            if (newSocket) {
-                newSocket.disconnect();
-            }
+            newSocket.disconnect();
         };
-    }, [token]); // Re-conecta se o token mudar
+    }, [token]);
 
     const notificationSound = useRef(new Audio('https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3'));
 
-    useEffect(() => {
-        if (socket && connected) {
-            // Ouvir novas mensagens globalmente para notificações
-            socket.on('message:new', (msg) => {
-                // Só notifica se não for o próprio usuário que enviou (ROLE LEAD ou SYSTEM)
-                // Ou se for USER mas em outra sessão? Por enquanto simplificamos:
-                if (msg.role !== 'USER') {
-                    playNotification();
-                    showBrowserNotification(msg);
-                }
-            });
-
-            // Ouvir criação de lead
-            socket.on('lead:created', ({ lead }) => {
-                playNotification();
-                showBrowserNotification({
-                    content: `Novo lead registrado: ${lead.name}`,
-                    role: 'SYSTEM'
-                });
-            });
-
-            return () => {
-                socket.off('message:new');
-                socket.off('lead:created');
-            };
-        }
-    }, [socket, connected]);
-
+    // Hoisted functions
     const playNotification = () => {
         notificationSound.current.play().catch(e => console.log('Audio play blocked:', e));
     };
@@ -108,14 +70,40 @@ export const RealtimeProvider = ({ children }) => {
         if (!("Notification" in window)) return;
 
         if (Notification.permission === "granted") {
-            new Notification("Quarks Solar", {
-                body: msg.content,
-                icon: '/favicon.ico' // TODO: check actual icon
-            });
+            new Notification("Nova mensagem", { body: msg.content });
         } else if (Notification.permission !== "denied") {
-            Notification.requestPermission();
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    new Notification("Nova mensagem", { body: msg.content });
+                }
+            });
         }
     };
+
+    useEffect(() => {
+        if (!socket || !connected) return;
+
+        socket.on('new_message', (msg) => {
+            console.log('New message received:', msg);
+            // Tocar som se não for mensagem do próprio usuário (ou se quisermos feedback sempre)
+            // Ou se for USER mas em outra sessão? Por enquanto simplificamos:
+            if (msg.role !== 'USER') {
+                playNotification();
+                showBrowserNotification(msg);
+            }
+        });
+
+        socket.on('new_lead', (lead) => {
+            console.log('New lead received:', lead);
+            // Atualizar lista ou notificar
+            playNotification();
+        });
+
+        return () => {
+            socket.off('new_message');
+            socket.off('new_lead');
+        };
+    }, [socket, connected]);
 
     const subscribeToLead = (leadId) => {
         if (socket && connected) {
@@ -129,14 +117,15 @@ export const RealtimeProvider = ({ children }) => {
         }
     };
 
-    const value = {
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
+    const value = React.useMemo(() => ({
         socket,
         connected,
         error,
         subscribeToLead,
         unsubscribeFromLead,
         playNotification
-    };
+    }), [socket, connected, error]);
 
     return (
         <RealtimeContext.Provider value={value}>

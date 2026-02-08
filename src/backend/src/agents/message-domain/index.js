@@ -36,25 +36,66 @@ class MessageDomainAgent extends BaseDomainAgent {
     async sendMessage(data) {
         const { leadId, content, role, senderId } = data;
 
-        const message = await prisma.message.create({
-            data: {
-                content,
-                role: role || 'USER',
-                leadId,
-                senderId: senderId || null
-            },
-            include: {
-                sender: {
-                    select: { id: true, name: true, email: true }
-                }
+        // Detect mentions (Improved Regex for Names with Spaces/Accents)
+        // Matches: @Name, @Name Surname, @João Silva
+        const mentionRegex = /@([a-zA-Z0-9À-ÿ]+(?: [a-zA-Z0-9À-ÿ]+)*)/g;
+        const matches = [...content.matchAll(mentionRegex)];
+        const potentialNames = matches.map(m => m[1]);
+
+        let mentions = [];
+        if (potentialNames.length > 0) {
+            try {
+                const users = await prisma.user.findMany({
+                    where: {
+                        OR: [
+                            { name: { in: potentialNames, mode: 'insensitive' } },
+                            { email: { in: potentialNames, mode: 'insensitive' } }
+                        ]
+                    },
+                    select: { id: true }
+                });
+                mentions = users.map(u => u.id);
+            } catch (err) {
+                console.error('Error resolving mentions:', err.message);
+                // Non-blocking: continue sending message even if mention resolution fails
             }
-        });
+        }
+
+        let message;
+        try {
+            message = await prisma.message.create({
+                data: {
+                    content,
+                    role: role || 'USER',
+                    leadId,
+                    senderId: senderId || null,
+                    mentions
+                },
+                include: {
+                    sender: {
+                        select: { id: true, name: true, email: true }
+                    }
+                }
+            });
+        } catch (dbError) {
+            console.error('CRITICAL: Failed to save message:', dbError);
+            throw new Error('Failed to send message. Please try again.');
+        }
 
         // Broadcast real-time
         const io = require('../../websocket/gateway').getIO();
         if (io) {
             io.to(`lead:${leadId}`).emit('message:new', message);
-            // Notificar unread count global se necessário
+        }
+
+        // Trigger Notifications
+        if (mentions.length > 0) {
+            try {
+                const notificationAgent = require('../notification-domain');
+                notificationAgent.handleMention(message.id, mentions);
+            } catch (e) {
+                console.error('Failed to trigger notifications:', e.message);
+            }
         }
 
         return message;

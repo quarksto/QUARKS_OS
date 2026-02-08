@@ -12,15 +12,6 @@ const readSidebarCollapsed = () => {
     }
 };
 
-const readCopilotOpen = () => {
-    try {
-        const v = localStorage.getItem(COPILOT_STORAGE_KEY);
-        return v === null ? true : v === 'true';
-    } catch {
-        return true;
-    }
-};
-
 const LayoutContext = createContext();
 
 export const LayoutProvider = ({ children }) => {
@@ -29,7 +20,9 @@ export const LayoutProvider = ({ children }) => {
     useEffect(() => {
         try {
             localStorage.setItem(SIDEBAR_STORAGE_KEY, String(isSidebarCollapsed));
-        } catch (_) { }
+        } catch (_) {
+            // ignore
+        }
     }, [isSidebarCollapsed]);
 
     const toggleSidebar = () => setIsSidebarCollapsed(prev => !prev);
@@ -44,6 +37,7 @@ export const LayoutProvider = ({ children }) => {
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useLayout = () => {
     const context = useContext(LayoutContext);
     if (!context) {

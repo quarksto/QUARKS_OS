@@ -65,7 +65,7 @@ export function HybridShell() {
       const next = typeof valueOrUpdater === 'function' ? valueOrUpdater(prev) : valueOrUpdater;
       try {
         localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
-      } catch (_) { }
+      } catch (_) { /* ignore */ }
       return next;
     });
   }, []);

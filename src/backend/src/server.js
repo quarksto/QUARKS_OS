@@ -1,4 +1,5 @@
 require('dotenv').config();
+// Triggering restart for env sync
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -12,11 +13,17 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({ origin: true, credentials: true })); // Allow all for debugging
 app.use(express.json());
 
-// Logging Middleware
+const fs = require('fs');
+const path = require('path');
+
+// Detailed Request Logger to debug login issues
 app.use((req, res, next) => {
+  const logLine = `[${new Date().toISOString()}] ${req.method} ${req.url} | Origin: ${req.headers.origin} | Body: ${JSON.stringify(req.body)}\n`;
+  fs.appendFileSync(path.join(__dirname, '../requests.log'), logLine);
+  console.log(`[REQUEST] ${req.method} ${req.originalUrl}`);
   logger.info(`${req.method} ${req.url}`);
   next();
 });
@@ -32,6 +39,8 @@ const calcAgent = require('./agents/calc-domain');
 const proposalAgent = require('./agents/proposal-domain');
 const inventoryAgent = require('./agents/inventory-domain');
 const projectAgent = require('./agents/project-domain');
+const serviceAgent = require('./agents/service-domain');
+const pricingAgent = require('./agents/pricing-domain');
 
 // Register Agents
 maestro.registerAgent('lead', leadAgent);
@@ -39,6 +48,8 @@ maestro.registerAgent('calc', calcAgent);
 maestro.registerAgent('proposal', proposalAgent);
 maestro.registerAgent('inventory', inventoryAgent);
 maestro.registerAgent('project', projectAgent);
+maestro.registerAgent('service', serviceAgent);
+maestro.registerAgent('pricing', pricingAgent);
 
 
 // Routes
@@ -46,14 +57,18 @@ maestro.registerAgent('project', projectAgent);
 app.use('/api/auth', authRoutes);
 app.use('/api/marketing', marketingRoutes);
 app.use('/api/copilot', require('./agents/copilot-domain/routes')(maestro));
+app.use('/api/users', require('./modules/users/routes'));
+app.use('/api/templates', require('./modules/templates/routes'));
 app.use('/api/analytics', require('./modules/analytics/routes'));
 app.use('/api/leads', require('./modules/leads/routes'));
 app.use('/api/inventory', require('./modules/inventory/routes')); // Explicit naming
+app.use('/api/services', require('./modules/service/routes'));
 app.use('/api/pricing-rules', require('./modules/pricing-rules/routes'));
 app.use('/api/proposals', require('./modules/proposals/routes'));
 app.use('/api/search', require('./modules/search/routes'));
 app.use('/api/messages', require('./modules/messages/routes'));
 app.use('/api/projects', require('./modules/projects/routes'));
+app.use('/api/documents', require('./modules/documents/routes'));
 
 
 app.get('/', (req, res) => {
@@ -81,8 +96,8 @@ app.post('/api/orchestrate/preview-proposal', async (req, res) => {
 // Orchestration Endpoint (Demo)
 app.post('/api/orchestrate/create-proposal', authenticate, authorize(['COMERCIAL', 'ADMIN']), async (req, res) => {
   try {
-    const { leadId, consumption } = req.body;
-    const result = await maestro.execute('CREATE_PROPOSAL_WORKFLOW', { leadId, consumption });
+    const { leadId, consumption, introduction, notes, paymentTerms } = req.body;
+    const result = await maestro.execute('CREATE_PROPOSAL_WORKFLOW', { leadId, consumption, introduction, notes, paymentTerms });
     res.json({ success: true, proposal: result });
   } catch (error) {
     logger.error(error);

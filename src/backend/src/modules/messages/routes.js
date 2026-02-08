@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const messageAgent = require('../../agents/message-domain');
 const { authenticate } = require('../../middleware/auth');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 // List messages for a lead
 router.get('/lead/:leadId', authenticate, async (req, res) => {
@@ -21,7 +23,7 @@ router.post('/', authenticate, async (req, res) => {
             leadId,
             content,
             role: role || 'USER',
-            senderId: req.user.userId
+            senderId: req.user.id
         });
         res.json(message);
     } catch (error) {

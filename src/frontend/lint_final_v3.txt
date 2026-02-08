@@ -1,0 +1,356 @@
+
+> frontend@0.0.0 lint
+> eslint .
+
+
+D:\QUARKS_OS\src\frontend\src\components\chat\InputArea.jsx
+  1:35  warning  'useEffect' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\copilot\CopilotBar.jsx
+   3:48  warning  'rem' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                no-unused-vars
+  11:56  warning  'viewMode' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\copilot\CopilotSidebar.jsx
+  4:10  warning  'format' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\AdaptiveHeader.jsx
+  14:5  warning  'subtitle' is assigned a value but never used. Allowed unused args must match /^_/u  no-unused-vars
+  15:5  warning  'loading' is assigned a value but never used. Allowed unused args must match /^_/u   no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\CreateLeadModal.jsx
+   7:35  error  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render   react-hooks/rules-of-hooks
+  17:37  error  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render   react-hooks/rules-of-hooks
+  27:5   error  React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+  41:24  error  React Hook "useMemo" is called conditionally. React Hooks must be called in the exact same order in every component render    react-hooks/rules-of-hooks
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\DashboardSidebar.jsx
+   4:10  warning  'useLayout' is defined but never used. Allowed unused vars must match /^[A-Z_]/u               no-unused-vars
+  68:21  warning  'isCopilotOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  68:51  warning  'toggleCopilot' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  71:40  warning  'Icon' is defined but never used. Allowed unused args must match /^_/u                         no-unused-vars
+  76:30  warning  'e' is defined but never used. Allowed unused args must match /^_/u                            no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\GlobalSearch.jsx
+   22:18  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u                                                    no-unused-vars
+  136:17  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\KanbanBoard.jsx
+    1:47  warning  'useRef' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        no-unused-vars
+   67:11  warning  'segment' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              no-unused-vars
+  238:1   warning  Unused eslint-disable directive (no problems were reported from 'react-refresh/only-export-components')
+  262:49  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  260 |     const useExternalPipeline = typeof onPipelineChange === 'function';
+  261 |
+> 262 |     useEffect(() => { if (!useExternalPipeline) setLocalPipeline(pipeline); }, [pipeline, useExternalPipeline]);
+      |                                                 ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  263 |
+  264 |     useEffect(() => {
+  265 |         const handleClickOutside = () => { setActiveMenuLeadId(null); setIsFunnelSelectOpen(false); };                                                 react-hooks/set-state-in-effect
+  324:38  error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `passesFilters`, but the source dependencies were [pipelineData, columns, filters, searchTerm]. Inferred different dependency than source.
+
+  322 |     };
+  323 |
+> 324 |     const filteredPipeline = useMemo(() => {
+      |                                      ^^^^^^^
+> 325 |         const next = {};
+      | ^^^^^^^^^^^^^^^^^^^^^^^^
+> 326 |         columns.forEach(col => next[col.id] = (pipelineData[col.id] || []).filter(passesFilters));
+      | ^^^^^^^^^^^^^^^^^^^^^^^^
+> 327 |         return next;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^
+> 328 |     }, [pipelineData, columns, filters, searchTerm]);
+      | ^^^^^^ Could not preserve existing manual memoization
+  329 |
+  330 |     const flattenedRows = useMemo(() => columns.flatMap(col => (filteredPipeline[col.id] || []).map(lead => ({ ...lead, stage: col.id }))), [filteredPipeline, columns]);
+  331 |  react-hooks/preserve-manual-memoization
+  328:8   warning  React Hook useMemo has a missing dependency: 'passesFilters'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\KpiGrid.jsx
+    3:48  warning  'period' is defined but never used. Allowed unused args must match /^_/u                    no-unused-vars
+    3:56  warning  'meta' is defined but never used. Allowed unused args must match /^_/u                      no-unused-vars
+  139:9   warning  'revenueRaw' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\LeadDetailModal.jsx
+   20:12   warning  'loading' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           no-unused-vars
+   21:13   warning  'setContext' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        no-unused-vars
+   21:25   warning  'triggerAction' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     no-unused-vars
+   21:40   warning  'openSidebar' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       no-unused-vars
+  132:113  error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  130 |                                     <div key={i} className="relative">
+  131 |                                         <div className="absolute -left-[21px] top-0.5 w-3 h-3 rounded-full border-2 border-white bg-slate-300"></div>
+> 132 |                                         <p className="text-xs text-slate-400 mb-0.5">{new Date(act.timestamp || Date.now()).toLocaleDateString('pt-BR')}</p>
+      |                                                                                                                 ^^^^^^^^^^ Cannot call impure function
+  133 |                                         <p className="text-sm font-medium text-slate-800">{act.description || 'Atividade registrada'}</p>
+  134 |                                     </div>
+  135 |                                 ))}  react-hooks/purity
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\LeadDetailPanel.jsx
+  24:9  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  22 |         if (!initialLead?.id) return;
+  23 |
+> 24 |         setLoading(true);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  25 |         setError(null);
+  26 |         setLead(initialLead);
+  27 |  react-hooks/set-state-in-effect
+  42:8  warning  React Hook useEffect has a missing dependency: 'initialLead'. Either include it or remove the dependency array. If 'setLead' needs the current value of 'initialLead', you can also switch to useReducer instead of useState and read 'initialLead' in the reducer                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\LeadListTable.jsx
+    2:26  warning  'getTemperatureClass' is defined but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+   18:7   warning  'stringToColor' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  127:73  warning  Unused eslint-disable directive (no problems were reported from 'no-undef')
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\LeadListTableRefactored.jsx
+    1:27  warning  'useMemo' is defined but never used. Allowed unused vars must match /^[A-Z_]/u              no-unused-vars
+    2:26  warning  'getTemperatureClass' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+    2:78  warning  'getLeadScore' is defined but never used. Allowed unused vars must match /^[A-Z_]/u         no-unused-vars
+   29:5   warning  'filters' is defined but never used. Allowed unused args must match /^_/u                   no-unused-vars
+   91:46  error    'setSearchTerm' is not defined                                                              no-undef
+  248:66  error    'setSearchTerm' is not defined                                                              no-undef
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\LeadQualificationForm.jsx
+  49:8  warning  React Hook useEffect has a missing dependency: 'lead'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\ProjectDetailModal.jsx
+    7:12  warning  'loading' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  142:65  warning  'idx' is defined but never used. Allowed unused args must match /^_/u                    no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\ProjectKanbanBoard.jsx
+  94:30  warning  'e' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\leadModal\LeadModalFooter.jsx
+  3:41  warning  'onNewProposal' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\leadModal\LeadModalJourneyBanner.jsx
+  7:22  warning  'filled' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  7:30  warning  'total' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u   no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\leadModal\LeadModalSolarInsights.jsx
+  13:12  warning  'error' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       no-unused-vars
+  18:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  16 |         if (!lead?.id || !lead?.location) return;
+  17 |
+> 18 |         setLoading(true);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  19 |         setError(null);
+  20 |         api.get(`/leads/${lead.id}/solar`)
+  21 |             .then((res) => setInsights(res.data))  react-hooks/set-state-in-effect
+
+D:\QUARKS_OS\src\frontend\src\components\shared\ConnectionStatus.jsx
+  49:7  warning  'styles' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\context\CopilotContext.jsx
+   30:43  warning  'chunkSessionId' is defined but never used. Allowed unused args must match /^_/u                                                no-unused-vars
+  186:14  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\QUARKS_OS\src\frontend\src\contexts\AuthContext.jsx
+  29:21  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  27 |                 const storedUser = localStorage.getItem('user');
+  28 |                 if (storedUser) {
+> 29 |                     setUser(JSON.parse(storedUser));
+     |                     ^^^^^^^ Avoid calling setState() directly within an effect
+  30 |                 }
+  31 |             } catch (e) {
+  32 |                 console.error("Auth init error", e);  react-hooks/set-state-in-effect
+
+D:\QUARKS_OS\src\frontend\src\hooks\useLeadsList.js
+   1:10  warning  'useState' is defined but never used. Allowed unused vars must match /^[A-Z_]/u   no-unused-vars
+   1:20  warning  'useEffect' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  13:23  error    'useMemo' is not defined                                                          no-undef
+
+D:\QUARKS_OS\src\frontend\src\hooks\useRealtime.js
+  63:8  warning  React Hook useEffect has missing dependencies: 'onUpdate', 'subscribeToLead', and 'unsubscribeFromLead'. Either include them or remove the dependency array. If 'onUpdate' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\hybrid\ConversationList.jsx
+   2:25  warning  'stageLabels' is defined but never used. Allowed unused vars must match /^[A-Z_]/u         no-unused-vars
+  28:10  warning  'isNewLead' is defined but never used. Allowed unused vars must match /^[A-Z_]/u           no-unused-vars
+  36:18  warning  'setSortBy' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\hybrid\HybridShell.jsx
+   10:10  warning  'downloadLeadsCsv' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                         no-unused-vars
+   68:19  error    Empty block statement                                                                                                                                                                                                                           no-empty
+  104:6   warning  React Hook useEffect has a missing dependency: 'selectedLead'. Either include it or remove the dependency array                                                                                                                                 react-hooks/exhaustive-deps
+  118:6   warning  React Hook useEffect has missing dependencies: 'leadIdFromUrl', 'searchParams', 'selectedLead', and 'setSearchParams'. Either include them or remove the dependency array                                                                       react-hooks/exhaustive-deps
+  156:6   warning  React Hook useEffect has a missing dependency: 'selectedLead'. Either include it or remove the dependency array                                                                                                                                 react-hooks/exhaustive-deps
+  240:6   warning  React Hook useEffect has a missing dependency: 'currentLead'. Either include it or remove the dependency array                                                                                                                                  react-hooks/exhaustive-deps
+  261:6   warning  React Hook useEffect has a missing dependency: 'selectedLead'. Either include it or remove the dependency array. You can also replace multiple useState variables with useReducer if 'setLeadDetail' needs the current value of 'selectedLead'  react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\hybrid\LeadContextPanel.jsx
+   4:16  warning  'rem' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                         no-unused-vars
+  29:65  warning  'onStatusChange' is defined but never used. Allowed unused args must match /^_/u                   no-unused-vars
+  30:10  warning  'statusUpdating' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+  30:26  warning  'setStatusUpdating' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\hybrid\LeadDetailDrawer.jsx
+   4:10  warning  'ptBR' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                   no-unused-vars
+  63:14  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u                  no-unused-vars
+  78:9   warning  'hasProposals' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\DashboardRefactored.jsx
+  21:13  warning  'isOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\ForgotPasswordPage.jsx
+  2:10  warning  'useNavigate' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\LeadDetailPage.jsx
+  111:13  warning  'percent' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\LeadsListPage.jsx
+  14:21  warning  'setFilters' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\LeadsPage.jsx
+  41:11  warning  'totalLeads' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\LoginPage.jsx
+  20:11  warning  'navigate' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\LoginPageAdvanced.jsx
+  23:11  warning  'navigate' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\LoginPageStitch.jsx
+  26:11  warning  'navigate' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\ProposalDetailPage.jsx
+  32:11  warning  'navigate' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\ProposalViewPublicPage.jsx
+  16:26  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  14 |     useEffect(() => {
+  15 |         if (!slug) {
+> 16 |             if (loading) setLoading(false);
+     |                          ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  17 |             return;
+  18 |         }
+  19 |         fetch(`${API_BASE}/api/proposals/public/${slug}`)  react-hooks/set-state-in-effect
+  26:8   warning  React Hook useEffect has a missing dependency: 'loading'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/exhaustive-deps
+  37:8   warning  React Hook useEffect has missing dependencies: 'markViewed' and 'proposal'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\pages\ProposalsListPage.jsx
+  26:26  warning  'setStatusFilter' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                    no-unused-vars
+  48:8   warning  React Hook useEffect has a missing dependency: 'fetchProposals'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\pages\SalesWorkspace.jsx
+   81:8  warning  React Hook useEffect has a missing dependency: 'selectedLead'. Either include it or remove the dependency array                                                                                                                                 react-hooks/exhaustive-deps
+   95:8  warning  React Hook useEffect has missing dependencies: 'leadIdFromUrl', 'searchParams', 'selectedLead', and 'setSearchParams'. Either include them or remove the dependency array                                                                       react-hooks/exhaustive-deps
+  128:8  warning  React Hook useEffect has a missing dependency: 'selectedLead'. Either include it or remove the dependency array                                                                                                                                 react-hooks/exhaustive-deps
+  207:8  warning  React Hook useEffect has a missing dependency: 'currentLead'. Either include it or remove the dependency array                                                                                                                                  react-hooks/exhaustive-deps
+  228:8  warning  React Hook useEffect has a missing dependency: 'selectedLead'. Either include it or remove the dependency array. You can also replace multiple useState variables with useReducer if 'setLeadDetail' needs the current value of 'selectedLead'  react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\providers\RealtimeProvider.jsx
+   17:13  warning  'user' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         no-unused-vars
+   21:11  warning  'reconnectTimeoutRef' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          no-unused-vars
+   72:8   warning  React Hook useEffect has a missing dependency: 'socket'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    react-hooks/exhaustive-deps
+   83:21  error    Error: Cannot access variable before it is declared
+
+`playNotification` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  81 |                 // Ou se for USER mas em outra sessão? Por enquanto simplificamos:
+  82 |                 if (msg.role !== 'USER') {
+> 83 |                     playNotification();
+     |                     ^^^^^^^^^^^^^^^^ `playNotification` accessed before it is declared
+  84 |                     showBrowserNotification(msg);
+  85 |                 }
+  86 |             });
+
+  102 |     }, [socket, connected]);
+  103 |
+> 104 |     const playNotification = () => {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 105 |         notificationSound.current.play().catch(e => console.log('Audio play blocked:', e));
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 106 |     };
+      | ^^^^^^^ `playNotification` is declared here
+  107 |
+  108 |     const showBrowserNotification = (msg) => {
+  109 |         if (!("Notification" in window)) return;  react-hooks/immutability
+   84:21  error    Error: Cannot access variable before it is declared
+
+`showBrowserNotification` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  82 |                 if (msg.role !== 'USER') {
+  83 |                     playNotification();
+> 84 |                     showBrowserNotification(msg);
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^ `showBrowserNotification` accessed before it is declared
+  85 |                 }
+  86 |             });
+  87 |
+
+  106 |     };
+  107 |
+> 108 |     const showBrowserNotification = (msg) => {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 109 |         if (!("Notification" in window)) return;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 110 |
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 118 |         }
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 119 |     };
+      | ^^^^^^^ `showBrowserNotification` is declared here
+  120 |
+  121 |     const subscribeToLead = (leadId) => {
+  122 |         if (socket && connected) {                react-hooks/immutability
+  140:9   warning  React Hook React.useMemo has missing dependencies: 'subscribeToLead' and 'unsubscribeFromLead'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\shell\UnifiedShell.jsx
+  59:8   warning  React Hook useEffect has a missing dependency: 'closeSidebar'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    react-hooks/exhaustive-deps
+  63:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  61 |     useEffect(() => {
+  62 |         if (mode !== activeMode) {
+> 63 |             setIsTransitioning(true);
+     |             ^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  64 |             const timer = setTimeout(() => {
+  65 |                 setActiveMode(mode);
+  66 |                 setIsTransitioning(false);  react-hooks/set-state-in-effect
+
+✖ 103 problems (20 errors, 83 warnings)
+  0 errors and 2 warnings potentially fixable with the `--fix` option.
+

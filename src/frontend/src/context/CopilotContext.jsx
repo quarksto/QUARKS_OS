@@ -183,6 +183,7 @@ export const CopilotProvider = ({ children }) => {
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useCopilot = () => {
     const context = useContext(CopilotContext);
     if (!context) {

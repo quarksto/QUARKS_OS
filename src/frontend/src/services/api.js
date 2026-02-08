@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Base URL do backend (usado por api e por useChat/copilot). Para produção, defina VITE_API_BASE no .env.
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
+// Base URL relative to leverage Vite proxy (avoids CORS)
+const API_BASE = ''; // This will make requests to /api/... relative to current origin
 
 const api = axios.create({
     baseURL: `${API_BASE}/api`,

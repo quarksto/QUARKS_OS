@@ -80,15 +80,17 @@ const executeTool = async (maestro, name, args) => {
 
     try {
         switch (name) {
-            case 'get_projects_summary':
+            case 'get_projects_summary': {
                 const projects = await maestro.execute('GET_PROJECTS_SUMMARY', {});
                 return { success: true, data: projects };
+            }
 
-            case 'get_project_details':
+            case 'get_project_details': {
                 const details = await maestro.execute('GET_PROJECT_DETAILS', { id: args.projectId });
                 return { success: true, data: details };
+            }
 
-            case 'create_proposal_preview':
+            case 'create_proposal_preview': {
                 // Map tool args to Maestro Payload
                 const payload = {
                     customer: {
@@ -115,8 +117,9 @@ const executeTool = async (maestro, name, args) => {
                         previewUrl: `http://localhost:5173/proposta/${result.proposal.id}` // Mock URL logic
                     }
                 };
+            }
 
-            case 'generate_image':
+            case 'generate_image': {
                 if (!maestro.agents['visual']) return { error: "Visual Agent not available" };
                 const imgResult = await maestro.agents['visual'].generateImage(args.prompt);
                 return {
@@ -126,8 +129,9 @@ const executeTool = async (maestro, name, args) => {
                         preview: `![Image](${imgResult.url})` // Markdown for frontend
                     }
                 };
+            }
 
-            case 'generate_video':
+            case 'generate_video': {
                 if (!maestro.agents['visual']) return { error: "Visual Agent not available" };
                 const vidResult = await maestro.agents['visual'].generateVideo(args.prompt);
                 return {
@@ -137,8 +141,9 @@ const executeTool = async (maestro, name, args) => {
                         preview: `[VIDEO GENERATED](${vidResult.url})`
                     }
                 };
+            }
 
-            case 'switch_mode':
+            case 'switch_mode': {
                 // O broadcaster vai emitir um evento que o frontend ouve para mudar o modo
                 const broadcaster = require('../../services/realtime/broadcaster');
                 broadcaster.broadcastModeSwitch(args.mode);
@@ -149,6 +154,7 @@ const executeTool = async (maestro, name, args) => {
                         mode: args.mode
                     }
                 };
+            }
 
             default:
                 return { error: `Tool ${name} not implemented` };

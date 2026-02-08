@@ -17,6 +17,8 @@ class PricingDomainAgent extends BaseDomainAgent {
                 return await this.findRule(payload);
             case 'LIST_RULES':
                 return await this.listRules(payload);
+            case 'GET_RULE':
+                return await this.getRule(payload.id);
             case 'CREATE_RULE':
                 return await this.createRule(payload);
             case 'UPDATE_RULE':
@@ -26,6 +28,12 @@ class PricingDomainAgent extends BaseDomainAgent {
             default:
                 throw new Error(`Unknown action: ${action}`);
         }
+    }
+
+    async getRule(id) {
+        const rule = await prisma.pricingRule.findUnique({ where: { id } });
+        if (!rule) throw new Error(`Rule not found: ${id}`);
+        return rule;
     }
 
     /**
@@ -71,55 +79,134 @@ class PricingDomainAgent extends BaseDomainAgent {
         };
     }
 
+    async calculateServices({ state, systemPower }) {
+        console.log(`[PricingDomain] Calculating services for State: ${state || 'National'}, Power: ${systemPower}kWp`);
+
+        // 1. Fetch active services (Installation, Engineering, Homologation, etc.)
+        const services = await prisma.service.findMany({
+            where: { active: true },
+            include: {
+                prices: {
+                    where: {
+                        active: true,
+                        minPower: { lte: systemPower },
+                        maxPower: { gte: systemPower },
+                        OR: [
+                            { state: state },       // Match State
+                            { state: null }         // OR National (fallback)
+                        ]
+                    },
+                    orderBy: { state: 'desc' } // Prefer State specific price over null
+                }
+            }
+        });
+
+        let totalServiceCost = 0;
+        const breakdown = {};
+
+        for (const service of services) {
+            // Find best matching price (State specific > National)
+            // Since we ordered by state desc, if we have both, the one with state will be first (string vs null)
+            // Note: This logic assumes 'state' string comes before null in sort, or we explicitly check.
+            // Better to filter manually to be safe.
+            let priceRule = service.prices.find(p => p.state === state);
+            if (!priceRule) priceRule = service.prices.find(p => p.state === null);
+
+            if (!priceRule) {
+                console.warn(`[PricingDomain] No price found for service: ${service.name} in context.`);
+                continue;
+            }
+
+            let cost = 0;
+            switch (priceRule.priceType) {
+                case 'FIXED':
+                    cost = priceRule.priceValue;
+                    break;
+                case 'PER_WATT':
+                    cost = priceRule.priceValue * (systemPower * 1000); // Wp
+                    break;
+                case 'PERCENT':
+                    // Percent needs Hardware Cost, passed as context? For now ignoring, implementing simple logic first.
+                    console.warn('[PricingDomain] PERCENT service price not yet supported without context.');
+                    break;
+                default:
+                    break;
+            }
+
+            totalServiceCost += cost;
+            breakdown[service.type] = {
+                name: service.name,
+                cost: parseFloat(cost.toFixed(2)),
+                rule: priceRule.priceType
+            };
+        }
+
+        return {
+            total: parseFloat(totalServiceCost.toFixed(2)),
+            details: breakdown
+        };
+    }
+
     async calculatePrice({ kit, state, kWp }) {
         if (!kit) throw new Error('Kit is required for pricing');
 
-        const systemPower = kWp || kit.powerKwp || 0;
+        const systemPower = parseFloat(kWp) || kit.size_kwp || kit.powerKwp || 0;
         console.log(`[PricingDomain] Calculating price for Kit: ${kit.name} | ${systemPower}kWp | State: ${state || 'Default'}`);
 
-        // 1. Calculate Base Cost (Sum of all items cost)
-        let totalCost = 0;
+        // 1. Calculate Base Hardware Cost
+        let hardwareCost = 0;
 
-        if (!kit.items || kit.items.length === 0) {
-            console.warn('[PricingDomain] Kit has no items. Using fallback cost.');
-            return { totalPrice: 0, baseCost: 0, margin: 0, taxRate: 0 };
-        }
-
-        for (const item of kit.items) {
-            if (item.product && item.product.costPrice) {
-                totalCost += item.product.costPrice * item.quantity;
+        // Check if Kit has direct price or items
+        if (kit.items && kit.items.length > 0) {
+            for (const item of kit.items) {
+                if (item.product && item.product.costPrice) {
+                    hardwareCost += item.product.costPrice * item.quantity;
+                }
             }
+        } else if (kit.price) {
+            // Fallback to kit base price if items not available
+            hardwareCost = kit.price;
+        } else {
+            console.warn('[PricingDomain] Kit has no items and no base price. Using fallback cost.');
         }
 
-        console.log(`[PricingDomain] Base Hardware Cost: R$ ${totalCost.toFixed(2)}`);
+        console.log(`[PricingDomain] Base Hardware Cost: R$ ${hardwareCost.toFixed(2)}`);
 
-        // 2. Fetch Pricing Rules (Margin & Tax)
+        // 2. Calculate Services Cost
+        const services = await this.calculateServices({ state, systemPower });
+        console.log(`[PricingDomain] Services Cost: R$ ${services.total.toFixed(2)}`);
+
+        // 3. Fetch Pricing Rules (Margin & Tax)
         const rule = await this.findRule({ state, kWp: systemPower });
-
         const margin = rule.targetMargin || 0.20;
         const tax = rule.taxRate || 0.12;
 
-        // 3. Mark-up Calculation
-        // Price = Cost * (1 + Margin) / (1 - Tax)
-        const priceWithMargin = totalCost * (1 + margin);
+        // 4. Mark-up Calculation
+        // Total Base = Hardware + Services
+        const totalBase = hardwareCost + services.total;
+
+        // Price = TotalBase * (1 + Margin) / (1 - Tax)
+        const priceWithMargin = totalBase * (1 + margin);
         const finalPrice = priceWithMargin / (1 - tax);
 
+        console.log(`[PricingDomain] Base Total: R$ ${totalBase.toFixed(2)}`);
         console.log(`[PricingDomain] Rule: ${rule.name} (${rule.isDefault ? 'default' : 'matched'})`);
-        console.log(`[PricingDomain] Applied: Margin ${(margin * 100).toFixed(1)}%, Tax ${(tax * 100).toFixed(1)}%`);
         console.log(`[PricingDomain] Final Price: R$ ${finalPrice.toFixed(2)}`);
 
         return {
             totalPrice: parseFloat(finalPrice.toFixed(2)),
-            baseCost: totalCost,
+            baseCost: totalBase,
             margin: margin,
             taxRate: tax,
             ruleId: rule.id,
             ruleName: rule.name,
             isDefaultRule: !!rule.isDefault,
             breakdown: {
-                hardware: totalCost,
-                grossMargin: priceWithMargin - totalCost,
-                estimatedTaxes: finalPrice - priceWithMargin
+                hardware: parseFloat(hardwareCost.toFixed(2)),
+                services: services.total,
+                servicesDetails: services.details,
+                grossMargin: parseFloat((priceWithMargin - totalBase).toFixed(2)),
+                estimatedTaxes: parseFloat((finalPrice - priceWithMargin).toFixed(2))
             }
         };
     }

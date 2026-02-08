@@ -26,7 +26,7 @@ const StitchBadge = ({ label, colorClass, dotColor }) => (
 export const LeadListTableRefactored = ({
     leads,
     loading,
-    filters,
+    filters: _filters,
     searchTerm,
     onSearchChange,
     onRefresh,
@@ -88,7 +88,7 @@ export const LeadListTableRefactored = ({
                             type="text"
                             placeholder="Buscar leads por nome, email..."
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
                             className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-petroleum/60 focus:ring-0 transition-all font-sans shadow-none"
                         />
                     </div>
@@ -245,7 +245,7 @@ export const LeadListTableRefactored = ({
                                                 Tente ajustar os termos de busca ou filtros para encontrar o que procura.
                                             </p>
                                             <button
-                                                onClick={() => { setSearchTerm(''); if (onRefresh) onRefresh(); }}
+                                                onClick={() => { if (onSearchChange) onSearchChange(''); if (onRefresh) onRefresh(); }}
                                                 className="mt-4 px-4 py-2 bg-white border border-slate-200 shadow-sm rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
                                             >
                                                 Limpar Filtros

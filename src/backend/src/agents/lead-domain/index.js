@@ -9,15 +9,43 @@ function getLeadPotential(lead) {
     return consumption * 4.5;
 }
 
+// --- Scoring Logic ---
+
 function getLeadScore(lead) {
-    const base = typeof lead.consumption === 'number' ? lead.consumption : 0;
-    return Math.min(100, Math.max(45, Math.round((base / 150) + 50)));
+    let score = 0;
+
+    // 1. Basic Info (Max 30)
+    if (lead.name) score += 10;
+    if (lead.phone) score += 10;
+    if (lead.email) score += 10;
+
+    // 2. Location & Bill (Max 40)
+    if (lead.location || lead.cep) score += 10;
+    if (lead.consumption && lead.consumption > 0) score += 10;
+    if (lead.distributor) score += 5;
+    if (lead.fullAddress) score += 5;
+    if (lead.connectionType) score += 5;
+    if (lead.roofType) score += 5;
+
+    // 3. System Engagement (Max 30)
+    // We check if lead has proposals or interactions (needs full lead object)
+    if (lead.proposals && lead.proposals.length > 0) score += 20;
+    if (lead.origin) score += 10;
+
+    return Math.min(100, score);
 }
 
 function getTemperature(lead) {
     const score = getLeadScore(lead);
-    if (score >= 85) return { label: 'Quente', color: 'green' };
-    if (score >= 65) return { label: 'Morno', color: 'orange' };
+    const status = lead.status || 'NEW';
+
+    // Temperature Logic based on Score + Status
+    if (status === 'CLOSED_WON') return { label: 'Vendido', color: 'green' };
+    if (status === 'CLOSED_LOST') return { label: 'Perdido', color: 'gray' };
+
+    if (score >= 80 || status === 'NEGOTIATION') return { label: 'Quente', color: 'red' };
+    if (score >= 50 || status === 'PROPOSAL_SENT') return { label: 'Morno', color: 'orange' };
+
     return { label: 'Frio', color: 'blue' };
 }
 
@@ -75,6 +103,14 @@ class LeadDomainAgent extends BaseDomainAgent {
     async updateStatus(leadId, newStatus) {
         const valid = ['NEW', 'CONTACTED', 'PROPOSAL_SENT', 'NEGOTIATION', 'CLOSED_WON', 'CLOSED_LOST'];
         if (!valid.includes(newStatus)) throw new Error(`Invalid status: ${newStatus}`);
+
+        const currentLead = await prisma.lead.findUnique({ where: { id: leadId } });
+
+        // Promotion Logic
+        if (newStatus === 'CLOSED_WON' && currentLead.status !== 'CLOSED_WON') {
+            await this.promoteToClient(leadId, currentLead);
+        }
+
         const lead = await prisma.lead.update({
             where: { id: leadId },
             data: { status: newStatus },
@@ -82,6 +118,56 @@ class LeadDomainAgent extends BaseDomainAgent {
         const enriched = enrichLead(lead);
         broadcaster.broadcastLeadUpdate(leadId, enriched);
         return enriched;
+    }
+
+    async promoteToClient(leadId, leadData) {
+        console.log(`[LeadDomain] Promoting Lead ${leadId} to Client...`);
+        try {
+            // 1. Check if Client exists (by Email first, assuming Document checks later)
+            let client = null;
+            if (leadData.email) {
+                client = await prisma.client.findUnique({ where: { email: leadData.email } });
+            }
+
+            if (!client) {
+                // 2. Create Client
+                client = await prisma.client.create({
+                    data: {
+                        name: leadData.name,
+                        email: leadData.email,
+                        phone: leadData.phone,
+                        address: leadData.fullAddress || leadData.location,
+                        type: 'PF' // Default
+                    }
+                });
+                console.log(`[LeadDomain] Created New Client: ${client.id}`);
+            } else {
+                console.log(`[LeadDomain] Found Existing Client: ${client.id}`);
+            }
+
+            // 3. Link Lead to Client
+            await prisma.lead.update({
+                where: { id: leadId },
+                data: { clientId: client.id }
+            });
+
+            // 4. Create Project automatically if not exists
+            const existingProject = await prisma.project.findFirst({ where: { leadId } });
+            if (!existingProject) {
+                await prisma.project.create({
+                    data: {
+                        name: `Projeto Solar - ${client.name}`,
+                        status: 'PLANNED',
+                        leadId: leadId,
+                        clientId: client.id
+                    }
+                });
+                console.log(`[LeadDomain] Auto-created Project for Client: ${client.name}`);
+            }
+        } catch (error) {
+            console.error("[LeadDomain] Error promoting to client:", error);
+            // Non-blocking error
+        }
     }
 
     async getLead(id) {

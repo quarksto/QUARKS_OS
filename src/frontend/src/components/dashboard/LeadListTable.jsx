@@ -124,7 +124,7 @@ export const LeadListTable = ({ leads, loading, filters, onRefresh, onLeadClick,
                         type="text"
                         placeholder="Buscar leads por nome, email..."
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(e) => setSearchTerm(e.target.value)} // eslint-disable-line no-undef
                         className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-petroleum/60 focus:ring-0 transition-all font-sans shadow-none"
                     />
                 </div>

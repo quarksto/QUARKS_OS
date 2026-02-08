@@ -16,6 +16,8 @@ class AnalyticsDomainAgent {
                 return await this.getRecentActivity(payload);
             case 'GET_LEAD_ACTIVITY':
                 return await this.getLeadActivity(payload.leadId);
+            case 'GET_ENERGY_BALANCE':
+                return await this.getEnergyBalance();
             default:
                 throw new Error(`Analytics Action ${action} not supported`);
         }
@@ -75,10 +77,42 @@ class AnalyticsDomainAgent {
         };
 
         // Deltas: optional period-over-period (placeholder when no history)
+        // Deltas: Period over Period (Month over Month)
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
+        const [leadsThisMonth, leadsLastMonth] = await Promise.all([
+            prisma.lead.count({ where: { createdAt: { gte: startOfMonth } } }),
+            prisma.lead.count({ where: { createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } } })
+        ]);
+
+        const leadsDelta = leadsLastMonth > 0 ? Math.round(((leadsThisMonth - leadsLastMonth) / leadsLastMonth) * 100) : 0;
+
+        // Revenue Delta (Pipeline Created) or Won? Let's use Pipeline Value logic for consistency with KPI
+        // Pipeline Value = Sent + Viewed
+        // But for Delta, "Revenue" usually implies Closed Won.
+        // Let's use Closed Won for Delta Revenue to be more meaningful as "Growth"
+        const [wonThisMonth, wonLastMonth] = await Promise.all([
+            prisma.proposal.aggregate({
+                _sum: { totalPrice: true },
+                where: { status: 'ACCEPTED', updatedAt: { gte: startOfMonth } }
+            }),
+            prisma.proposal.aggregate({
+                _sum: { totalPrice: true },
+                where: { status: 'ACCEPTED', updatedAt: { gte: startOfLastMonth, lte: endOfLastMonth } }
+            })
+        ]);
+
+        const revThis = wonThisMonth._sum.totalPrice || 0;
+        const revLast = wonLastMonth._sum.totalPrice || 0;
+        const revenueDelta = revLast > 0 ? Math.round(((revThis - revLast) / revLast) * 100) : 0;
+
         const deltas = {
-            leads: null,
-            conversion: null,
-            revenue: null
+            leads: `${leadsDelta > 0 ? '+' : ''}${leadsDelta}%`,
+            conversion: null, // Harder to calc without snapshots
+            revenue: `${revenueDelta > 0 ? '+' : ''}${revenueDelta}%`
         };
 
         return {
@@ -203,6 +237,54 @@ class AnalyticsDomainAgent {
         });
 
         return activity.sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+    async getEnergyBalance() {
+        // Get closed deals from the last 6 months
+        // Since we don't have a 'closedAt' field yet, we use updatedAt for CLOSED_WON leads
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        const closedLeads = await prisma.lead.findMany({
+            where: {
+                status: 'CLOSED_WON',
+                updatedAt: { gte: sixMonthsAgo }
+            },
+            include: {
+                proposals: {
+                    where: { status: 'ACCEPTED' },
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1
+                }
+            }
+        });
+
+        // Group by Month
+        const balance = {};
+        const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+        // Initialize last 6 months
+        for (let i = 5; i >= 0; i--) {
+            const d = new Date();
+            d.setMonth(d.getMonth() - i);
+            const key = `${months[d.getMonth()]}`;
+            balance[key] = { month: key, consumption: 0, generation: 0 };
+        }
+
+        closedLeads.forEach(lead => {
+            const date = new Date(lead.updatedAt);
+            const key = `${months[date.getMonth()]}`;
+
+            if (balance[key]) {
+                balance[key].consumption += Math.round(lead.consumption || 0);
+
+                const proposal = lead.proposals[0];
+                if (proposal) {
+                    balance[key].generation += Math.round(proposal.generationKwh || 0);
+                }
+            }
+        });
+
+        return Object.values(balance);
     }
 }
 

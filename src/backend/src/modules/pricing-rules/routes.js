@@ -1,46 +1,18 @@
 /**
  * PricingRule Routes - CRUD de Regras de Precificação
- * 
- * Rotas:
- * - GET /api/pricing-rules - Listar regras (filtro por state, kWp)
- * - GET /api/pricing-rules/:id - Detalhe da regra
- * - POST /api/pricing-rules - Criar regra (ADMIN)
- * - PATCH /api/pricing-rules/:id - Atualizar regra (ADMIN)
- * - DELETE /api/pricing-rules/:id - Soft delete (ADMIN)
- * - GET /api/pricing-rules/match - Encontrar regra por state/kWp
  */
 
 const express = require('express');
 const router = express.Router();
-const { PrismaClient } = require('@prisma/client');
+const { maestro } = require('../../orchestrator/maestro');
 const { authenticate, authorize } = require('../../middleware/auth');
 
-const prisma = new PrismaClient();
+// Agent Name: 'pricing'
 
 // GET /api/pricing-rules
 router.get('/', async (req, res) => {
     try {
-        const { active, minPower, maxPower } = req.query;
-
-        const where = {};
-        if (active !== undefined) {
-            where.active = active !== 'false';
-        }
-        if (minPower) {
-            where.minPower = { gte: parseFloat(minPower) };
-        }
-        if (maxPower) {
-            where.maxPower = { lte: parseFloat(maxPower) };
-        }
-
-        const rules = await prisma.pricingRule.findMany({
-            where,
-            orderBy: [
-                { minPower: 'asc' },
-                { createdAt: 'desc' }
-            ]
-        });
-
+        const rules = await maestro.agents['pricing'].execute('LIST_RULES', req.query);
         res.json(rules);
     } catch (error) {
         console.error('[PricingRules] Error listing rules:', error.message);
@@ -48,40 +20,16 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET /api/pricing-rules/match - Encontrar regra que melhor se aplica
+// GET /api/pricing-rules/match
 router.get('/match', async (req, res) => {
     try {
-        const { state, kWp } = req.query;
-        const power = kWp ? parseFloat(kWp) : 0;
-
-        // Buscar regra que corresponde ao power range
-        // Prioridade: regra com state específico > regra geral
-        const rule = await prisma.pricingRule.findFirst({
-            where: {
-                active: true,
-                minPower: { lte: power },
-                maxPower: { gte: power }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
-
+        const rule = await maestro.agents['pricing'].execute('FIND_RULE', req.query);
         if (!rule) {
-            // Fallback: regra padrão (sem range específico)
-            const defaultRule = await prisma.pricingRule.findFirst({
-                where: { active: true },
-                orderBy: { createdAt: 'desc' }
-            });
-
-            if (defaultRule) {
-                return res.json({ ...defaultRule, isDefault: true });
-            }
-
             return res.status(404).json({
                 error: 'No matching pricing rule found',
                 fallback: { targetMargin: 0.20, taxRate: 0.12 }
             });
         }
-
         res.json(rule);
     } catch (error) {
         console.error('[PricingRules] Error matching rule:', error.message);
@@ -92,90 +40,53 @@ router.get('/match', async (req, res) => {
 // GET /api/pricing-rules/:id
 router.get('/:id', async (req, res) => {
     try {
-        const rule = await prisma.pricingRule.findUnique({
-            where: { id: req.params.id }
-        });
-
-        if (!rule) {
-            return res.status(404).json({ error: 'Pricing rule not found' });
-        }
-
+        // Since the agent might not have GET_RULE explicitly, we can assume LIST_RULES with filter or check agent code.
+        // Checking agent code in previous step... it ONLY had LIST_RULES, FIND_RULE, CREATE... 
+        // Wait, did it have GET_RULE? 
+        // Step 1074: execute switch had: CREATE_RULE, UPDATE_RULE, DELETE_RULE, LIST_RULES...
+        // It did NOT have GET_RULE. I should fix the agent too or just use LIST_RULES filtering here?
+        // Better to add GET_RULE to agent. For now I'll assume I can add it or use Prisma directly? 
+        // No, I should fix the agent. But let's check if the agent *actually* had it and I missed it.
+        // Step 1074 lines 14-26: CALCULATE_PRICE, FIND_RULE, LIST_RULES, CREATE_RULE, UPDATE_RULE, DELETE_RULE.
+        // No GET_RULE.
+        // I will add GET_RULE to the agent in the next step.
+        // For now, I'll write the route assuming it will exist.
+        const rule = await maestro.agents['pricing'].execute('GET_RULE', { id: req.params.id });
         res.json(rule);
     } catch (error) {
-        console.error('[PricingRules] Error getting rule:', error.message);
         res.status(500).json({ error: error.message });
     }
 });
 
-// POST /api/pricing-rules (protected - ADMIN only)
+// POST /api/pricing-rules (ADMIN)
 router.post('/', authenticate, authorize(['ADMIN']), async (req, res) => {
     try {
-        const { name, minPower, maxPower, targetMargin, taxRate, state } = req.body;
-
-        if (!name || targetMargin === undefined || taxRate === undefined) {
-            return res.status(400).json({
-                error: 'Missing required fields: name, targetMargin, taxRate'
-            });
-        }
-
-        const rule = await prisma.pricingRule.create({
-            data: {
-                name,
-                minPower: parseFloat(minPower) || 0,
-                maxPower: parseFloat(maxPower) || 999,
-                targetMargin: parseFloat(targetMargin),
-                taxRate: parseFloat(taxRate),
-                active: true
-            }
-        });
-
+        const rule = await maestro.agents['pricing'].execute('CREATE_RULE', req.body);
         res.status(201).json(rule);
     } catch (error) {
-        console.error('[PricingRules] Error creating rule:', error.message);
         res.status(400).json({ error: error.message });
     }
 });
 
-// PATCH /api/pricing-rules/:id (protected - ADMIN only)
+// PATCH /api/pricing-rules/:id (ADMIN)
 router.patch('/:id', authenticate, authorize(['ADMIN']), async (req, res) => {
     try {
-        const allowed = ['name', 'minPower', 'maxPower', 'targetMargin', 'taxRate', 'active'];
-        const data = {};
-
-        for (const key of allowed) {
-            if (req.body[key] !== undefined) {
-                if (['minPower', 'maxPower', 'targetMargin', 'taxRate'].includes(key)) {
-                    data[key] = parseFloat(req.body[key]);
-                } else {
-                    data[key] = req.body[key];
-                }
-            }
-        }
-
-        const rule = await prisma.pricingRule.update({
-            where: { id: req.params.id },
-            data
+        const rule = await maestro.agents['pricing'].execute('UPDATE_RULE', {
+            id: req.params.id,
+            data: req.body
         });
-
         res.json(rule);
     } catch (error) {
-        console.error('[PricingRules] Error updating rule:', error.message);
         res.status(400).json({ error: error.message });
     }
 });
 
-// DELETE /api/pricing-rules/:id (protected - ADMIN only)
+// DELETE /api/pricing-rules/:id (ADMIN)
 router.delete('/:id', authenticate, authorize(['ADMIN']), async (req, res) => {
     try {
-        // Soft delete
-        await prisma.pricingRule.update({
-            where: { id: req.params.id },
-            data: { active: false }
-        });
-
+        await maestro.agents['pricing'].execute('DELETE_RULE', { id: req.params.id });
         res.status(204).send();
     } catch (error) {
-        console.error('[PricingRules] Error deleting rule:', error.message);
         res.status(400).json({ error: error.message });
     }
 });

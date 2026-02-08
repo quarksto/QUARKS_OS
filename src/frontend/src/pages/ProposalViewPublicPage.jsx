@@ -13,7 +13,7 @@ export default function ProposalViewPublicPage() {
 
     useEffect(() => {
         if (!slug) {
-            setLoading(false);
+            // if (loading) setLoading(false);
             return;
         }
         fetch(`${API_BASE}/api/proposals/public/${slug}`)
@@ -29,7 +29,7 @@ export default function ProposalViewPublicPage() {
         if (!slug || proposal?.status !== 'SENT') return;
         fetch(`${API_BASE}/api/proposals/public/${slug}/view`, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
             .then(() => setProposal((p) => (p ? { ...p, status: 'VIEWED' } : null)))
-            .catch(() => {});
+            .catch(() => { });
     };
 
     useEffect(() => {

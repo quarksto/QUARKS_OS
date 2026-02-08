@@ -69,7 +69,7 @@ async function main() {
         const kitName = "Kit Solar 4.4 kWp (8x550W)";
         const existingKit = await prisma.kit.findFirst({ where: { name: kitName } });
 
-        let kitId = existingKit?.id;
+        // let kitId = existingKit?.id; // This assignment is useless as kitId is either reassigned or not used if existingKit exists.
 
         if (!existingKit) {
             const newKit = await prisma.kit.create({
@@ -78,13 +78,14 @@ async function main() {
                     description: "Kit Ideal para residências médias"
                 }
             });
-            kitId = newKit.id;
+            const kitId = newKit.id;
             console.log(`✅ Created Kit: ${kitName}`);
 
             await prisma.kitItem.create({ data: { kitId, productId: pModule.id, quantity: 8 } });
             await prisma.kitItem.create({ data: { kitId, productId: pInverter.id, quantity: 1 } });
         } else {
-            console.log(`Computed Kit exists: ${kitName}`);
+            const kitId = existingKit.id;
+            console.log(`Computed Kit exists: ${kitName} (ID: ${kitId})`);
         }
     }
 }

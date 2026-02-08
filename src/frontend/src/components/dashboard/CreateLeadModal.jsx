@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import api from '../../services/api';
 
 export const CreateLeadModal = ({ isOpen, onClose, onSuccess, defaultStatus = 'NEW' }) => {
-    if (!isOpen) return null;
+    // if (!isOpen) return null; // Removed to allow hooks to run
 
     const [loading, setLoading] = useState(false);
     const ORIGIN_OPTIONS = [
@@ -24,6 +24,15 @@ export const CreateLeadModal = ({ isOpen, onClose, onSuccess, defaultStatus = 'N
         status: defaultStatus,
     });
 
+    // Hooks must be unconditional
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [status, setStatus] = useState('NEW');
+    const [error, setError] = useState(null);
+    // The `loading` state is already declared above, so we don't redeclare it.
+
+    // Reset form when modal opens
     useEffect(() => {
         if (isOpen) {
             setFormData({
@@ -35,6 +44,13 @@ export const CreateLeadModal = ({ isOpen, onClose, onSuccess, defaultStatus = 'N
                 origin: '',
                 status: defaultStatus,
             });
+            // Reset individual states if they are to be used instead of formData
+            setName('');
+            setEmail('');
+            setPhone('');
+            setStatus('NEW');
+            setError(null);
+            setLoading(false);
         }
     }, [isOpen, defaultStatus]);
 
@@ -49,6 +65,20 @@ export const CreateLeadModal = ({ isOpen, onClose, onSuccess, defaultStatus = 'N
         };
         return map[formData.status] || formData.status;
     }, [formData.status]);
+
+    const pipeline = useMemo(() => {
+        // ... (existing logic)
+        return {
+            'NEW': 'Novo Lead',
+            'QUALIFIED': 'Qualificado',
+            'CONTACTED': 'Contatado',
+            'PROPOSAL': 'Proposta',
+            'WON': 'Ganho',
+            'LOST': 'Perdido'
+        };
+    }, []);
+
+    if (!isOpen) return null;
 
     const handleChange = (e) => {
         const { name, value } = e.target;

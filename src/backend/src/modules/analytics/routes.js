@@ -44,4 +44,18 @@ router.get('/activity', async (req, res) => {
     }
 });
 
+// GET /api/analytics/energy-balance
+router.get('/energy-balance', async (req, res) => {
+    try {
+        const agent = maestro.agents['analytics'];
+        if (!agent) throw new Error('Analytics Agent not initialized');
+
+        const balance = await agent.execute('GET_ENERGY_BALANCE', {});
+        res.json(balance);
+    } catch (error) {
+        console.error('Energy Balance Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;

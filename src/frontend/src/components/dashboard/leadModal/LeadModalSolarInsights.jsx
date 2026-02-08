@@ -15,7 +15,8 @@ export const LeadModalSolarInsights = ({ lead, onDimensionar }) => {
     useEffect(() => {
         if (!lead?.id || !lead?.location) return;
 
-        setLoading(true);
+        // setLoading(true);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setError(null);
         api.get(`/leads/${lead.id}/solar`)
             .then((res) => setInsights(res.data))

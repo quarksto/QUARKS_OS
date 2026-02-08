@@ -47,11 +47,18 @@ const getNavConfig = (mode) => {
     return [
         { section: 'Operacional', items: operationalItems },
         {
+            section: 'Gestão', items: [
+                { path: '/services', icon: MdSettings, label: 'Serviços e Custos' },
+                { path: '/pricing-rules', icon: MdAttachMoney, label: 'Regras de Preço' },
+            ]
+        },
+        {
             section: 'Engenharia', items: [
                 { path: '/projetos', icon: MdFolderOpen, label: 'Projetos' },
                 { path: '/dimensionamento', icon: MdPsychology, label: 'Dimensionamento IA' },
                 { path: '/cronograma', icon: MdCalendarToday, label: 'Cronograma' },
-                { path: '/kits', icon: MdSolarPower, label: 'Kits' },
+                { path: '/products', icon: MdSolarPower, label: 'Produtos' },
+                { path: '/kits', icon: MdBolt, label: 'Kits' },
             ]
         },
         {

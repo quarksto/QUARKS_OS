@@ -4,28 +4,33 @@ import api from '../services/api';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(localStorage.getItem('token'));
-    const [loading, setLoading] = useState(true);
+
+    const [token, setToken] = useState(() => localStorage.getItem('token'));
+    const [user, setUser] = useState(() => {
+        try {
+            const stored = localStorage.getItem('user');
+            return stored ? JSON.parse(stored) : null;
+        } catch {
+            return null;
+        }
+    });
+    const [loading, setLoading] = useState(false);
+
+    const logout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        delete api.defaults.headers.common['Authorization'];
+        setToken(null);
+        setUser(null);
+    };
 
     useEffect(() => {
         if (token) {
-            // Validate token or just decode if backend validation is expensive
-            // For now, we assume user is logged in if token exists
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            try {
-                // Decode token payload simply to get user info if not stored
-                // OR fetch user profile from backend
-                const storedUser = localStorage.getItem('user');
-                if (storedUser) {
-                    setUser(JSON.parse(storedUser));
-                }
-            } catch (e) {
-                console.error("Auth init error", e);
-                logout();
-            }
+            // User is already set via lazy init or login logic
+        } else {
+            delete api.defaults.headers.common['Authorization'];
         }
-        setLoading(false);
     }, [token]);
 
     const login = async (email, password) => {
@@ -45,7 +50,7 @@ export function AuthProvider({ children }) {
             console.error("Login failed", error);
             return {
                 success: false,
-                error: error.response?.data?.error || 'Login failed'
+                error: error.response?.data?.error || error.message || 'Login failed'
             };
         }
     };
@@ -61,14 +66,6 @@ export function AuthProvider({ children }) {
                 error: error.response?.data?.error || 'Registration failed'
             };
         }
-    };
-
-    const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        delete api.defaults.headers.common['Authorization'];
-        setToken(null);
-        setUser(null);
     };
 
     const value = {
@@ -88,6 +85,7 @@ export function AuthProvider({ children }) {
     );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
     return useContext(AuthContext);
 }

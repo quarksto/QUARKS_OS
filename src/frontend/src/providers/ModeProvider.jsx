@@ -2,12 +2,14 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ModeContext = createContext(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const MODES = {
     SALES: 'sales',
     MANAGE: 'manage',
     PROJECTS: 'projects'
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useMode = () => {
     const context = useContext(ModeContext);
     if (!context) {

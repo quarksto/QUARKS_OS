@@ -41,7 +41,7 @@ class CalcDomainAgent extends BaseDomainAgent {
         } catch (error) {
             console.error('[CalcDomain] Engine Error:', error.message);
             // Fallback or re-throw
-            throw new Error('Calculation Engine Unavailable');
+            throw new Error(`Calculation Engine Unavailable: ${error.message}`, { cause: error });
         }
     }
 
@@ -64,7 +64,7 @@ class CalcDomainAgent extends BaseDomainAgent {
         } catch (error) {
             console.error('[CalcDomain] ROI Error:', error.message);
             if (error.response) console.error('Detail:', error.response.data);
-            throw new Error('ROI Calculation Failed');
+            throw new Error('ROI Calculation Failed', { cause: error });
         }
     }
 

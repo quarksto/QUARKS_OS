@@ -113,7 +113,7 @@ class CopilotDomainAgent {
             if (toolCalls.length > 0) {
                 for (const call of toolCalls) {
                     const result = await executeTool(this.maestro, call.name, call.args);
-                    const toolFeedback = `\n[Tool Executed: ${call.name}] Result: ${JSON.stringify(result.data)}`;
+                    const toolFeedback = `\n[Tool Executed: ${call.name}]Result: ${JSON.stringify(result.data)} `;
                     fullAssistantText += toolFeedback;
                     // Emitir o feedback da ferramenta como um chunk final
                     broadcaster.broadcastCopilotChunk(activeSessionId, toolFeedback, chunkIndex++);
@@ -132,7 +132,7 @@ class CopilotDomainAgent {
 
         } catch (error) {
             console.error('[Copilot] Stream Error:', error);
-            broadcaster.broadcastCopilotChunk(activeSessionId, `Erro: ${error.message}`, -1);
+            broadcaster.broadcastCopilotChunk(activeSessionId, `Erro: ${error.message} `, -1);
             throw error;
         }
     }
@@ -173,7 +173,7 @@ class CopilotDomainAgent {
 
             // IF video/audio OR size > limit -> Use File API
             if (isVideo || isAudio || file.size > INLINE_SIZE_LIMIT) {
-                console.log(`[Copilot] Uploading large file/media (${file.size} bytes) to Gemini File API...`);
+                console.log(`[Copilot] Uploading large file / media(${file.size} bytes) to Gemini File API...`);
 
                 try {
                     const uploadResult = await fileManager.uploadFile(
@@ -206,7 +206,7 @@ class CopilotDomainAgent {
 
                 } catch (uploadErr) {
                     console.error('[Copilot] File API upload failed:', uploadErr);
-                    throw new Error('Falha ao processar arquivo grande/mídia com Gemini.');
+                    throw new Error('Falha ao processar arquivo grande/mídia com Gemini.', { cause: uploadErr });
                 }
 
             } else {
@@ -269,7 +269,7 @@ class CopilotDomainAgent {
                 for (const call of toolCalls) {
                     // call.name, call.args (might be object already)
                     const result = await executeTool(this.maestro, call.name, call.args);
-                    finalText += `\n[Tool Executed: ${call.name}] Result: ${JSON.stringify(result.data)}`;
+                    finalText += `\n[Tool Executed: ${call.name}]Result: ${JSON.stringify(result.data)} `;
                     // In a real multi-turn, we'd send this back. For MVP, we stop here.
                 }
             }
@@ -289,7 +289,7 @@ class CopilotDomainAgent {
             return {
                 sessionId: session.id,
                 role: 'model',
-                content: `Erro ao processar: ${error.message}`
+                content: `Erro ao processar: ${error.message} `
             };
         }
     }

@@ -6,7 +6,7 @@ import api from '../../services/api';
 
 export function QuickChatPanel({ leadId }) {
     const [messages, setMessages] = useState([]);
-    const [input, setInput] = useState('');
+    const [chatInput, setChatInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [isOtherTyping, setIsOtherTyping] = useState(false);
     const scrollRef = useRef(null);
@@ -17,7 +17,7 @@ export function QuickChatPanel({ leadId }) {
         if (!leadId) return;
 
         // Carregar histórico
-        setLoading(true);
+        // setLoading(true);
         api.get(`/messages/lead/${leadId}`)
             .then(res => setMessages(res.data))
             .catch(err => console.error('Load messages error:', err))
@@ -62,7 +62,7 @@ export function QuickChatPanel({ leadId }) {
     }, [messages, isOtherTyping]);
 
     const handleInputChange = (val) => {
-        setInput(val);
+        setChatInput(val);
 
         // Emitir typing start
         if (socket && connected && leadId) {
@@ -79,10 +79,10 @@ export function QuickChatPanel({ leadId }) {
     };
 
     const handleSend = async () => {
-        if (!input.trim() || !leadId) return;
+        if (!chatInput.trim() || !leadId) return;
 
-        const content = input;
-        setInput('');
+        const content = chatInput;
+        setChatInput('');
 
         // Optimistic Update
         const tempId = 'temp-' + Date.now();
@@ -141,7 +141,7 @@ export function QuickChatPanel({ leadId }) {
                     <TextInput
                         placeholder="Digite uma mensagem..."
                         style={{ flex: 1 }}
-                        value={input}
+                        value={chatInput}
                         onChange={(e) => handleInputChange(e.currentTarget.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                         radius="xl"
@@ -155,7 +155,7 @@ export function QuickChatPanel({ leadId }) {
                         size="lg"
                         variant="filled"
                         onClick={handleSend}
-                        disabled={!input.trim()}
+                        disabled={!chatInput.trim()}
                     >
                         <IconSend size={20} />
                     </ActionIcon>

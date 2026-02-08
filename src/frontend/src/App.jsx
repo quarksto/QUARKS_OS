@@ -19,6 +19,9 @@ import ClientsPage from './pages/ClientsPage';
 import ProjetosPage from './pages/ProjetosPage';
 import DimensionamentoPage from './pages/DimensionamentoPage';
 import CronogramaPage from './pages/CronogramaPage';
+import ProductsPage from './pages/ProductsPage';
+import ServicesPage from './pages/ServicesPage';
+import PricingRulesPage from './pages/PricingRulesPage';
 import KitsPage from './pages/KitsPage';
 import SettingsPage from './pages/SettingsPage';
 import SalesWorkspace from './pages/SalesWorkspace';
@@ -128,6 +131,14 @@ function App() {
                   </ProtectedRoute>
                 } />
 
+                <Route path="/clients/:id" element={
+                  <ProtectedRoute>
+                    <ProtectedLayout>
+                      <ClientDetailPage />
+                    </ProtectedLayout>
+                  </ProtectedRoute>
+                } />
+
                 <Route path="/proposals" element={
                   <ProtectedRoute>
                     <ProtectedLayout>
@@ -178,6 +189,30 @@ function App() {
                   <ProtectedRoute>
                     <ProtectedLayout>
                       <CronogramaPage />
+                    </ProtectedLayout>
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/products" element={
+                  <ProtectedRoute>
+                    <ProtectedLayout>
+                      <ProductsPage />
+                    </ProtectedLayout>
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/services" element={
+                  <ProtectedRoute>
+                    <ProtectedLayout>
+                      <ServicesPage />
+                    </ProtectedLayout>
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/pricing-rules" element={
+                  <ProtectedRoute>
+                    <ProtectedLayout>
+                      <PricingRulesPage />
                     </ProtectedLayout>
                   </ProtectedRoute>
                 } />

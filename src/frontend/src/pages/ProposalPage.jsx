@@ -28,15 +28,39 @@ const ProposalPage = () => {
         distributor: 'CPFL_PAULISTA'
     });
 
-    // Fetch kits and pricing rules on mount
+    // Custom Kit State
+    const [activeTab, setActiveTab] = useState('PRESET'); // 'PRESET' | 'CUSTOM'
+    const [products, setProducts] = useState({ modules: [], inverters: [], structures: [] });
+    const [customKit, setCustomKit] = useState({
+        module: null,
+        moduleCount: 10,
+        inverter: null,
+        structure: null,
+        powerKwp: 0,
+        costPrice: 0
+    });
+
+    // Fetch kits, projects and pricing rules on mount
     useEffect(() => {
         const fetchData = async () => {
             setKitsLoading(true);
             try {
                 // Fetch Kits
-                const kitsRes = await api.get('/inventory/kits');
+                const kitsRes = await api.get('/inventory/kits?active=true');
                 const kits = kitsRes.data || [];
                 setAvailableKits(kits);
+
+                // Fetch Products for Custom Kit
+                const [modulesRes, invertersRes, structuresRes] = await Promise.all([
+                    api.get('/inventory/products?type=MODULE&active=true'),
+                    api.get('/inventory/products?type=INVERTER&active=true'),
+                    api.get('/inventory/products?type=STRUCTURE&active=true')
+                ]);
+                setProducts({
+                    modules: modulesRes.data || [],
+                    inverters: invertersRes.data || [],
+                    structures: structuresRes.data || []
+                });
 
                 // Set default kit if available
                 if (kits.length > 0) {
@@ -51,28 +75,13 @@ const ProposalPage = () => {
                         },
                         financials: {
                             ...prev.financials,
-                            system_cost: (firstKit.price || 15000) * 1.2
+                            // System cost will now be calculated by backend
+                            system_cost: 0
                         }
                     }));
                 }
-
-                // Fetch Pricing Rules (if endpoint exists)
-                try {
-                    const rulesRes = await api.get('/pricing-rules?active=true');
-                    const rules = Array.isArray(rulesRes.data) ? rulesRes.data : rulesRes.data?.data || [];
-                    if (rules.length > 0) {
-                        const activeRule = rules[0];
-                        setPricingRules(prev => ({
-                            ...prev,
-                            margin: (activeRule.targetMargin != null ? activeRule.targetMargin * 100 : prev.margin) ?? 20,
-                            tax: (activeRule.taxRate != null ? activeRule.taxRate * 100 : prev.tax) ?? 15
-                        }));
-                    }
-                } catch (e) {
-                    console.log('Pricing rules not available, using defaults');
-                }
             } catch (error) {
-                console.error('Error fetching kits:', error);
+                console.error('Error fetching data:', error);
                 // Fallback to mock data if API fails
                 setAvailableKits([
                     { id: 1, name: 'Kit 3kWp Econômico', inverter: 'Growatt 3000TL', panels: '6x Jinko 550W', price: 9500, size_kwp: 3.3 },
@@ -86,6 +95,41 @@ const ProposalPage = () => {
         };
         fetchData();
     }, []);
+
+    // Effect to update Custom Kit calculations
+    useEffect(() => {
+        if (activeTab === 'CUSTOM') {
+            const mod = products.modules.find(m => m.id === customKit.module) || {};
+            const inv = products.inverters.find(i => i.id === customKit.inverter) || {};
+            const str = products.structures.find(s => s.id === customKit.structure) || {};
+
+            const modPower = (mod.specs?.power || 550);
+            const totalPower = (modPower * customKit.moduleCount) / 1000; // kWp
+
+            const totalCost =
+                ((mod.costPrice || 0) * customKit.moduleCount) +
+                (inv.costPrice || 0) +
+                (str.costPrice || 0);
+
+            setCustomKit(prev => ({
+                ...prev,
+                powerKwp: totalPower,
+                costPrice: totalCost
+            }));
+
+            // Sync with main form for preview
+            setFormData(prev => ({
+                ...prev,
+                generation: {
+                    ...prev.generation,
+                    system_size_kwp: totalPower,
+                    panels_count: customKit.moduleCount,
+                    estimated_generation_monthly: totalPower * 130
+                }
+            }));
+            setHtmlContent(null);
+        }
+    }, [customKit.module, customKit.moduleCount, customKit.inverter, customKit.structure, activeTab, products]);
 
     // Fetch lead data if leadId provided
     useEffect(() => {
@@ -118,9 +162,8 @@ const ProposalPage = () => {
         setSelectedKitId(id);
         const kit = availableKits.find(k => k.id === id || String(k.id) === String(id));
         if (kit) {
-            // Recalculate based on kit
+            // Only update system info, Price is calculated by backend
             const sizeKwp = kit.size_kwp || kit.size || 5.5;
-            const cost = (kit.price || 15000) * (1 + (pricingRules.margin / 100));
             setFormData(prev => ({
                 ...prev,
                 generation: {
@@ -128,34 +171,69 @@ const ProposalPage = () => {
                     system_size_kwp: sizeKwp,
                     panels_count: Math.ceil(sizeKwp / 0.55), // approx
                     estimated_generation_monthly: sizeKwp * 130 // approx 130kWh/kWp
-                },
-                financials: {
-                    ...prev.financials,
-                    system_cost: cost
                 }
             }));
+            // Clear previous html content to force regeneration
+            setHtmlContent(null);
         }
     };
 
+    // State for visual breakdown
+    const [pricingBreakdown, setPricingBreakdown] = useState(null);
+
     const handleGenerate = async () => {
         setLoading(true);
+        setPricingBreakdown(null);
         try {
-            const kit = availableKits.find(k => k.id === selectedKitId);
+            let payloadKit;
+
+            if (activeTab === 'PRESET') {
+                const kit = availableKits.find(k => k.id === selectedKitId);
+                payloadKit = {
+                    name: kit ? kit.name : 'Kit Padrão',
+                    price: kit ? kit.price : 0, // Backend checks this
+                    powerKwp: kit ? kit.size_kwp : 0,
+                    id: kit ? kit.id : null
+                };
+            } else {
+                payloadKit = {
+                    name: 'Kit Personalizado',
+                    price: customKit.costPrice,
+                    powerKwp: customKit.powerKwp,
+                    isCustom: true
+                };
+            }
+
             const payload = {
                 customer: formData.customer,
                 consumption: formData.generation.estimated_generation_monthly,
                 distributor: formData.distributor,
-                kit_name: kit ? kit.name : 'Personalizado',
+                kit: payloadKit, // Send Full Object
+                kit_name: payloadKit.name, // Fallback
                 system_size: formData.generation.system_size_kwp,
-                price: formData.financials.system_cost
+                kit_name: payloadKit.name, // Fallback
+                system_size: formData.generation.system_size_kwp,
+                // price: No longer sending price, backend calculates it
+                introduction: formData.introduction,
+                notes: formData.notes,
+                paymentTerms: formData.paymentTerms
             };
 
-            // Usando api (axios) configurada com interceptor e baseURL
-            // O backend agora serve em /api/orchestrate/preview-proposal
             const response = await api.post('/orchestrate/preview-proposal', payload);
 
             if (response.data.html_content) {
                 setHtmlContent(response.data.html_content);
+            }
+
+            if (response.data.pricing) {
+                setPricingBreakdown(response.data.pricing);
+                setFormData(prev => ({
+                    ...prev,
+                    financials: {
+                        ...prev.financials,
+                        system_cost: response.data.pricing.total
+                    }
+                }));
             } else if (response.data.error) {
                 throw new Error(response.data.error);
             }
@@ -175,7 +253,14 @@ const ProposalPage = () => {
         setCreating(true);
         try {
             const consumption = formData.generation?.estimated_generation_monthly || lead?.consumption || 500;
-            const response = await api.post('/orchestrate/create-proposal', { leadId, consumption });
+            const payload = {
+                leadId,
+                consumption,
+                introduction: formData.introduction,
+                notes: formData.notes,
+                paymentTerms: formData.paymentTerms
+            };
+            const response = await api.post('/orchestrate/create-proposal', payload);
             if (response.data?.proposal?.id) {
                 setHtmlContent(null);
                 navigate(`/proposals/${response.data.proposal.id}`);
@@ -213,34 +298,116 @@ const ProposalPage = () => {
                     <div className="technical-card p-6 h-fit">
                         <h3 className="ds-title-section mb-6 text-petroleum-800">1. Seleção do Kit</h3>
                         <div className="space-y-4 mb-8">
-                            <div>
-                                <label className="ds-label block mb-1.5">Modelo do Kit</label>
-                                {kitsLoading ? (
-                                    <div className="w-full px-3 py-2 border border-slate-100 rounded-md text-sm text-slate-400 bg-slate-50">
-                                        Carregando kits...
-                                    </div>
-                                ) : availableKits.length === 0 ? (
-                                    <div className="w-full px-3 py-2 border border-orange-200 rounded-md text-sm text-orange-600 bg-orange-50">
-                                        Nenhum kit cadastrado. Use a página Catálogo para adicionar.
-                                    </div>
-                                ) : (
-                                    <select
-                                        value={selectedKitId || ''}
-                                        onChange={(e) => handleKitChange(e.target.value)}
-                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 focus:border-petroleum focus:ring-1 focus:ring-petroleum outline-none transition-all"
-                                    >
-                                        {availableKits.map(kit => (
-                                            <option key={kit.id} value={kit.id}>
-                                                {kit.name} - R$ {(kit.price || 0).toLocaleString()}
-                                            </option>
-                                        ))}
-                                    </select>
-                                )}
+                            <div className="flex border-b border-gray-200 mb-6">
+                                <button
+                                    className={`px-4 py-2 text-sm font-medium ${activeTab === 'PRESET' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                                    onClick={() => setActiveTab('PRESET')}
+                                >
+                                    Kits Prontos
+                                </button>
+                                <button
+                                    className={`px-4 py-2 text-sm font-medium ${activeTab === 'CUSTOM' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                                    onClick={() => setActiveTab('CUSTOM')}
+                                >
+                                    Montar Kit
+                                </button>
                             </div>
+
+                            {activeTab === 'PRESET' ? (
+                                <div>
+                                    <label className="ds-label block mb-1.5">Modelo do Kit</label>
+                                    {kitsLoading ? (
+                                        <div className="w-full px-3 py-2 border border-slate-100 rounded-md text-sm text-slate-400 bg-slate-50">
+                                            Carregando kits...
+                                        </div>
+                                    ) : availableKits.length === 0 ? (
+                                        <div className="w-full px-3 py-2 border border-orange-200 rounded-md text-sm text-orange-600 bg-orange-50">
+                                            Nenhum kit cadastrado. Use a página Catálogo para adicionar.
+                                        </div>
+                                    ) : (
+                                        <select
+                                            value={selectedKitId || ''}
+                                            onChange={(e) => handleKitChange(e.target.value)}
+                                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 focus:border-petroleum focus:ring-1 focus:ring-petroleum outline-none transition-all"
+                                        >
+                                            {availableKits.map(kit => (
+                                                <option key={kit.id} value={kit.id}>
+                                                    {kit.name} - R$ {(kit.price || 0).toLocaleString()}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="space-y-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                    {/* Inverter */}
+                                    <div>
+                                        <label className="ds-label block mb-1">Inversor</label>
+                                        <select
+                                            className="w-full text-sm border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                                            value={customKit.inverter || ''}
+                                            onChange={e => setCustomKit(prev => ({ ...prev, inverter: e.target.value }))}
+                                        >
+                                            <option value="">Selecione um inversor...</option>
+                                            {products.inverters.map(p => (
+                                                <option key={p.id} value={p.id}>{p.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* Modules */}
+                                    <div className="flex gap-3">
+                                        <div className="flex-1">
+                                            <label className="ds-label block mb-1">Módulo</label>
+                                            <select
+                                                className="w-full text-sm border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                                                value={customKit.module || ''}
+                                                onChange={e => setCustomKit(prev => ({ ...prev, module: e.target.value }))}
+                                            >
+                                                <option value="">Selecione um módulo...</option>
+                                                {products.modules.map(p => (
+                                                    <option key={p.id} value={p.id}>{p.name} ({p.specs?.power || '?'}W)</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="w-24">
+                                            <label className="ds-label block mb-1">Qtd</label>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                className="w-full text-sm border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                                                value={customKit.moduleCount}
+                                                onChange={e => setCustomKit(prev => ({ ...prev, moduleCount: parseInt(e.target.value) || 0 }))}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Structure */}
+                                    <div>
+                                        <label className="ds-label block mb-1">Estrutura</label>
+                                        <select
+                                            className="w-full text-sm border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                                            value={customKit.structure || ''}
+                                            onChange={e => setCustomKit(prev => ({ ...prev, structure: e.target.value }))}
+                                        >
+                                            <option value="">Selecione uma estrutura...</option>
+                                            {products.structures.map(p => (
+                                                <option key={p.id} value={p.id}>{p.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="pt-2 border-t border-slate-200 flex justify-between items-center">
+                                        <span className="text-sm text-slate-500">Potência Total:</span>
+                                        <span className="text-lg font-bold text-blue-700">{customKit.powerKwp.toFixed(2)} kWp</span>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-lg border border-slate-100">
                                 <div>
                                     <span className="text-xs text-slate-500 block">Potência</span>
-                                    <span className="font-bold text-petroleum-800">{formData.generation.system_size_kwp} kWp</span>
+                                    <span className="font-bold text-petroleum-800">{formData.generation.system_size_kwp.toFixed(2)} kWp</span>
                                 </div>
                                 <div>
                                     <span className="text-xs text-slate-500 block">Preço Final</span>
@@ -270,70 +437,105 @@ const ProposalPage = () => {
                                     className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 focus:border-petroleum focus:ring-1 focus:ring-petroleum outline-none transition-all"
                                 />
                             </div>
+                        </div>
 
-                            {leadId && (
-                                <div className="pt-2">
-                                    <button
-                                        type="button"
-                                        onClick={handleCreateAndSave}
-                                        disabled={creating || !leadId}
-                                        className="w-full rounded-lg bg-petroleum hover:bg-petroleum-600 text-white px-4 py-2.5 font-bold text-xs uppercase tracking-wide flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md disabled:opacity-70 disabled:cursor-not-allowed border border-petroleum"
-                                    >
-                                        {creating ? (
-                                            <>
-                                                <span className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent" />
-                                                Criando...
-                                            </>
-                                        ) : (
-                                            'Criar e salvar proposta'
-                                        )}
-                                    </button>
-                                </div>
-                            )}
+                        <h3 className="ds-title-section mb-6 text-petroleum-800 border-t pt-6 border-slate-100">3. Personalização da Proposta (Opcional)</h3>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="ds-label block mb-1.5 has-tooltip" data-tooltip="Texto de apresentação que aparece no início da proposta">Apresentação / Introdução</label>
+                                <textarea
+                                    rows={3}
+                                    value={formData.introduction}
+                                    onChange={(e) => setFormData({ ...formData, introduction: e.target.value })}
+                                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 focus:border-petroleum focus:ring-1 focus:ring-petroleum outline-none transition-all placeholder:text-slate-300 resize-y"
+                                    placeholder="Ex: É com satisfação que apresentamos esta proposta..."
+                                />
+                            </div>
+                            <div>
+                                <label className="ds-label block mb-1.5 has-tooltip" data-tooltip="Condições comerciais e formas de pagamento">Condições de Pagamento</label>
+                                <textarea
+                                    rows={2}
+                                    value={formData.paymentTerms}
+                                    onChange={(e) => setFormData({ ...formData, paymentTerms: e.target.value })}
+                                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 focus:border-petroleum focus:ring-1 focus:ring-petroleum outline-none transition-all placeholder:text-slate-300 resize-y"
+                                    placeholder="Ex: 30% sinal + 70% na entrega ou Financiamento em até 60x"
+                                />
+                            </div>
+                            <div>
+                                <label className="ds-label block mb-1.5 has-tooltip" data-tooltip="Observações gerais para o cliente">Observações</label>
+                                <textarea
+                                    rows={2}
+                                    value={formData.notes}
+                                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 focus:border-petroleum focus:ring-1 focus:ring-petroleum outline-none transition-all placeholder:text-slate-300 resize-y"
+                                    placeholder="Ex: Validade da proposta: 5 dias."
+                                />
+                            </div>
+                        </div>
 
+                        {leadId && (
                             <div className="pt-2">
                                 <button
                                     type="button"
-                                    onClick={handleGenerate}
-                                    disabled={loading}
-                                    className="w-full rounded-lg bg-solar-500 hover:bg-solar-600 active:bg-solar-700 text-white px-4 py-2.5 font-bold text-xs uppercase tracking-wide flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
+                                    onClick={handleCreateAndSave}
+                                    disabled={creating || !leadId}
+                                    className="w-full rounded-lg bg-petroleum hover:bg-petroleum-600 text-white px-4 py-2.5 font-bold text-xs uppercase tracking-wide flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md disabled:opacity-70 disabled:cursor-not-allowed border border-petroleum"
                                 >
-                                    {loading ? (
+                                    {creating ? (
                                         <>
-                                            <span className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent"></span>
-                                            Gerando...
+                                            <span className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent" />
+                                            Criando...
                                         </>
                                     ) : (
-                                        'Gerar Proposta (prévia)'
+                                        'Criar e salvar proposta'
                                     )}
                                 </button>
                             </div>
+                        )}
+
+                        <div className="pt-2">
+                            <button
+                                type="button"
+                                onClick={handleGenerate}
+                                disabled={loading}
+                                className="w-full rounded-lg bg-solar-500 hover:bg-solar-600 active:bg-solar-700 text-white px-4 py-2.5 font-bold text-xs uppercase tracking-wide flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
+                            >
+                                {loading ? (
+                                    <>
+                                        <span className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent"></span>
+                                        Gerando...
+                                    </>
+                                ) : (
+                                    'Gerar Proposta (prévia)'
+                                )}
+                            </button>
                         </div>
                     </div>
+                </div>
 
-                    <div className="lg:col-span-2 technical-card p-0 min-h-[600px] relative overflow-hidden bg-slate-50 flex flex-col">
-                        {loading && (
-                            <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center z-10 transition-all">
-                                <div className="animate-spin rounded-lg h-8 w-8 border-4 border-solar-500 border-t-transparent mb-4"></div>
-                                <span className="ds-label text-slate-500">Gerando proposta personalizada...</span>
-                            </div>
-                        )}
-                        {htmlContent ? (
-                            <iframe
-                                srcDoc={htmlContent}
-                                className="w-full flex-1 border-0"
-                                title="Proposta Preview"
-                            />
-                        ) : (
-                            <div className="flex flex-col items-center justify-center flex-1 text-slate-400 gap-4">
-                                <span className="material-symbols-outlined text-4xl opacity-20">description</span>
-                                <p className="ds-body text-center max-w-xs">Preencha os dados ao lado e clique em <strong className="text-solar-600">Gerar Proposta</strong> para visualizar a prévia.</p>
-                            </div>
-                        )}
-                    </div>
+                <div className="lg:col-span-2 technical-card p-0 min-h-[600px] relative overflow-hidden bg-slate-50 flex flex-col">
+                    {loading && (
+                        <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center z-10 transition-all">
+                            <div className="animate-spin rounded-lg h-8 w-8 border-4 border-solar-500 border-t-transparent mb-4"></div>
+                            <span className="ds-label text-slate-500">Gerando proposta personalizada...</span>
+                        </div>
+                    )}
+                    {htmlContent ? (
+                        <iframe
+                            srcDoc={htmlContent}
+                            className="w-full flex-1 border-0"
+                            title="Proposta Preview"
+                        />
+                    ) : (
+                        <div className="flex flex-col items-center justify-center flex-1 text-slate-400 gap-4">
+                            <span className="material-symbols-outlined text-4xl opacity-20">description</span>
+                            <p className="ds-body text-center max-w-xs">Preencha os dados ao lado e clique em <strong className="text-solar-600">Gerar Proposta</strong> para visualizar a prévia.</p>
+                        </div>
+                    )}
                 </div>
             </div>
-        </DashboardShell>
+        </div>
+        </DashboardShell >
     );
 };
 
