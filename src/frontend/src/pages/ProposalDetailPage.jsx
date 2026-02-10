@@ -4,6 +4,7 @@ import api, { openProposalDocument } from '../services/api';
 import { DashboardShell } from '../components/dashboard/DashboardShell';
 import { AdaptiveHeader } from '../components/dashboard/AdaptiveHeader';
 import { StandardAvatar } from '../components/ui/StandardAvatar';
+import ProposalDetailCanvas from '../components/dashboard/ProposalDetailCanvas';
 
 const STATUS_CONFIG = {
     DRAFT: 'Rascunho',
@@ -14,24 +15,17 @@ const STATUS_CONFIG = {
     EXPIRED: 'Expirada'
 };
 
-const MetricCard = ({ icon, label, value, subtext }) => (
-    <div className="flex-1 p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-4">
-        <div className="size-10 bg-white border border-slate-200 rounded-lg flex items-center justify-center text-petroleum-600 flex-shrink-0 shadow-sm">
-            <span className="material-symbols-outlined">{icon}</span>
-        </div>
-        <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{label}</p>
-            <p className="text-xl font-bold text-slate-900 mt-1">{value}</p>
-            <p className="text-xs text-slate-500 mt-1">{subtext}</p>
-        </div>
-    </div>
-);
+const TABS = [
+    { id: 'visao_geral', label: 'Visão Geral', icon: 'hub' },
+    { id: 'configuracoes', label: 'Configurações', icon: 'settings_suggest' },
+];
 
 export default function ProposalDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [proposal, setProposal] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('visao_geral');
     const [actionLoading, setActionLoading] = useState(null); // 'send' | 'pdf' | 'save'
     const [editData, setEditData] = useState({ status: '', discountPercent: '', discountAbsolute: '' });
 
@@ -66,6 +60,7 @@ export default function ProposalDetailPage() {
             };
             const res = await api.patch(`/proposals/${id}`, payload);
             setProposal(res.data);
+            setActiveTab('visao_geral');
         } catch (e) {
             alert('Erro ao salvar: ' + (e.response?.data?.error || e.message));
         } finally {
@@ -107,181 +102,149 @@ export default function ProposalDetailPage() {
         </DashboardShell>
     );
 
-    const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
+    const headerRight = (
+        <div className="flex items-center gap-2">
+            <button
+                onClick={handleGeneratePdf}
+                disabled={actionLoading !== null}
+                className="h-8 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-4 rounded-full flex items-center gap-2 font-bold text-[11px] transition-all shadow-none uppercase tracking-wider focus:border-petroleum/60 focus:outline-none focus:ring-0 disabled:opacity-50"
+            >
+                {actionLoading === 'pdf' ? <span className="animate-spin size-4 rounded-full border-2 border-slate-300 border-t-slate-600"></span> : <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>}
+                PDF
+            </button>
+            <button
+                onClick={handleSend}
+                disabled={actionLoading !== null}
+                className="h-8 bg-petroleum text-white hover:bg-petroleum-600 px-4 rounded-full flex items-center gap-2 font-bold text-[11px] transition-all shadow-none uppercase tracking-wider focus:border-petroleum focus:outline-none focus:ring-0 disabled:opacity-50"
+            >
+                {actionLoading === 'send' ? <span className="animate-spin size-4 rounded-full border-2 border-white/30 border-t-white"></span> : <span className="material-symbols-outlined text-[18px]">send</span>}
+                Enviar
+            </button>
+        </div>
+    );
 
     return (
-        <DashboardShell breadcrumbs={[{ label: 'Propostas', href: '/proposals' }, { label: proposal.title || 'Detalhe', active: true }]}>
-            <div className="flex flex-col h-full bg-[#F8F8F5]">
-                <AdaptiveHeader
-                    title={proposal.title || 'Detalhe da Proposta'}
-                    subtitle={`Lead: ${proposal.lead?.name || 'Cliente'}`} // Fixed: subtitle prop was missing in some examples
-                    headerIcon="description"
-                    loading={loading}
-                />
+        <DashboardShell
+            title={proposal.title || 'Ficha da Proposta'}
+            subtitle={`Lead: ${proposal.lead?.name || 'Cliente'}`}
+            loading={loading}
+            headerIcon="description"
+            headerRight={headerRight}
+            breadcrumbs={[
+                { label: 'Propostas', path: '/proposals' },
+                { label: proposal.title || 'Visualização', active: true }
+            ]}
+        >
+            <div className="flex flex-col h-full bg-slate-50">
+                {/* Tabs Navigation */}
+                <div className="bg-white border-b border-slate-200 px-4 md:px-6 lg:px-8">
+                    <div className="max-w-[1600px] mx-auto flex gap-6">
+                        {TABS.map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex items-center gap-2 py-4 border-b-2 transition-all text-xs font-bold uppercase tracking-widest ${activeTab === tab.id
+                                    ? 'border-solar text-petroleum'
+                                    : 'border-transparent text-slate-400 hover:text-slate-600'
+                                    }`}
+                            >
+                                <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
 
-                <main className="flex-1 overflow-y-auto p-6 md:p-10">
-                    <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* LEFT COLUMN (Wide) */}
-                        <div className="lg:col-span-2 space-y-6">
+                <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+                    <div className="max-w-[1600px] mx-auto">
 
-                            {/* Proposal Info Card */}
-                            <div className="bg-white rounded-2xl border border-[#e8e2ce] p-8 shadow-sm">
-                                <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-petroleum-600">info_spark</span>
-                                    Informações do Sistema
-                                </h3>
+                        {activeTab === 'visao_geral' && (
+                            <ProposalDetailCanvas proposal={proposal} />
+                        )}
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                                    <MetricCard
-                                        icon="solar_power"
-                                        label="Potência do Sistema"
-                                        value={`${proposal.systemSizeKwp || 0} kWp`}
-                                        subtext="Capacidade total instalada"
-                                    />
-                                    <MetricCard
-                                        icon="bolt"
-                                        label="Geração Estimada"
-                                        value={`${proposal.generationKwh || 0} kWh`}
-                                        subtext="Produção mensal média"
-                                    />
-                                    <MetricCard
-                                        icon="price_check"
-                                        label="Investimento Total"
-                                        value={formatCurrency(proposal.totalPrice)}
-                                        subtext="Valor final para o cliente"
-                                    />
-                                    <MetricCard
-                                        icon="savings"
-                                        label="Economia Mensal"
-                                        value={formatCurrency(proposal.savingsMonthly)}
-                                        subtext="Redução na conta de luz"
-                                    />
-                                </div>
-                                <div className="mt-6 pt-6 border-t border-slate-100 flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <span className="material-symbols-outlined text-amber-500">light_mode</span>
-                                        <div>
-                                            <p className="font-bold text-slate-900">{proposal.kit?.name || 'Kit Personalizado'}</p>
-                                            <p className="text-xs text-slate-500">Inversores de alta eficiência</p>
+                        {activeTab === 'configuracoes' && (
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <div className="lg:col-span-2 space-y-6">
+                                    <div className="bg-white rounded-lg border border-slate-200 p-8">
+                                        <h3 className="text-sm font-bold text-petroleum uppercase tracking-wider mb-6 flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-solar">edit_note</span>
+                                            Editor de Proposta
+                                        </h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1 block">Status Comercial</label>
+                                                <select
+                                                    value={editData.status}
+                                                    onChange={(e) => setEditData({ ...editData, status: e.target.value })}
+                                                    className="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-petroleum focus:border-petroleum/60 focus:outline-none focus:ring-0 transition-all"
+                                                >
+                                                    {Object.entries(STATUS_CONFIG).map(([key, label]) => (
+                                                        <option key={key} value={key}>{label}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1 block">Desconto (%)</label>
+                                                    <input
+                                                        type="number"
+                                                        value={editData.discountPercent}
+                                                        onChange={(e) => setEditData({ ...editData, discountPercent: e.target.value })}
+                                                        className="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-petroleum focus:border-petroleum/60 focus:outline-none focus:ring-0 transition-all"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1 block">Desconto (R$)</label>
+                                                    <input
+                                                        type="number"
+                                                        value={editData.discountAbsolute}
+                                                        onChange={(e) => setEditData({ ...editData, discountAbsolute: e.target.value })}
+                                                        className="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-petroleum focus:border-petroleum/60 focus:outline-none focus:ring-0 transition-all"
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Lead Info Card (Reusing Stitch style) */}
-                            <div className="bg-white rounded-2xl border border-[#e8e2ce] p-8 shadow-sm">
-                                <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-petroleum-600">person</span>
-                                    Dados do Cliente
-                                </h3>
-                                <div className="flex items-center gap-6">
-                                    <StandardAvatar
-                                        name={proposal.lead?.name || '?'}
-                                        src={proposal.lead?.avatar_url || proposal.lead?.avatarUrl}
-                                        size="xl"
-                                        className="!w-20 !h-20 !text-2xl"
-                                    />
-                                    <div>
-                                        <h2 className="text-2xl font-black text-slate-900">{proposal.lead?.name || 'Cliente Desconhecido'}</h2>
-                                        <p className="text-slate-500 mb-2">{proposal.lead?.email || 'Sem email'}</p>
-                                        <Link to={`/leads/${proposal.leadId}`} className="text-sm font-bold text-petroleum-600 hover:underline flex items-center gap-1">
-                                            Ver Perfil Completo
-                                            <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                                        </Link>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* RIGHT COLUMN (Narrow) */}
-                        <div className="space-y-6">
-
-                            {/* Actions Card */}
-                            <div className="bg-white rounded-2xl border border-[#e8e2ce] p-6 shadow-sm">
-                                <h3 className="text-lg font-bold text-slate-900 mb-4">Ações Rápidas</h3>
-                                <div className="space-y-3">
-                                    <button
-                                        onClick={handleSend}
-                                        disabled={actionLoading !== null}
-                                        className="w-full flex items-center justify-center gap-3 bg-petroleum hover:bg-petroleum-900 text-white font-bold py-3 rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-70"
-                                    >
-                                        {actionLoading === 'send' ? <span className="animate-spin size-5 rounded-full border-2 border-white/30 border-t-white"></span> : <span className="material-symbols-outlined">send</span>}
-                                        Enviar por Email
-                                    </button>
-                                    <button
-                                        onClick={handleGeneratePdf}
-                                        disabled={actionLoading !== null}
-                                        className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-all disabled:opacity-70"
-                                    >
-                                        {actionLoading === 'pdf' ? <span className="animate-spin size-5 rounded-full border-2 border-slate-300 border-t-slate-600"></span> : <span className="material-symbols-outlined">picture_as_pdf</span>}
-                                        Gerar PDF
-                                    </button>
-                                </div>
-                                {(proposal.publicSlug || proposal.clientLinkSlug) && (
-                                    <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                                        <p className="text-xs font-bold text-slate-500 mb-1 uppercase">Link Público</p>
-                                        <div className="flex items-center gap-2">
-                                            <input readOnly value={`${window.location.origin}/view-proposal/${proposal.clientLinkSlug || proposal.publicSlug}`} className="bg-white border text-xs border-slate-200 rounded px-2 py-1 w-full text-slate-600" />
+                                        <div className="mt-8 flex justify-end gap-3 pt-6 border-t border-slate-100">
                                             <button
-                                                onClick={() => navigator.clipboard.writeText(`${window.location.origin}/view-proposal/${proposal.clientLinkSlug || proposal.publicSlug}`)}
-                                                className="p-1 hovered:bg-slate-200 rounded text-slate-500"
+                                                onClick={() => setActiveTab('visao_geral')}
+                                                className="h-10 px-6 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-100 transition-all uppercase tracking-wider"
                                             >
-                                                <span className="material-symbols-outlined text-sm">content_copy</span>
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                onClick={handleSave}
+                                                disabled={actionLoading === 'save'}
+                                                className="h-10 px-6 bg-solar text-petroleum hover:bg-amber-600 rounded-lg text-xs font-bold transition-all shadow-none uppercase tracking-wider focus:border-petroleum focus:outline-none focus:ring-0 disabled:opacity-50"
+                                            >
+                                                {actionLoading === 'save' ? 'Salvando...' : 'Salvar Alterações'}
                                             </button>
                                         </div>
                                     </div>
-                                )}
-                            </div>
-
-                            {/* Edit Config Card */}
-                            <div className="bg-white rounded-2xl border border-[#e8e2ce] p-6 shadow-sm">
-                                <h3 className="text-lg font-bold text-slate-900 mb-4">Configurações</h3>
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Status</label>
-                                        <select
-                                            value={editData.status}
-                                            onChange={(e) => setEditData({ ...editData, status: e.target.value })}
-                                            className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:outline-none focus:border-petroleum"
-                                        >
-                                            {Object.entries(STATUS_CONFIG).map(([key, label]) => (
-                                                <option key={key} value={key}>{label}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Desconto (%)</label>
-                                            <input
-                                                type="number"
-                                                value={editData.discountPercent}
-                                                onChange={(e) => setEditData({ ...editData, discountPercent: e.target.value })}
-                                                className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:outline-none focus:border-petroleum"
+                                </div>
+                                <div className="space-y-6">
+                                    <div className="bg-white rounded-lg border border-slate-200 p-6">
+                                        <h3 className="text-sm font-bold text-petroleum uppercase tracking-wider mb-4">Dados do Cliente</h3>
+                                        <div className="flex items-center gap-4">
+                                            <StandardAvatar
+                                                name={proposal.lead?.name || '?'}
+                                                src={proposal.lead?.avatar_url || proposal.lead?.avatarUrl}
+                                                size="lg"
                                             />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Desconto (R$)</label>
-                                            <input
-                                                type="number"
-                                                value={editData.discountAbsolute}
-                                                onChange={(e) => setEditData({ ...editData, discountAbsolute: e.target.value })}
-                                                className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:outline-none focus:border-petroleum"
-                                            />
+                                            <div>
+                                                <p className="text-sm font-black text-petroleum leading-tight">{proposal.lead?.name || 'Cliente'}</p>
+                                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">{proposal.lead?.email || 'Sem email'}</p>
+                                                <Link to={`/leads/${proposal.leadId}`} className="text-[10px] font-bold text-solar hover:underline mt-2 flex items-center gap-1 uppercase tracking-widest">
+                                                    Perfil do Lead
+                                                    <span className="material-symbols-outlined text-[12px]">open_in_new</span>
+                                                </Link>
+                                            </div>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={handleSave}
-                                        disabled={actionLoading === 'save'}
-                                        className="w-full mt-2 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-bold py-2 rounded-lg transition-colors text-sm"
-                                    >
-                                        {actionLoading === 'save' ? 'Salvando...' : 'Salvar Alterações'}
-                                    </button>
                                 </div>
                             </div>
-
-                        </div>
+                        )}
                     </div>
-                </main>
+                </div>
             </div>
         </DashboardShell>
     );

@@ -4,7 +4,9 @@
   "description": "Quarks OS - Solar CRM and Calculation Platform",
   "main": "src/backend/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:e2e": "playwright test --config=e2e/playwright.config.js",
+    "test:report": "node scripts/run-tests-and-report.js"
   },
   "author": "Antigravity",
   "license": "ISC",
@@ -16,6 +18,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.58.2",
     "eslint": "^10.0.0",
     "globals": "^17.3.0",
     "jest": "^30.2.0"

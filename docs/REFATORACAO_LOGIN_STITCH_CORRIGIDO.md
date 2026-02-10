@@ -123,7 +123,7 @@ Agora que sabemos o projeto correto, podemos:
 3. **Manter consistência visual**:
    - Todas as telas no mesmo projeto
    - Mesmo tema (LIGHT, Inter, petroleum)
-   - Mesmo Design System v1.3
+   - Mesmo Design System v1.4
 
 ---
 

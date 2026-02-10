@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../services/api';
+import api from '../services/api';
 import { DashboardShell } from '../components/dashboard/DashboardShell';
 import { Plus, Trash2, X, Package, Search } from 'lucide-react';
 
@@ -102,7 +102,7 @@ const KitsPage = () => {
                 </div>
                 <button
                     onClick={() => setShowCreateModal(true)}
-                    className="ds-button-primary bg-solar hover:bg-solar-600 text-white flex items-center gap-2"
+                    className="ds-button-primary bg-solar hover:bg-amber-600 text-white flex items-center gap-2"
                 >
                     <Plus size={18} />
                     Novo Kit
@@ -113,7 +113,7 @@ const KitsPage = () => {
             {error && <p className="text-red-500">{error}</p>}
 
             {!loading && !error && kits.length === 0 && (
-                <div className="text-center p-12 bg-white rounded-xl border border-slate-200">
+                <div className="text-center p-12 bg-white rounded-lg border border-slate-200">
                     <p className="text-slate-400">Nenhum kit cadastrado.</p>
                 </div>
             )}
@@ -123,7 +123,7 @@ const KitsPage = () => {
                     <div
                         key={kit.id}
                         onClick={() => setSelectedKit(kit)}
-                        className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 cursor-pointer hover:border-petroleum transition-colors group"
+                        className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 cursor-pointer hover:border-petroleum transition-colors group"
                     >
                         <div className="flex justify-between items-start mb-2">
                             <h3 className="ds-title-card text-petroleum group-hover:text-solar transition-colors">{kit.name}</h3>
@@ -133,7 +133,7 @@ const KitsPage = () => {
 
                         <div className="pt-4 border-t border-slate-100 flex justify-between items-center">
                             <span className="text-xs text-slate-400 uppercase font-semibold">Custo Estimado</span>
-                            <div className="text-green-600 font-mono font-medium">
+                            <div className="text-emerald-600 font-mono font-medium">
                                 R$ {calculateKitCost(kit).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </div>
                         </div>
@@ -144,7 +144,7 @@ const KitsPage = () => {
             {/* CREATE MODAL */}
             {showCreateModal && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white rounded-lg shadow-sm w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="ds-title-card">Novo Kit</h2>
                             <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-600"><X size={24} /></button>
@@ -252,7 +252,7 @@ const KitsPage = () => {
                                             <tfoot className="bg-slate-50 font-semibold text-slate-700">
                                                 <tr>
                                                     <td colSpan="2" className="py-2 px-3 text-right">Total Estimado:</td>
-                                                    <td className="py-2 px-3 text-right font-mono text-green-700">
+                                                    <td className="py-2 px-3 text-right font-mono text-emerald-700">
                                                         R$ {calculateFormCost().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                                     </td>
                                                     <td></td>
@@ -275,7 +275,7 @@ const KitsPage = () => {
             {/* DETAIL MODAL */}
             {selectedKit && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white rounded-lg shadow-sm w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex justify-between items-start mb-4">
                             <h2 className="ds-title-card pr-8">{selectedKit.name}</h2>
                             <button onClick={() => setSelectedKit(null)} className="text-slate-400 hover:text-slate-600"><X size={24} /></button>
@@ -305,7 +305,7 @@ const KitsPage = () => {
 
                         <div className="pt-4 border-t border-slate-100 flex justify-between items-center">
                             <span className="text-sm font-medium text-slate-500">Custo Total Componentes</span>
-                            <span className="text-lg font-bold text-green-600 font-mono">
+                            <span className="text-lg font-bold text-emerald-600 font-mono">
                                 R$ {calculateKitCost(selectedKit).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </span>
                         </div>

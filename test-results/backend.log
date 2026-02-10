@@ -1,0 +1,280 @@
+  console.log
+    [dotenv@17.2.3] injecting env (5) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [Maestro] Registered agent: lead
+
+      at MaestroAgent.log [as registerAgent] (src/orchestrator/maestro.js:29:17)
+
+  console.log
+    [Maestro] Registered agent: calc
+
+      at MaestroAgent.log [as registerAgent] (src/orchestrator/maestro.js:29:17)
+
+  console.log
+    [Maestro] Registered agent: proposal
+
+      at MaestroAgent.log [as registerAgent] (src/orchestrator/maestro.js:29:17)
+
+  console.log
+    [Maestro] Registered agent: product
+
+      at MaestroAgent.log [as registerAgent] (src/orchestrator/maestro.js:29:17)
+
+  console.log
+    [Maestro] Registered agent: pricing
+
+      at MaestroAgent.log [as registerAgent] (src/orchestrator/maestro.js:29:17)
+
+  console.log
+    [Maestro] Registered agent: copilot
+
+      at MaestroAgent.log [as registerAgent] (src/orchestrator/maestro.js:29:17)
+
+  console.log
+    [Maestro] Registered agent: visual
+
+      at MaestroAgent.log [as registerAgent] (src/orchestrator/maestro.js:29:17)
+
+  console.log
+    [Maestro] Registered agent: analytics
+
+      at MaestroAgent.log [as registerAgent] (src/orchestrator/maestro.js:29:17)
+
+  console.log
+    [Maestro] Registered agent: lead
+
+      at MaestroAgent.log [as registerAgent] (src/orchestrator/maestro.js:29:17)
+
+  console.log
+    [Maestro] Registered agent: calc
+
+      at MaestroAgent.log [as registerAgent] (src/orchestrator/maestro.js:29:17)
+
+  console.log
+    [Maestro] Registered agent: proposal
+
+      at MaestroAgent.log [as registerAgent] (src/orchestrator/maestro.js:29:17)
+
+  console.log
+    [Maestro] Registered agent: inventory
+
+      at MaestroAgent.log [as registerAgent] (src/orchestrator/maestro.js:29:17)
+
+  console.log
+    [Maestro] Registered agent: project
+
+      at MaestroAgent.log [as registerAgent] (src/orchestrator/maestro.js:29:17)
+
+  console.log
+    [Maestro] Registered agent: service
+
+      at MaestroAgent.log [as registerAgent] (src/orchestrator/maestro.js:29:17)
+
+  console.log
+    [Maestro] Registered agent: pricing
+
+      at MaestroAgent.log [as registerAgent] (src/orchestrator/maestro.js:29:17)
+
+  console.log
+    [Maestro] Registered agent: analytics
+
+      at MaestroAgent.log [as registerAgent] (src/orchestrator/maestro.js:29:17)
+
+  console.log
+    [REQUEST] GET /
+
+      at log (src/server.js:30:11)
+
+[20:20:19.614] INFO (22112): GET /
+  console.log
+    [REQUEST] GET /health
+
+      at log (src/server.js:30:11)
+
+[20:20:19.642] INFO (22112): GET /health
+  console.log
+    [REQUEST] GET /api/health/db
+
+      at log (src/server.js:30:11)
+
+[20:20:19.652] INFO (22112): GET /api/health/db
+  console.log
+    [REQUEST] POST /api/auth/login
+
+      at log (src/server.js:30:11)
+
+[20:20:19.729] INFO (22112): POST /api/auth/login
+  console.log
+    [REQUEST] POST /api/auth/login
+
+      at log (src/server.js:30:11)
+
+[20:20:19.794] INFO (22112): POST /api/auth/login
+  console.log
+    [REQUEST] POST /api/auth/login
+
+      at log (src/server.js:30:11)
+
+[20:20:19.807] INFO (22112): POST /api/auth/login
+  console.log
+    [REQUEST] GET /api/analytics/dashboard
+
+      at log (src/server.js:30:11)
+
+[20:20:19.903] INFO (22112): GET /api/analytics/dashboard
+  console.log
+    [REQUEST] GET /api/analytics/funnel
+
+      at log (src/server.js:30:11)
+
+[20:20:20.022] INFO (22112): GET /api/analytics/funnel
+  console.log
+    [REQUEST] GET /api/analytics/activity
+
+      at log (src/server.js:30:11)
+
+[20:20:20.090] INFO (22112): GET /api/analytics/activity
+  console.log
+    [REQUEST] GET /api/leads/pipeline
+
+      at log (src/server.js:30:11)
+
+  console.log
+    [LeadDomain] Received action: GET_PIPELINE
+
+      at LeadDomainAgent.log [as execute] (src/agents/lead-domain/index.js:68:17)
+
+[20:20:20.108] INFO (22112): GET /api/leads/pipeline
+  console.log
+    [REQUEST] POST /api/auth/login
+
+      at log (src/server.js:30:11)
+
+[20:20:20.167] INFO (22112): POST /api/auth/login
+  console.log
+    [REQUEST] GET /api/leads
+
+      at log (src/server.js:30:11)
+
+[20:20:20.249] INFO (22112): GET /api/leads
+  console.log
+    [REQUEST] GET /api/leads
+
+      at log (src/server.js:30:11)
+
+[20:20:20.257] INFO (22112): GET /api/leads
+  console.log
+    [REQUEST] POST /api/auth/login
+
+      at log (src/server.js:30:11)
+
+[20:20:20.307] INFO (22112): POST /api/auth/login
+  console.log
+    [REQUEST] GET /api/proposals
+
+      at log (src/server.js:30:11)
+
+[20:20:20.391] INFO (22112): GET /api/proposals
+  console.log
+    [REQUEST] GET /api/proposals
+
+      at log (src/server.js:30:11)
+
+[20:20:20.399] INFO (22112): GET /api/proposals
+  console.log
+    [REQUEST] POST /api/auth/login
+
+      at log (src/server.js:30:11)
+
+[20:20:20.549] INFO (22112): POST /api/auth/login
+  console.log
+    [REQUEST] GET /api/users
+
+      at log (src/server.js:30:11)
+
+[20:20:20.632] INFO (22112): GET /api/users
+  console.log
+    [REQUEST] GET /api/users
+
+      at log (src/server.js:30:11)
+
+[20:20:20.639] INFO (22112): GET /api/users
+  console.log
+    [REQUEST] GET /api/proposals/public/slug-inexistente-12345
+
+      at log (src/server.js:30:11)
+
+[20:20:20.681] INFO (22112): GET /api/proposals/public/slug-inexistente-12345
+  console.log
+    [REQUEST] POST /api/copilot/chat
+
+      at log (src/server.js:30:11)
+
+[20:20:20.691] INFO (22112): POST /api/copilot/chat
+  console.error
+    [Copilot] Gemini Error: ApiError: {"error":{"code":403,"message":"Your API key was reported as leaked. Please use another API key.","status":"PERMISSION_DENIED"}}
+        at throwErrorIfNotOK (D:\QUARKS_OS\src\backend\node_modules\@google\genai\dist\node\index.cjs:12194:30)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at D:\QUARKS_OS\src\backend\node_modules\@google\genai\dist\node\index.cjs:11914:13
+        at Models.generateContent (D:\QUARKS_OS\src\backend\node_modules\@google\genai\dist\node\index.cjs:13257:24)
+        at CopilotDomainAgent.handleChat (D:\QUARKS_OS\src\backend\src\agents\copilot-domain\index.js:233:30)
+        at CopilotDomainAgent.execute (D:\QUARKS_OS\src\backend\src\agents\copilot-domain\index.js:50:24)
+        at D:\QUARKS_OS\src\backend\src\agents\copilot-domain\routes.js:19:28 {
+      status: 403
+    }
+
+      285 |
+      286 |         } catch (error) {
+    > 287 |             console.error('[Copilot] Gemini Error:', error);
+          |                     ^
+      288 |             // Fallback for user
+      289 |             return {
+      290 |                 sessionId: session.id,
+
+      at CopilotDomainAgent.error [as handleChat] (src/agents/copilot-domain/index.js:287:21)
+      at CopilotDomainAgent.execute (src/agents/copilot-domain/index.js:50:24)
+      at src/agents/copilot-domain/routes.js:19:28
+
+
+PASS __tests__/api.test.js
+  APIs - Health e raiz
+    √ GET / retorna mensagem da API (45 ms)
+    √ GET /health retorna status ok (10 ms)
+    √ GET /api/health/db conecta ao banco (65 ms)
+  APIs - Auth
+    √ POST /api/auth/login sem body retorna erro (4xx ou 5xx) (77 ms)
+    √ POST /api/auth/login com credenciais inválidas retorna 401 (12 ms)
+    √ POST /api/auth/login com Master (seed) retorna token (96 ms)
+  APIs - Analytics (públicas)
+    √ GET /api/analytics/dashboard retorna métricas (119 ms)
+    √ GET /api/analytics/funnel retorna funnel (67 ms)
+    √ GET /api/analytics/activity retorna atividade (17 ms)
+  APIs - Leads (pipeline público)
+    √ GET /api/leads/pipeline retorna estágios (62 ms)
+  APIs - Leads (autenticadas)
+    √ GET /api/leads sem token retorna 401 (5 ms)
+    √ GET /api/leads com token retorna array (51 ms)
+  APIs - Proposals (autenticadas)
+    √ GET /api/proposals sem token retorna 401 (8 ms)
+    √ GET /api/proposals com token retorna array (151 ms)
+  APIs - Users (autenticado)
+    √ GET /api/users sem token retorna 401 (6 ms)
+    √ GET /api/users com token retorna array (44 ms)
+  APIs - Proposals públicas (slug)
+    √ GET /api/proposals/public/slug-invalido retorna 404 (7 ms)
+  APIs - Copilot
+    √ POST /api/copilot/chat existe (200 ou 503 por API key) (1222 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       18 passed, 18 total
+Snapshots:   0 total
+Time:        3.55 s
+Ran all test suites matching __tests__/api.test.js.

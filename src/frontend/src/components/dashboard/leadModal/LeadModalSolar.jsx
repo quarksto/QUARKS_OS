@@ -10,7 +10,7 @@ export const LeadModalSolar = ({ lead }) => {
         <section className="technical-card p-5">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="ds-title flex items-center gap-2 text-slate-900">
-                    <span className="material-symbols-outlined text-slate-400 text-[18px]">wb_sunny</span>
+                    <span className="material-symbols-outlined text-slate-400 text-[18px] ds-icon-w300">wb_sunny</span>
                     Dados Solares
                 </h3>
             </div>
@@ -32,7 +32,7 @@ export const LeadModalSolar = ({ lead }) => {
                 <div>
                     <label className="block ds-meta text-slate-500 uppercase tracking-wider mb-1">Potência Estimada</label>
                     <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-slate-400 text-[18px]">electric_bolt</span>
+                        <span className="material-symbols-outlined text-slate-400 text-[18px] ds-icon-w300">electric_bolt</span>
                         <span className="ds-data text-slate-800">{kwp} kWp</span>
                     </div>
                 </div>

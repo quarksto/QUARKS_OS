@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { DashboardShell } from '../components/dashboard/DashboardShell';
 
@@ -22,7 +23,7 @@ export default function SettingsPage() {
                 {/* Perfil */}
                 <section className="technical-card p-6 border border-slate-200">
                     <h2 className="ds-title-section text-slate-800 mb-4 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-petroleum">person</span>
+                        <span className="material-symbols-outlined text-petroleum ds-icon-w300" aria-hidden>person</span>
                         Perfil
                     </h2>
                     <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 ds-body text-slate-700">
@@ -47,25 +48,43 @@ export default function SettingsPage() {
                 {/* Seções úteis */}
                 <section className="technical-card p-6 border border-slate-200">
                     <h2 className="ds-title-section text-slate-800 mb-4 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-petroleum">tune</span>
+                        <span className="material-symbols-outlined text-petroleum ds-icon-w300" aria-hidden>tune</span>
                         Configurações do sistema
                     </h2>
                     <ul className="space-y-3">
                         <li className="flex items-center justify-between py-2 border-b border-slate-100">
-                            <span className="ds-body text-slate-700">Precificação e regras</span>
-                            <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">Em breve</span>
+                            <Link to="/pricing-rules" className="ds-body text-slate-700 hover:text-petroleum-600 transition-colors flex items-center gap-2">
+                                <span className="material-symbols-outlined text-[18px] text-slate-400 ds-icon-w300" aria-hidden>attach_money</span>
+                                Tabelas de Preço e Regras
+                            </Link>
+                            <Link to="/pricing-rules" className="text-xs text-petroleum-600 hover:text-petroleum-700 font-semibold flex items-center gap-1">
+                                Configurar <span className="material-symbols-outlined text-[14px] ds-icon-w300" aria-hidden>arrow_forward</span>
+                            </Link>
                         </li>
                         <li className="flex items-center justify-between py-2 border-b border-slate-100">
-                            <span className="ds-body text-slate-700">Dados da empresa</span>
-                            <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">Em breve</span>
+                            <Link to="/services" className="ds-body text-slate-700 hover:text-petroleum-600 transition-colors flex items-center gap-2">
+                                <span className="material-symbols-outlined text-[18px] text-slate-400 ds-icon-w300" aria-hidden>miscellaneous_services</span>
+                                Serviços e precificação
+                            </Link>
+                            <Link to="/services" className="text-xs text-petroleum-600 hover:text-petroleum-700 font-semibold flex items-center gap-1">
+                                Gerenciar <span className="material-symbols-outlined text-[14px] ds-icon-w300" aria-hidden>arrow_forward</span>
+                            </Link>
                         </li>
                         <li className="flex items-center justify-between py-2 border-b border-slate-100">
-                            <span className="ds-body text-slate-700">Gestão de usuários</span>
-                            <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">Em breve</span>
+                            <Link to="/products" className="ds-body text-slate-700 hover:text-petroleum-600 transition-colors flex items-center gap-2">
+                                <span className="material-symbols-outlined text-[18px] text-slate-400 ds-icon-w300" aria-hidden>inventory_2</span>
+                                Produtos e Kits
+                            </Link>
+                            <Link to="/products" className="text-xs text-petroleum-600 hover:text-petroleum-700 font-semibold flex items-center gap-1">
+                                Gerenciar <span className="material-symbols-outlined text-[14px] ds-icon-w300" aria-hidden>arrow_forward</span>
+                            </Link>
                         </li>
                         <li className="flex items-center justify-between py-2">
-                            <span className="ds-body text-slate-700">Notificações e e-mail</span>
-                            <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">Em breve</span>
+                            <span className="ds-body text-slate-700 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-[18px] text-slate-400 ds-icon-w300" aria-hidden>notifications</span>
+                                Notificações e e-mail
+                            </span>
+                            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 py-0.5 rounded-md border border-slate-200 bg-white">Em breve</span>
                         </li>
                     </ul>
                 </section>
@@ -73,7 +92,7 @@ export default function SettingsPage() {
                 {/* Sobre */}
                 <section className="technical-card p-6 border border-slate-200">
                     <h2 className="ds-title-section text-slate-800 mb-2 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-petroleum">info</span>
+                        <span className="material-symbols-outlined text-petroleum ds-icon-w300" aria-hidden>info</span>
                         Sobre
                     </h2>
                     <p className="ds-body text-slate-600">

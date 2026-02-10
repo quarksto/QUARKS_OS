@@ -71,13 +71,13 @@ export function GlobalSearch({ open, onClose }) {
 
     return (
         <div
-            className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] bg-black/60"
             onClick={onClose}
             role="dialog"
             aria-label="Busca global"
         >
             <div
-                className="technical-card w-full max-w-xl shadow-xl overflow-hidden"
+                className="technical-card w-full max-w-xl shadow-sm overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-200">

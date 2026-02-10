@@ -3,6 +3,33 @@
  */
 const TOOLS = [
     {
+        name: "get_lead_summary",
+        description: "Returns a summary of a lead: name, consumption, status, temperature (Quente/Morno/Frio), score, and potential value.",
+        parameters: {
+            type: "OBJECT",
+            properties: {
+                leadId: { type: "STRING", description: "The unique ID of the lead" }
+            },
+            required: ["leadId"]
+        }
+    },
+    {
+        name: "get_lead_details",
+        description: "Returns full details of a lead including messages, proposals, and all fields.",
+        parameters: {
+            type: "OBJECT",
+            properties: {
+                leadId: { type: "STRING", description: "The unique ID of the lead" }
+            },
+            required: ["leadId"]
+        }
+    },
+    {
+        name: "get_funnel_summary",
+        description: "Returns the sales pipeline: count of leads per stage (NEW, CONTACTED, PROPOSAL_SENT, NEGOTIATION, CLOSED_WON, CLOSED_LOST).",
+        parameters: { type: "OBJECT", properties: {} }
+    },
+    {
         name: "get_projects_summary",
         description: "Returns a summary of all active engineering projects, their current phases (Kanban stages), and assigned technicians.",
         parameters: { type: "OBJECT", properties: {} }
@@ -57,6 +84,45 @@ const TOOLS = [
         }
     },
     {
+        name: "get_proposal_summary",
+        description: "Returns a summary of proposals for a lead. Use leadId to get proposals linked to that lead.",
+        parameters: {
+            type: "OBJECT",
+            properties: {
+                leadId: { type: "STRING", description: "The lead ID to fetch proposals for" }
+            },
+            required: ["leadId"]
+        }
+    },
+    {
+        name: "get_analytics_insight",
+        description: "Returns contextual insight about the dashboard: metrics (active leads, conversion rate, proposals sent), deltas, and a suggested message.",
+        parameters: { type: "OBJECT", properties: {} }
+    },
+    {
+        name: "query_product_catalog",
+        description: "Answers questions about products: warranty, specs, inverters, modules, kits. Use when user asks about product specifications, guarantees, or catalog.",
+        parameters: {
+            type: "OBJECT",
+            properties: {
+                query: { type: "STRING", description: "Optional search term to filter products (e.g. inversor, módulo, garantia)" }
+            }
+        }
+    },
+    {
+        name: "calculate_dimensionamento",
+        description: "Calculates solar system sizing: given consumption (kWh/month) and distributor, returns system size (kWp), panels, area, price, payback.",
+        parameters: {
+            type: "OBJECT",
+            properties: {
+                consumption: { type: "NUMBER", description: "Monthly average consumption in kWh" },
+                distributor: { type: "STRING", description: "Energy distributor (CPFL_PAULISTA, ENEL_SP, CEMIG, etc.)" },
+                state: { type: "STRING", description: "State UF (SP, MG, etc.)" }
+            },
+            required: ["consumption"]
+        }
+    },
+    {
         name: "switch_mode",
         description: "Switches the application mode (Sales, Management, Projects).",
         parameters: {
@@ -80,6 +146,39 @@ const executeTool = async (maestro, name, args) => {
 
     try {
         switch (name) {
+            case 'get_lead_summary': {
+                if (!maestro.agents['lead']) return { error: "Lead Agent not available" };
+                const lead = await maestro.agents['lead'].execute('GET_LEAD', { id: args.leadId });
+                return {
+                    success: true,
+                    data: {
+                        id: lead.id,
+                        name: lead.name,
+                        consumption: lead.consumption,
+                        status: lead.status,
+                        temperature: lead.temperature,
+                        score: lead.score,
+                        potential: lead.potential
+                    }
+                };
+            }
+
+            case 'get_lead_details': {
+                if (!maestro.agents['lead']) return { error: "Lead Agent not available" };
+                const details = await maestro.agents['lead'].execute('GET_LEAD_FULL', { id: args.leadId });
+                return { success: true, data: details };
+            }
+
+            case 'get_funnel_summary': {
+                if (!maestro.agents['lead']) return { error: "Lead Agent not available" };
+                const pipeline = await maestro.agents['lead'].execute('GET_PIPELINE', {});
+                const summary = {};
+                for (const [stage, leads] of Object.entries(pipeline)) {
+                    summary[stage] = Array.isArray(leads) ? leads.length : 0;
+                }
+                return { success: true, data: summary };
+            }
+
             case 'get_projects_summary': {
                 const projects = await maestro.execute('GET_PROJECTS_SUMMARY', {});
                 return { success: true, data: projects };
@@ -141,6 +240,52 @@ const executeTool = async (maestro, name, args) => {
                         preview: `[VIDEO GENERATED](${vidResult.url})`
                     }
                 };
+            }
+
+            case 'get_proposal_summary': {
+                if (!maestro.agents['proposal']) return { error: "Proposal Agent not available" };
+                const proposals = await maestro.agents['proposal'].execute('LIST_PROPOSALS', { leadId: args.leadId, limit: 10 });
+                const summary = proposals.map(p => ({
+                    id: p.id,
+                    status: p.status,
+                    totalPrice: p.totalPrice,
+                    leadName: p.lead?.name,
+                    kitName: p.kit?.name
+                }));
+                return { success: true, data: summary };
+            }
+
+            case 'get_analytics_insight': {
+                if (!maestro.agents['analytics']) return { error: "Analytics Agent not available" };
+                const [insight, metrics] = await Promise.all([
+                    maestro.agents['analytics'].execute('GET_INSIGHT', {}),
+                    maestro.agents['analytics'].execute('GET_DASHBOARD_METRICS', {})
+                ]);
+                return {
+                    success: true,
+                    data: {
+                        message: insight,
+                        activeLeads: metrics.activeLeads,
+                        conversionRate: metrics.conversionRate,
+                        proposalsSent: metrics.proposalsSent,
+                        revenue: metrics.revenue
+                    }
+                };
+            }
+
+            case 'query_product_catalog': {
+                if (!maestro.agents['product']) return { error: "Product Agent not available" };
+                const catalog = await maestro.agents['product'].execute('QUERY_CATALOG', { query: args.query });
+                return { success: true, data: catalog };
+            }
+
+            case 'calculate_dimensionamento': {
+                const result = await maestro.execute('DIMENSIONAMENTO', {
+                    consumption: args.consumption,
+                    distributor: args.distributor || 'CEMIG',
+                    state: args.state || 'SP'
+                });
+                return { success: true, data: result };
             }
 
             case 'switch_mode': {

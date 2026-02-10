@@ -21,7 +21,7 @@ export const ConsumptionChartWidget = ({ data }) => {
                         <span className="text-[11px] text-slate-500 font-bold">Consumo</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-sm bg-solar-500"></div>
+                        <div className="w-2.5 h-2.5 rounded-sm bg-solar"></div>
                         <span className="text-[11px] text-slate-500 font-bold">Geração</span>
                     </div>
                 </div>
@@ -48,7 +48,7 @@ export const ConsumptionChartWidget = ({ data }) => {
                                 ></div>
                                 {/* Generation Bar */}
                                 <div
-                                    className="flex-1 bg-solar-500 hover:bg-solar-600 transition-all rounded-t-lg"
+                                    className="flex-1 bg-solar hover:bg-amber-600 transition-all rounded-t-lg"
                                     style={{ height: `${(item.generation / maxVal) * 100}%` }}
                                 ></div>
                             </div>

@@ -3,12 +3,12 @@ import React from 'react';
 const CardWrapper = ({ title, children, trend, period, meta, onClick }) => (
     <div
         onClick={onClick}
-        className={`technical-card p-6 flex flex-col h-[160px] relative overflow-hidden group hover:border-petroleum/30 hover:-translate-y-1 transition-all duration-300 ease-out rounded-lg shadow-sm ${onClick ? 'cursor-pointer' : ''}`}
+        className={`technical-card p-6 flex flex-col h-[160px] relative overflow-hidden group hover:border-petroleum/30 transition-colors duration-200 rounded-lg shadow-none hover:shadow-sm ${onClick ? 'cursor-pointer' : ''}`}
     >
         <div className="flex justify-between items-start mb-2">
-            <h3 className="ds-title-card">{title}</h3>
+            <h3 className="ds-title-section text-slate-700">{title}</h3>
             {trend && (
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-lg flex items-center gap-1 ${trend.positive ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
+                <span className={`text-meta px-2 py-0.5 rounded-full border flex items-center gap-1 ${trend.positive ? 'border-emerald-200 text-emerald-700 bg-white' : 'border-red-200 text-red-600 bg-white'
                     }`}>
                     {trend.positive ? '↑' : '↓'} {trend.value}
                 </span>
@@ -40,7 +40,7 @@ const LeadsCard = ({ value, target = 150, trend, onClick }) => {
                 <span className="ds-display-xl tabular-nums">{value}</span>
             </div>
             <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                <div className="bg-solar-500 h-full rounded-full transition-all duration-1000" style={{ width: `${progress}%` }}></div>
+                <div className="bg-solar h-full rounded-full transition-all duration-1000" style={{ width: `${progress}%` }}></div>
             </div>
         </CardWrapper>
     );
@@ -74,7 +74,7 @@ const ConversionCard = ({ value, target, trend, onClick }) => {
                             strokeLinecap="round"
                         />
                     </svg>
-                    <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-solar-600">
+                    <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-solar">
                         {Math.round(numValue)}%
                     </div>
                 </div>

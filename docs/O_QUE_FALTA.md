@@ -37,8 +37,9 @@
 - **Busca Global (⌘K):** GlobalSearch + GET /api/search (leads e propostas); atalho registrado no ProtectedLayout.
 
 ### Ainda falta
+- [x] **InsightBar** — Conectado à API GET /api/analytics/insight; mensagem contextual baseada em métricas. Ver docs/IA_USAGE.md.
 - [ ] **Metas/deltas ou rótulo**  
-  Confirmar se todos os valores em KpiGrid e InsightBar vêm da API; se restar placeholder (ex.: "+12.5%", "92% Match"), conectar à API ou rotular como "Exemplo".
+  Confirmar se todos os valores em KpiGrid vêm da API; se restar placeholder (ex.: "+12.5%", "92% Match"), conectar à API ou rotular como "Exemplo".
 - [ ] **Filtro do Kanban**  
   pipelineFilters/onFiltersChange existem; verificar se o filtro aplica de fato (data, estágio, etc.) ou só atualiza estado sem efeito visual.
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../services/api';
+import api from '../services/api';
 import { DashboardShell } from '../components/dashboard/DashboardShell';
-import { Plus, Edit2, Trash2, TrendingUp, Percent } from 'lucide-react';
+import { PageContent } from '../components/dashboard/PageContent';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
 
 const PricingRulesPage = () => {
     const [rules, setRules] = useState([]);
@@ -84,69 +85,70 @@ const PricingRulesPage = () => {
     };
 
     return (
-        <DashboardShell>
-            <div className="flex justify-between items-center mb-8">
-                <div>
-                    <h1 className="ds-display-l text-petroleum mb-1">Regras de Preço</h1>
-                    <p className="ds-body-m text-slate-500">Defina margens e impostos baseados na potência do sistema.</p>
-                </div>
+        <DashboardShell
+            title="Regras de Preço"
+            subtitle="Defina margens e impostos baseados na potência do sistema."
+            headerIcon="settings_suggest"
+            headerRight={
                 <button
                     onClick={handleNew}
-                    className="ds-button-primary bg-solar hover:bg-solar-600 text-white flex items-center gap-2"
+                    className="h-8 px-4 rounded-full bg-solar hover:bg-amber-600 text-white flex items-center gap-2 font-bold text-[11px] transition-all shadow-none active:scale-95 uppercase tracking-wider"
                 >
-                    <Plus size={18} />
+                    <span className="material-symbols-outlined text-[18px] ds-icon-w300">add</span>
                     Nova Regra
                 </button>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <table className="w-full">
-                    <thead className="bg-slate-50 border-b border-slate-200">
-                        <tr>
-                            <th className="text-left py-3 px-6 ds-label text-slate-500">Regra</th>
-                            <th className="text-left py-3 px-6 ds-label text-slate-500">Potência (kWp)</th>
-                            <th className="text-right py-3 px-6 ds-label text-slate-500">Margem Alvo</th>
-                            <th className="text-right py-3 px-6 ds-label text-slate-500">Imposto Estimado</th>
-                            <th className="text-right py-3 px-6 ds-label text-slate-500">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        {rules.map(rule => (
-                            <tr key={rule.id} className="hover:bg-slate-50">
-                                <td className="py-3 px-6 font-medium text-petroleum">{rule.name}</td>
-                                <td className="py-3 px-6 text-slate-600">
-                                    {rule.minPower} kWp - {rule.maxPower >= 999 ? '∞' : `${rule.maxPower} kWp`}
-                                </td>
-                                <td className="py-3 px-6 text-right font-mono text-green-600">
-                                    {(rule.targetMargin * 100).toFixed(1)}%
-                                </td>
-                                <td className="py-3 px-6 text-right font-mono text-slate-600">
-                                    {(rule.taxRate * 100).toFixed(1)}%
-                                </td>
-                                <td className="py-3 px-6 text-right">
-                                    <button onClick={() => handleEdit(rule)} className="p-2 text-slate-400 hover:text-petroleum">
-                                        <Edit2 size={16} />
-                                    </button>
-                                    <button onClick={() => handleDelete(rule.id)} className="p-2 text-slate-400 hover:text-red-500">
-                                        <Trash2 size={16} />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                        {rules.length === 0 && !loading && (
+            }
+        >
+            <PageContent className="flex flex-col gap-10">
+                <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                    <table className="w-full">
+                        <thead className="bg-slate-50 border-b border-slate-200">
                             <tr>
-                                <td colSpan="5" className="p-8 text-center text-slate-400">
-                                    Nenhuma regra definida. O sistema usará os padrões globais.
-                                </td>
+                                <th className="text-left py-3 px-6 ds-label text-slate-500">Regra</th>
+                                <th className="text-left py-3 px-6 ds-label text-slate-500">Potência (kWp)</th>
+                                <th className="text-right py-3 px-6 ds-label text-slate-500">Margem Alvo</th>
+                                <th className="text-right py-3 px-6 ds-label text-slate-500">Imposto Estimado</th>
+                                <th className="text-right py-3 px-6 ds-label text-slate-500">Ações</th>
                             </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {rules.map(rule => (
+                                <tr key={rule.id} className="hover:bg-slate-50">
+                                    <td className="py-3 px-6 font-medium text-petroleum">{rule.name}</td>
+                                    <td className="py-3 px-6 text-slate-600">
+                                        {rule.minPower} kWp - {rule.maxPower >= 999 ? '∞' : `${rule.maxPower} kWp`}
+                                    </td>
+                                    <td className="py-3 px-6 text-right font-mono text-green-600">
+                                        {(rule.targetMargin * 100).toFixed(1)}%
+                                    </td>
+                                    <td className="py-3 px-6 text-right font-mono text-slate-600">
+                                        {(rule.taxRate * 100).toFixed(1)}%
+                                    </td>
+                                    <td className="py-3 px-6 text-right">
+                                        <button onClick={() => handleEdit(rule)} className="p-2 text-slate-400 hover:text-petroleum">
+                                            <Edit2 size={16} />
+                                        </button>
+                                        <button onClick={() => handleDelete(rule.id)} className="p-2 text-slate-400 hover:text-red-500">
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {rules.length === 0 && !loading && (
+                                <tr>
+                                    <td colSpan="5" className="p-8 text-center text-slate-400">
+                                        Nenhuma regra definida. O sistema usará os padrões globais.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </PageContent>
 
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+                    <div className="bg-white rounded-lg shadow-sm w-full max-w-md p-6">
                         <h2 className="ds-title-card mb-4">{editingId ? 'Editar Regra' : 'Nova Regra'}</h2>
                         <form onSubmit={handleSave} className="space-y-4">
                             <div>
@@ -160,7 +162,7 @@ const PricingRulesPage = () => {
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
-                                <div>
+                                <div className="space-y-1">
                                     <label className="ds-label mb-1 block">Min kWp</label>
                                     <input
                                         type="number"
@@ -169,7 +171,7 @@ const PricingRulesPage = () => {
                                         onChange={e => setFormData({ ...formData, minPower: e.target.value })}
                                     />
                                 </div>
-                                <div>
+                                <div className="space-y-1">
                                     <label className="ds-label mb-1 block">Max kWp</label>
                                     <input
                                         type="number"
@@ -180,7 +182,7 @@ const PricingRulesPage = () => {
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
-                                <div>
+                                <div className="space-y-1">
                                     <label className="ds-label mb-1 block">Margem (%)</label>
                                     <div className="relative">
                                         <input
@@ -193,7 +195,7 @@ const PricingRulesPage = () => {
                                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">%</span>
                                     </div>
                                 </div>
-                                <div>
+                                <div className="space-y-1">
                                     <label className="ds-label mb-1 block">Imposto (%)</label>
                                     <div className="relative">
                                         <input

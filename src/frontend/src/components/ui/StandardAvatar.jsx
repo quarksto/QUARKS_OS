@@ -24,16 +24,17 @@ export const StandardAvatar = ({ name, src, className = '', size = 'md', channel
 
     const sizeClass = baseSizeClasses[size] || baseSizeClasses.md;
 
-    // Common classes - DS Rule 3.25: Neutral Slate Background (bg-slate-100), Slate Text
-    const containerClass = `rounded-lg flex items-center justify-center font-bold tracking-wide shrink-0 border border-slate-200 overflow-hidden ${sizeClass} bg-slate-100 text-slate-500 ${className}`;
+    /* DS §4 Avatar: rounded-full; borda 1px; bg-slate-100 text-slate-600 */
+    const containerClass = `rounded-full flex items-center justify-center font-semibold tracking-wide shrink-0 border border-slate-200 overflow-hidden ${sizeClass} bg-slate-100 text-slate-600 ${className}`;
 
     // Channel Indicator Setup
     const renderChannelBadge = () => {
         if (!channel) return null;
 
+        /* DS: apenas petroleum, solar, slate, white — badges em slate */
         const badgeConfig = {
-            whatsapp: { icon: FaWhatsapp, color: 'bg-emerald-500' },
-            email: { icon: MdEmail, color: 'bg-blue-500' },
+            whatsapp: { icon: FaWhatsapp, color: 'bg-slate-500' },
+            email: { icon: MdEmail, color: 'bg-slate-500' },
             phone: { icon: FaPhone, color: 'bg-slate-500' },
         };
 
@@ -44,9 +45,10 @@ export const StandardAvatar = ({ name, src, className = '', size = 'md', channel
         // Adjust icon size relative to badge
         const iconSize = size === 'sm' ? 8 : (size === 'xl' ? 14 : 10);
 
+        /* DS: borda 1px; sem sombra */
         return (
-            <div className={`absolute -bottom-1 -right-1 ${badgeSize} ${config.color} rounded-full border-2 border-white flex items-center justify-center text-white shadow-sm z-10 box-content`}>
-                <IconComponent size={iconSize} />
+            <div className={`absolute -bottom-1 -right-1 ${badgeSize} ${config.color} rounded-full border border-white flex items-center justify-center text-white z-10 box-content`}>
+                <IconComponent size={iconSize} aria-hidden="true" />
             </div>
         );
     };

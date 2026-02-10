@@ -2,25 +2,27 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import { DashboardShell } from '../components/dashboard/DashboardShell';
-import { AdaptiveHeader } from '../components/dashboard/AdaptiveHeader';
 import { StandardAvatar } from '../components/ui/StandardAvatar';
 
-// Configuration based on Stitch "Outline Badge" design (ID e9296f...)
+/**
+ * Propostas Comercial — refatorado conforme docs/dsoficial.md (DS v1.4).
+ * Design minimalista, zero sombras (exceto hover sutil), tokens semânticos, badge outline.
+ */
+
 const STATUS_CONFIG = {
-    DRAFT: { label: 'Rascunho', color: 'border-slate-300 text-slate-500 bg-transparent' },
-    SENT: { label: 'Enviada', color: 'border-blue-500 text-blue-600 bg-transparent' },
-    VIEWED: { label: 'Visualizada', color: 'border-amber-500 text-amber-600 bg-transparent' },
-    ACCEPTED: { label: 'Aceita', color: 'border-emerald-500 text-emerald-600 bg-transparent' },
-    REJECTED: { label: 'Rejeitada', color: 'border-red-500 text-red-600 bg-transparent' },
-    EXPIRED: { label: 'Expirada', color: 'border-slate-300 text-slate-400 bg-transparent' }
+    DRAFT: { label: 'Rascunho', class: 'border-slate-200 text-slate-500' },
+    SENT: { label: 'Enviada', class: 'border-amber-200 text-amber-700' },
+    VIEWED: { label: 'Visualizada', class: 'border-amber-200 text-amber-600' },
+    ACCEPTED: { label: 'Aceita', class: 'border-emerald-200 text-emerald-700' },
+    REJECTED: { label: 'Rejeitada', class: 'border-red-200 text-red-700' },
+    EXPIRED: { label: 'Expirada', class: 'border-slate-200 text-slate-400' }
 };
 
 export default function ProposalsListPage() {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
-    // ... (omitting lines for brevity in search context if needed, but here replacing the top block mainly)
-
     const leadIdFromUrl = searchParams.get('leadId') || '';
+
     const [proposals, setProposals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('');
@@ -52,15 +54,11 @@ export default function ProposalsListPage() {
             setLeadName('');
             return;
         }
-        let cancelled = false;
         api.get(`/leads/${leadIdFromUrl}`)
             .then((res) => {
-                if (!cancelled && res.data?.name) setLeadName(res.data.name);
+                if (res.data?.name) setLeadName(res.data.name);
             })
-            .catch(() => {
-                if (!cancelled) setLeadName('');
-            });
-        return () => { cancelled = true; };
+            .catch(() => setLeadName(''));
     }, [leadIdFromUrl]);
 
     const clearLeadFilter = () => {
@@ -69,114 +67,201 @@ export default function ProposalsListPage() {
         setSearchParams(next, { replace: true });
     };
 
+    const stats = useMemo(() => ({
+        total: proposals.length,
+        value: proposals.reduce((acc, p) => acc + (p.totalPrice || 0), 0),
+        accepted: proposals.filter(p => p.status === 'ACCEPTED').length,
+        pending: proposals.filter(p => p.status === 'SENT' || p.status === 'VIEWED').length
+    }), [proposals]);
+
     const filteredProposals = useMemo(() => {
+        const searchLower = searchTerm.toLowerCase();
         return proposals.filter(p => {
-            const searchLower = searchTerm.toLowerCase();
             const titleMatch = (p.title || '').toLowerCase().includes(searchLower);
             const leadMatch = (p.lead?.name || '').toLowerCase().includes(searchLower);
             return titleMatch || leadMatch;
         });
     }, [proposals, searchTerm]);
 
+    const formatCurrency = (val) =>
+        new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(val);
+
+    const formatCurrencyFull = (val) =>
+        new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+
     const moduleActions = (
         <div className="flex items-center gap-3">
-            <div className="relative group">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
-                <input
-                    type="text"
-                    placeholder="Search proposals..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-petroleum/60 w-64 transition-all"
-                />
-            </div>
             <Link
                 to="/proposals/new"
-                className="bg-solar hover:bg-yellow-500 text-slate-900 rounded-lg px-4 py-2 flex items-center gap-2 font-bold text-sm transition-all shadow-sm hover:shadow active:scale-95"
+                className="h-8 rounded-full bg-solar hover:bg-amber-600 text-white px-4 flex items-center gap-2 font-bold text-[11px] transition-colors duration-200 active:scale-95 uppercase tracking-wider focus:outline-none focus:border-petroleum"
             >
-                <span className="material-symbols-outlined text-lg">add</span>
-                New Proposal
+                <span className="material-symbols-outlined text-[18px] ds-icon-w300" aria-hidden>add</span>
+                Nova Proposta
             </Link>
         </div>
     );
 
     return (
         <DashboardShell
-            title="Proposals"
-            subtitle="Manage your quotes and contracts"
+            title="Propostas Comercial"
+            subtitle="Central de Orçamentos e Contratos"
             headerIcon="description"
             loading={loading}
             headerRight={moduleActions}
-            breadcrumbs={[{ label: 'Sales', path: '/proposals' }, { label: 'Proposals' }]}
+            breadcrumbs={[{ label: 'Vendas', path: '/proposals' }, { label: 'Visão Geral', active: true }]}
         >
-            <div className="flex flex-col h-full bg-white">
+            <div className="flex-1 overflow-hidden p-4 md:p-6 lg:p-8 flex flex-col h-full bg-canvas">
+                <div className="max-w-[1600px] mx-auto w-full h-full flex flex-col gap-6">
 
-                <main className="flex-1 overflow-y-auto p-10">
+                    {/* Tabs (DS: 1 CTA = Nova Proposta; abas secundárias) */}
+                    <div className="flex items-center gap-6 border-b border-slate-100">
+                        <button
+                            type="button"
+                            className="pb-3 text-[11px] font-bold uppercase tracking-wider text-slate-800 border-b-2 border-[#F59E0B] -mb-px"
+                        >
+                            Vendas
+                        </button>
+                        <button
+                            type="button"
+                            className="pb-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-700 transition-colors -mb-px"
+                        >
+                            Gestão
+                        </button>
+                        <button
+                            type="button"
+                            className="pb-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-700 transition-colors -mb-px"
+                        >
+                            Projetos
+                        </button>
+                    </div>
+
+                    {/* KPI Grid — DS: rounded-lg, border-slate-200, shadow apenas hover:shadow-sm */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <KPICard
+                            label="Total de Propostas"
+                            value={stats.total}
+                            sublabel="Volume global"
+                            icon="description"
+                        />
+                        <KPICard
+                            label="Valor em Aberto"
+                            value={formatCurrency(stats.value)}
+                            sublabel="Potencial de fechamento"
+                            icon="payments"
+                            valueClass="text-slate-800"
+                        />
+                        <KPICard
+                            label="Aguardando Aceite"
+                            value={stats.pending}
+                            sublabel="Follow-up necessário"
+                            icon="visibility"
+                            valueClass="text-slate-800"
+                        />
+                        <KPICard
+                            label="Contratos Aceitos"
+                            value={stats.accepted}
+                            sublabel="Conversão efetivada"
+                            icon="check_circle"
+                            valueClass="text-emerald-600"
+                        />
+                    </div>
+
                     {leadIdFromUrl && (
-                        <div className="max-w-[1280px] mx-auto mb-4 flex items-center gap-2 flex-wrap">
-                            <span className="text-sm text-slate-600">
-                                Filtrando por lead: <strong>{leadName || `ID ${leadIdFromUrl}`}</strong>
+                        <div className="flex items-center gap-2">
+                            <span className="ds-meta text-slate-500">
+                                Filtrando por lead: <strong className="text-petroleum">{leadName || leadIdFromUrl}</strong>
                             </span>
                             <button
                                 type="button"
                                 onClick={clearLeadFilter}
-                                className="inline-flex items-center gap-1 text-sm font-medium text-petroleum-600 hover:text-petroleum-700"
+                                className="bg-transparent hover:bg-slate-50 text-slate-500 hover:text-slate-800 rounded-lg px-3 py-2 text-[11px] font-medium transition-colors duration-200 focus:outline-none focus:border-petroleum flex items-center gap-1"
                             >
-                                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>filter_alt_off</span>
-                                Ver todas as propostas
+                                <span className="material-symbols-outlined text-[14px]" aria-hidden>close</span>
+                                Remover filtro
                             </button>
                         </div>
                     )}
-                    <div className="max-w-[1280px] mx-auto border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                        <div className="overflow-x-auto">
+
+                    {/* Barra de pesquisa — DS: border-slate-200 rounded-lg h-9 */}
+                    <div className="flex items-center gap-4">
+                        <input
+                            type="search"
+                            placeholder="Pesquisar..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="border border-slate-200 rounded-lg bg-white h-9 px-3 text-[13px] w-full max-w-xs focus:border-petroleum/60 focus:outline-none placeholder:text-slate-400"
+                            aria-label="Pesquisar propostas"
+                        />
+                    </div>
+
+                    {/* Tabela — DS: header bg-slate-50 text-slate-500 uppercase text-[10px], linhas border-b border-slate-100 hover:bg-slate-50/50 */}
+                    <div className="bg-white border border-slate-200 rounded-lg flex-1 overflow-hidden flex flex-col transition-shadow duration-200 hover:shadow-sm">
+                        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="border-b border-slate-200 bg-white">
-                                        <th className="py-4 px-6 text-xs font-bold uppercase tracking-widest text-slate-500">Proposal Name</th>
-                                        <th className="py-4 px-6 text-xs font-bold uppercase tracking-widest text-slate-500">Lead</th>
-                                        <th className="py-4 px-6 text-xs font-bold uppercase tracking-widest text-slate-500">Value (R$)</th>
-                                        <th className="py-4 px-6 text-xs font-bold uppercase tracking-widest text-slate-500">Status</th>
-                                        <th className="py-4 px-6 text-xs font-bold uppercase tracking-widest text-slate-500">Date</th>
-                                        <th className="py-4 px-6 text-end text-xs font-bold uppercase tracking-widest text-slate-500">Actions</th>
+                                    <tr className="bg-slate-50 border-b border-slate-100">
+                                        <th className="py-3 px-6 text-[10px] font-bold uppercase tracking-wider text-slate-500">Proposta</th>
+                                        <th className="py-3 px-6 text-[10px] font-bold uppercase tracking-wider text-slate-500">Lead / Cliente</th>
+                                        <th className="py-3 px-6 text-[10px] font-bold uppercase tracking-wider text-slate-500 text-right">Valor Total</th>
+                                        <th className="py-3 px-6 text-[10px] font-bold uppercase tracking-wider text-slate-500 text-center">Status</th>
+                                        <th className="py-3 px-6 text-[10px] font-bold uppercase tracking-wider text-slate-500">Data</th>
+                                        <th className="py-3 px-6 text-end text-[10px] font-bold uppercase tracking-wider text-slate-500">Ações</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100">
+                                <tbody>
                                     {filteredProposals.map((p) => {
                                         const status = STATUS_CONFIG[p.status] || STATUS_CONFIG.DRAFT;
                                         return (
-                                            <tr key={p.id} className="group hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => navigate(`/proposals/${p.id}`)}>
-                                                <td className="py-4 px-6">
-                                                    <div className="font-bold text-slate-900">{p.title || 'Untitled Proposal'}</div>
-                                                    <div className="text-xs text-slate-400 mt-0.5 font-medium">{p.kit?.name || 'Custom System'}</div>
+                                            <tr
+                                                key={p.id}
+                                                className="group border-b border-slate-100 hover:bg-slate-50/50 transition-colors duration-200 cursor-pointer"
+                                                onClick={() => navigate(`/proposals/${p.id}`)}
+                                            >
+                                                <td className="py-3 px-6">
+                                                    <div className="font-semibold text-slate-800 text-[13px]">{p.title || 'Proposta sem título'}</div>
+                                                    <div className="ds-label mt-0.5">{p.kit?.name || 'Sistema personalizado'}</div>
                                                 </td>
-                                                <td className="py-4 px-6">
+                                                <td className="py-3 px-6">
                                                     <div className="flex items-center gap-3">
                                                         <StandardAvatar
                                                             name={p.lead?.name}
                                                             src={p.lead?.avatar_url || p.lead?.avatarUrl}
                                                             size="sm"
-                                                            className="!w-8 !h-8 !text-[10px]"
+                                                            className="!w-8 !h-8"
                                                         />
-                                                        <span className="text-sm font-medium text-slate-700">{p.lead?.name || 'Unknown Lead'}</span>
+                                                        <span className="text-[13px] font-medium text-slate-700">{p.lead?.name || 'Lead s/ nome'}</span>
                                                     </div>
                                                 </td>
-                                                <td className="py-4 px-6">
-                                                    <div className="font-bold text-slate-900 tracking-tight">
-                                                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.totalPrice || 0)}
-                                                    </div>
+                                                <td className="py-3 px-6 text-right">
+                                                    <span className="font-semibold text-slate-800 text-[13px] tabular-nums">
+                                                        {formatCurrencyFull(p.totalPrice || 0)}
+                                                    </span>
                                                 </td>
-                                                <td className="py-4 px-6">
-                                                    <span className={`inline-flex px-3 py-1 rounded-lg text-[11px] font-bold border ${status.color}`}>
+                                                <td className="py-3 px-6 text-center">
+                                                    <span className={`badge-kanban ${status.class}`}>
                                                         {status.label}
                                                     </span>
                                                 </td>
-                                                <td className="py-4 px-6 text-sm text-slate-500 font-medium">
+                                                <td className="py-3 px-6 text-[13px] text-slate-500">
                                                     {new Date(p.createdAt).toLocaleDateString('pt-BR')}
                                                 </td>
-                                                <td className="py-4 px-6 text-end">
-                                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex justify-end">
-                                                        <button className="flex items-center justify-center p-2 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors">
-                                                            <span className="material-symbols-outlined text-lg">more_vert</span>
+                                                <td className="py-3 px-6 text-end">
+                                                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                        <button
+                                                            type="button"
+                                                            className="size-8 rounded-full flex items-center justify-center hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition-colors duration-200 focus:outline-none focus:border-petroleum"
+                                                            aria-label="Ver proposta"
+                                                            onClick={(e) => { e.stopPropagation(); navigate(`/proposals/${p.id}`); }}
+                                                        >
+                                                            <span className="material-symbols-outlined text-[18px] ds-icon-w300">visibility</span>
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="size-8 rounded-full flex items-center justify-center hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition-colors duration-200 focus:outline-none focus:border-petroleum"
+                                                            aria-label="Mais ações"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <span className="material-symbols-outlined text-[18px] ds-icon-w300">more_vert</span>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -185,28 +270,47 @@ export default function ProposalsListPage() {
                                     })}
                                     {filteredProposals.length === 0 && (
                                         <tr>
-                                            <td colSpan="6" className="py-12 text-center text-slate-400 font-medium">
-                                                No proposals found.
+                                            <td colSpan={6} className="py-16 text-center">
+                                                <div className="flex flex-col items-center gap-3">
+                                                    <span className="material-symbols-outlined text-4xl text-slate-300 ds-icon-w300" aria-hidden>description</span>
+                                                    <p className="text-[13px] text-slate-500">Nenhuma proposta encontrada</p>
+                                                    <Link
+                                                        to="/proposals/new"
+                                                        className="text-[11px] font-bold text-[#F59E0B] hover:text-amber-600 transition-colors"
+                                                    >
+                                                        Criar primeira proposta
+                                                    </Link>
+                                                </div>
                                             </td>
                                         </tr>
                                     )}
                                 </tbody>
                             </table>
                         </div>
-                        {/* Footer / Pagination Placeholder matching Stitch design */}
-                        {filteredProposals.length > 0 && (
-                            <div className="flex items-center justify-between p-4 border-t border-slate-100">
-                                <p className="text-xs text-slate-500 font-medium pl-2">Showing {filteredProposals.length} results</p>
-                                <div className="flex items-center gap-1">
-                                    <button className="p-1 rounded-lg hover:bg-slate-100 disabled:opacity-50" disabled><span className="material-symbols-outlined text-lg text-slate-600">chevron_left</span></button>
-                                    <button className="px-3 py-1 text-xs font-bold rounded-lg bg-solar text-slate-900">1</button>
-                                    <button className="p-1 rounded-lg hover:bg-slate-100"><span className="material-symbols-outlined text-lg text-slate-600">chevron_right</span></button>
-                                </div>
-                            </div>
-                        )}
                     </div>
-                </main>
+                </div>
             </div>
         </DashboardShell>
+    );
+}
+
+/**
+ * KPI Card — DS: bg-white border border-slate-200 rounded-lg, shadow apenas hover:shadow-sm.
+ * Valor: .ds-display-xl ou .ds-display-l, font-semibold (KPI Weight).
+ */
+function KPICard({ label, value, sublabel, icon, valueClass = 'text-slate-800' }) {
+    return (
+        <div className="bg-white border border-slate-200 rounded-lg p-5 flex items-start justify-between transition-shadow duration-200 hover:shadow-sm">
+            <div className="min-w-0">
+                <p className="ds-meta text-slate-500 mb-2">{label}</p>
+                <div className={`ds-display-l ${valueClass} truncate`}>{value}</div>
+                {sublabel && (
+                    <p className="ds-label mt-2 text-slate-400">{sublabel}</p>
+                )}
+            </div>
+            <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 ml-3">
+                <span className="material-symbols-outlined text-slate-600 text-[20px] ds-icon-w300" aria-hidden>{icon}</span>
+            </div>
+        </div>
     );
 }

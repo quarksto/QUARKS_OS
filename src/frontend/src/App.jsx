@@ -13,9 +13,10 @@ import ProposalDetailPage from './pages/ProposalDetailPage';
 import ProposalViewPublicPage from './pages/ProposalViewPublicPage';
 import ChatPage from './pages/ChatPage';
 import LeadsPage from './pages/LeadsPage';
-import LeadsListPage from './pages/LeadsListPage';
+
 import LeadDetailPage from './pages/LeadDetailPage';
 import ClientsPage from './pages/ClientsPage';
+import ClientDetailPage from './pages/ClientDetailPage';
 import ProjetosPage from './pages/ProjetosPage';
 import DimensionamentoPage from './pages/DimensionamentoPage';
 import CronogramaPage from './pages/CronogramaPage';
@@ -99,13 +100,7 @@ function App() {
                   </ProtectedRoute>
                 } />
 
-                <Route path="/funnel" element={
-                  <ProtectedRoute>
-                    <ProtectedLayout>
-                      <LeadsPage />
-                    </ProtectedLayout>
-                  </ProtectedRoute>
-                } />
+                <Route path="/funnel" element={<Navigate to="/leads" replace />} />
 
                 <Route path="/leads/:id" element={
                   <ProtectedRoute>
@@ -118,7 +113,7 @@ function App() {
                 <Route path="/leads" element={
                   <ProtectedRoute>
                     <ProtectedLayout>
-                      <LeadsListPage />
+                      <LeadsPage />
                     </ProtectedLayout>
                   </ProtectedRoute>
                 } />
@@ -146,6 +141,7 @@ function App() {
                     </ProtectedLayout>
                   </ProtectedRoute>
                 } />
+
                 <Route path="/proposals/new" element={
                   <ProtectedRoute>
                     <ProtectedLayout>

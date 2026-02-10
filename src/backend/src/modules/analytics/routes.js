@@ -58,4 +58,21 @@ router.get('/energy-balance', async (req, res) => {
     }
 });
 
+// GET /api/analytics/insight - Mensagem contextual para InsightBar (LLM quando disponível, regras como fallback)
+router.get('/insight', async (req, res) => {
+    try {
+        const agent = maestro.agents['analytics'];
+        if (!agent) throw new Error('Analytics Agent not initialized');
+
+        const useLLM = req.query.llm !== 'false'; // ?llm=false para forçar regras
+        const insight = useLLM
+            ? await agent.execute('GET_INSIGHT_LLM', {})
+            : await agent.execute('GET_INSIGHT', {});
+        res.json({ insight });
+    } catch (error) {
+        console.error('Insight Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;

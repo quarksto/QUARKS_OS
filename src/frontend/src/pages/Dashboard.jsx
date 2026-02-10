@@ -33,7 +33,7 @@ function Dashboard() {
                 <div className="h-16 flex items-center justify-between px-6 border-b border-white/5 shrink-0">
                     <Link to="/" className={`flex items-center gap-3 ${sidebarCollapsed ? 'hidden' : ''}`} aria-label="Ir para início">
                         <div className="w-8 h-8 bg-white/10 rounded-md flex items-center justify-center">
-                            <span className="material-symbols-outlined text-solar-500" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
+                            <span className="material-symbols-outlined text-solar" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
                         </div>
                         <span className="text-white font-bold tracking-tight text-sm">SOLAR OS</span>
                     </Link>
@@ -149,7 +149,7 @@ function Dashboard() {
                         {/* New Business Button (Rounded Full, No Shadow) */}
                         <button
                             type="button"
-                            className="rounded-lg bg-solar-500 hover:bg-solar-600 text-[#FFFFFF] px-6 py-2.5 flex items-center gap-2 font-bold text-[11px] transition-colors"
+                            className="rounded-lg bg-solar hover:bg-amber-600 text-[#FFFFFF] px-6 py-2.5 flex items-center gap-2 font-bold text-[11px] transition-colors"
                             onClick={() => navigate('/chat')}
                             aria-label="Abrir Chat IA para novo negócio"
                         >
@@ -178,10 +178,10 @@ function Dashboard() {
                     </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-10 scroll-smooth">
-                    <div className="max-w-[1800px] mx-auto space-y-10">
+                <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
+                    <div className="max-w-[1600px] mx-auto space-y-6">
                         {/* KPI Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {/* Card 1 */}
                             <div className="technical-card h-[200px] hover:border-petroleum/30 p-6">
                                 <div className="flex justify-between items-start mb-4">
@@ -191,7 +191,7 @@ function Dashboard() {
                                 <div className="flex-1 flex flex-col justify-center">
                                     <h3 className="ds-display-l tabular-nums">{metrics.activeLeads}</h3>
                                     <div className="mt-4 h-1.5 w-full bg-slate-100 rounded-lg overflow-hidden">
-                                        <div className="h-full bg-solar-500" style={{ width: '83.2%' }}></div>
+                                        <div className="h-full bg-solar" style={{ width: '83.2%' }}></div>
                                     </div>
                                 </div>
                                 <div className="mt-auto pt-4 border-t border-slate-200/20 flex justify-between">
@@ -216,10 +216,10 @@ function Dashboard() {
                                     <div className="relative w-16 h-16 shrink-0">
                                         <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
                                             <circle className="stroke-slate-100" cx="18" cy="18" fill="none" r="16" strokeWidth="3"></circle>
-                                            <circle className="stroke-solar-500" cx="18" cy="18" fill="none" r="16" strokeDasharray="38.2, 100" strokeLinecap="round" strokeWidth="3"></circle>
+                                            <circle className="stroke-solar" cx="18" cy="18" fill="none" r="16" strokeDasharray="38.2, 100" strokeLinecap="round" strokeWidth="3"></circle>
                                         </svg>
                                         <div className="absolute inset-0 flex items-center justify-center">
-                                            <span className="text-[10px] font-sans font-medium text-solar-600">{metrics.conversionRate}</span>
+                                            <span className="text-[10px] font-sans font-medium text-solar">{metrics.conversionRate}</span>
                                         </div>
                                     </div>
                                     <div className="flex flex-col">
@@ -278,13 +278,13 @@ function Dashboard() {
                                         <span className="ds-label-subtle">ops</span>
                                     </div>
                                     <div className="mt-4 flex items-end gap-1 h-8">
-                                        <div className="w-full bg-solar-500/20 h-[30%] rounded-t-sm"></div>
-                                        <div className="w-full bg-solar-500/20 h-[45%] rounded-t-sm"></div>
-                                        <div className="w-full bg-solar-500/20 h-[65%] rounded-t-sm"></div>
-                                        <div className="w-full bg-solar-500 h-[85%] rounded-t-sm"></div>
-                                        <div className="w-full bg-solar-500/20 h-[50%] rounded-t-sm"></div>
-                                        <div className="w-full bg-solar-500/20 h-[40%] rounded-t-sm"></div>
-                                        <div className="w-full bg-solar-500/20 h-[75%] rounded-t-sm"></div>
+                                        <div className="w-full bg-solar/20 h-[30%] rounded-t-sm"></div>
+                                        <div className="w-full bg-solar/20 h-[45%] rounded-t-sm"></div>
+                                        <div className="w-full bg-solar/20 h-[65%] rounded-t-sm"></div>
+                                        <div className="w-full bg-solar h-[85%] rounded-t-sm"></div>
+                                        <div className="w-full bg-solar/20 h-[50%] rounded-t-sm"></div>
+                                        <div className="w-full bg-solar/20 h-[40%] rounded-t-sm"></div>
+                                        <div className="w-full bg-solar/20 h-[75%] rounded-t-sm"></div>
                                     </div>
                                 </div>
                                 <div className="mt-auto pt-4 border-t border-slate-200/20 flex justify-between">
@@ -300,7 +300,7 @@ function Dashboard() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-12 gap-10 items-start">
+                        <div className="grid grid-cols-12 gap-6 items-start">
                             <div className="col-span-12 xl:col-span-9 space-y-6">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
@@ -314,7 +314,7 @@ function Dashboard() {
                                     </button>
                                 </div>
 
-                                <div className="flex gap-8 overflow-x-auto pb-6 -mx-2 px-2">
+                                <div className="flex gap-6 overflow-x-auto pb-6 -mx-2 px-2">
                                     {/* Kanban Columns Dynamic */}
                                     {Object.entries(COLUMN_TITLES).map(([statusKey, config]) => (
                                         <div key={statusKey} className="kanban-column flex flex-col gap-5 min-w-[300px] max-w-[300px]">
@@ -343,7 +343,7 @@ function Dashboard() {
                                                                 {lead.consumption} kWh
                                                             </span>
                                                         )}
-                                                        <span className="badge-ultra-compact border-solar-500/20 text-solar-600 bg-solar-50/50 tabular-nums rounded-lg">92% Match</span>
+                                                        <span className="badge-ultra-compact border-solar/20 text-solar bg-solar-50/50 tabular-nums rounded-lg">92% Match</span>
                                                     </div>
                                                     <div className="flex items-center justify-between pt-4 border-t border-slate-100">
                                                         <span className="kpi-value text-[14px] tabular-nums text-slate-700">R$ --</span>

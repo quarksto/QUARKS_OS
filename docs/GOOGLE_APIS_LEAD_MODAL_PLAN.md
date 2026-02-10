@@ -1,7 +1,7 @@
 # Planejamento: Google Maps + Solar API no Modal Ficha do Lead
 
 **Data:** 2026-02-03  
-**Referência:** MCP Stitch (Ficha do Lead), DS v1, Dashboard de referência.
+**Referência:** MCP Stitch (Ficha do Lead), DS v1.4, Dashboard de referência.
 
 ---
 
@@ -107,4 +107,4 @@ GET /api/leads/:id/solar
 - [Maps Embed API](https://developers.google.com/maps/documentation/embed/get-started)
 - [Solar API Overview](https://developers.google.com/maps/documentation/solar/overview)
 - MCP Stitch: Ficha do Lead (screenId: 4ceea72db8e2497db3f7933d49575c14)
-- DS v1: `technical-card`, `ds-title`, `ds-meta`, `badge-kanban-*`
+- DS v1.4: `technical-card`, `ds-title`, `ds-meta`, `badge-kanban-*`

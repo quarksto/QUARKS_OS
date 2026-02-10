@@ -1,19 +1,24 @@
 import React from 'react';
-import { getStageLabel, stageLabels } from '../utils/pipeline';
+import { stageLabels } from '../utils/pipeline';
 
 const FILTER_PRIORITY = '__PRIORITY__';
 const FILTER_UNREAD = '__UNREAD__';
-
-const QUICK_FILTERS = [
-  { value: '', label: 'Todos' },
-  { value: FILTER_PRIORITY, label: 'Prioritários' },
-  { value: FILTER_UNREAD, label: 'Não Lidos' },
-];
+const FILTER_NEW = '__NEW__';
 
 const SORT_RECENT = 'recent';
 const SORT_NAME = 'name';
 
 const HOURS_NEW = 48;
+
+// Omnichannel Icons mapping
+// Omnichannel Icons mapping - Standardizing to Petroleum/Slate for Super Flat look
+const ORIGIN_ICONS = {
+  'WHATSAPP': { icon: 'chat', color: 'text-slate-600', bg: 'bg-white border border-slate-100' },
+  'INSTAGRAM': { icon: 'camera_alt', color: 'text-slate-600', bg: 'bg-white border border-slate-100' },
+  'FACEBOOK': { icon: 'public', color: 'text-slate-600', bg: 'bg-white border border-slate-100' },
+  'WEB': { icon: 'language', color: 'text-slate-600', bg: 'bg-white border border-slate-100' },
+  'MANUAL': { icon: 'edit', color: 'text-slate-600', bg: 'bg-white border border-slate-100' }
+};
 
 function matchLead(query, lead) {
   if (!query || !query.trim()) return true;
@@ -25,19 +30,26 @@ function matchLead(query, lead) {
   return name.includes(q) || email.includes(q) || (qNorm && phone.includes(qNorm));
 }
 
-function isNewLead(lead) {
-  const created = lead?.createdAt;
-  if (!created) return false;
-  const ageMs = Date.now() - new Date(created).getTime();
-  return ageMs < HOURS_NEW * 60 * 60 * 1000;
-}
-
-export function ConversationList({ leads, selectedId, onSelectLead, loading, searchQuery = '', onSearchChange, statusFilter = '', onStatusFilterChange, onRequestCreateLead, error = null, onRetry }) {
+export function ConversationList({
+  leads,
+  selectedId,
+  onSelectLead,
+  loading,
+  searchQuery = '',
+  onSearchChange,
+  statusFilter = '',
+  onStatusFilterChange,
+  onRequestCreateLead,
+  error = null,
+  onRetry
+}) {
   const [sortBy, setSortBy] = React.useState(SORT_RECENT);
 
   const filteredLeads = React.useMemo(() => {
     if (!leads) return [];
     let list = leads;
+
+    // 1. Filtering
     if (statusFilter === FILTER_PRIORITY) {
       list = list.filter((l) => (l.score || 0) > 80);
     } else if (statusFilter === FILTER_UNREAD) {
@@ -46,15 +58,20 @@ export function ConversationList({ leads, selectedId, onSelectLead, loading, sea
       list = list.filter((l) => l.status === statusFilter);
     }
     if (searchQuery?.trim()) list = list.filter((lead) => matchLead(searchQuery, lead));
+
+    // 2. Sorting (Smart Sort)
     if (sortBy === SORT_NAME) {
-      list = [...list].sort((a, b) =>
-        (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase())
-      );
+      list = [...list].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     } else {
+      // Smart Sort: Unread > New > Recent
       list = [...list].sort((a, b) => {
-        const ta = new Date(a.createdAt || 0).getTime();
-        const tb = new Date(b.createdAt || 0).getTime();
-        return tb - ta;
+        // Priority 1: Unread
+        const unreadA = (a.unreadCount || 0) > 0 ? 1 : 0;
+        const unreadB = (b.unreadCount || 0) > 0 ? 1 : 0;
+        if (unreadA !== unreadB) return unreadB - unreadA;
+
+        // Priority 2: Recency
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
       });
     }
     return list;
@@ -63,69 +80,59 @@ export function ConversationList({ leads, selectedId, onSelectLead, loading, sea
   return (
     <>
       {/* 1. List Header & Search */}
-      <div className="p-6 border-b border-slate-100 shrink-0 space-y-5 bg-white">
+      <div className="p-4 border-b border-slate-100 flex flex-col gap-3 sticky top-0 bg-white z-10 shrink-0">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-petroleum-900 tracking-tight">Leads</h2>
-          <div className="flex gap-1.5">
+          <h3 className="ds-label text-slate-400 uppercase tracking-widest flex items-center gap-2">
+            <span className="material-symbols-outlined ds-icon-w300 text-[16px]">inbox</span>
+            Caixa de Entrada
+          </h3>
+          <div className="flex gap-1">
             <button
-              type="button"
               onClick={onRequestCreateLead}
-              className="size-8 rounded-full bg-slate-50 text-slate-500 hover:bg-petroleum-900 hover:text-white transition-all flex items-center justify-center border border-slate-100"
+              className="size-8 flex items-center justify-center rounded-full bg-solar hover:bg-amber-600 text-white transition-all shadow-none active:scale-95"
               title="Novo Lead"
             >
-              <span className="material-symbols-outlined text-[18px]">add</span>
+              <span className="material-symbols-outlined ds-icon-w300 text-[18px]">add</span>
+            </button>
+            <div className="h-8 w-px bg-slate-100 mx-1"></div>
+            <button
+              className={`size-8 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-400 hover:text-slate-800 transition-all shadow-none active:scale-95 ${statusFilter === FILTER_UNREAD ? 'text-solar border border-solar-100 bg-white' : ''}`}
+              onClick={() => onStatusFilterChange(statusFilter === FILTER_UNREAD ? '' : FILTER_UNREAD)}
+              title="Filtrar Não Lidos"
+            >
+              <span className="material-symbols-outlined ds-icon-w300 text-[18px]">mark_chat_unread</span>
             </button>
           </div>
         </div>
 
         <div className="relative group">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-petroleum-600 transition-colors" style={{ fontSize: '18px' }}>search</span>
+          <span className="material-symbols-outlined ds-icon-w300 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[18px]">search</span>
           <input
             id="workspace-search"
             type="search"
-            placeholder="Buscar por nome ou contato..."
+            placeholder="Buscar por nome, email ou telefone..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 text-xs font-semibold border border-slate-100 rounded-full focus:outline-none focus:ring-2 focus:ring-petroleum/10 focus:border-petroleum/40 bg-slate-50/50 transition-all placeholder:text-slate-400"
+            className="w-full pl-10 pr-4 h-10 bg-slate-50 border-none rounded-full text-sm focus:ring-0 focus:outline-none transition-all placeholder:text-slate-400 text-slate-700 font-medium"
           />
         </div>
-
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pt-1">
-          {QUICK_FILTERS.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => onStatusFilterChange(f.value)}
-              className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${statusFilter === f.value
-                ? 'bg-petroleum-900 text-white border-petroleum-900 shadow-md transform scale-105'
-                : 'bg-white text-slate-500 border-slate-100 hover:border-slate-300'
-                }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between px-6 py-2.5 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 bg-slate-50/30">
-        <span>Lead</span>
-        <span>Status</span>
       </div>
 
       {/* 2. List Body */}
       {error ? (
         <div className="flex flex-col items-center justify-center flex-1 text-slate-400 p-8 text-center bg-white">
-          <span className="material-symbols-outlined text-4xl mb-3 text-red-400">cloud_off</span>
-          <p className="text-xs font-bold text-petroleum-900 uppercase">Falha na Sincronização</p>
-          <button onClick={onRetry} className="mt-4 text-petroleum-600 text-xs font-bold hover:underline">Tentar Novamente</button>
+          <span className="material-symbols-outlined ds-icon-w300 text-4xl mb-3 text-red-300">cloud_off</span>
+          <p className="text-xs font-semibold text-slate-700 uppercase">Falha na Sincronização</p>
+          <button onClick={onRetry} className="mt-4 text-petroleum text-xs font-semibold hover:underline">Tentar Novamente</button>
         </div>
       ) : loading ? (
-        <div className="divide-y divide-slate-50 overflow-y-auto flex-1 bg-white">
+        <div className="overflow-y-auto flex-1 bg-white custom-scrollbar p-2 space-y-2">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="p-6 flex gap-3 animate-pulse">
-              <div className="size-10 bg-slate-100 rounded-full" />
-              <div className="flex-1 space-y-2">
-                <div className="h-3 bg-slate-100 rounded w-1/2" />
-                <div className="h-2 bg-slate-50 rounded w-1/3" />
+            <div key={i} className="p-3 flex gap-3 animate-pulse border border-transparent">
+              <div className="size-10 bg-slate-50 rounded-full" />
+              <div className="flex-1 space-y-2 py-1">
+                <div className="h-3 bg-slate-50 rounded w-1/2" />
+                <div className="h-2 bg-slate-50/50 rounded w-1/3" />
               </div>
             </div>
           ))}
@@ -133,67 +140,67 @@ export function ConversationList({ leads, selectedId, onSelectLead, loading, sea
       ) : filteredLeads?.length === 0 ? (
         <div className="flex flex-col items-center justify-center flex-1 text-slate-400 p-8 text-center bg-white">
           <div className="size-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 text-slate-200">
-            <span className="material-symbols-outlined text-4xl">inbox_customize</span>
+            <span className="material-symbols-outlined ds-icon-w300 text-4xl">inbox_customize</span>
           </div>
-          <p className="text-xs font-bold text-petroleum-900 uppercase tracking-widest">Lista Vazia</p>
-          <p className="text-[10px] mt-1 text-slate-400">Nenhum lead encontrado com estes filtros.</p>
+          <p className="text-xs font-semibold text-slate-700 uppercase tracking-widest">Nenhum lead encontrado</p>
         </div>
       ) : (
-        <ul className="divide-y divide-slate-50 overflow-y-auto flex-1 bg-white custom-scrollbar">
+        <ul className="overflow-y-auto flex-1 bg-white custom-scrollbar p-2 space-y-2">
           {filteredLeads.map((lead) => {
             const isSelected = selectedId === lead.id;
-
-            // Priority logic matching Stitch style
-            const score = lead.score || 0;
-            const isHighPriority = score > 80;
+            const hasUnread = (lead.unreadCount || 0) > 0;
+            const originConfig = ORIGIN_ICONS[lead.origin] || ORIGIN_ICONS['MANUAL'];
 
             return (
-              <li key={lead.id} className="relative group/item">
+              <li key={lead.id}>
                 <button
                   type="button"
                   onClick={() => onSelectLead(lead)}
-                  className={`w-full flex items-start gap-4 p-5 text-left transition-all border-l-4 ${isSelected
-                    ? 'bg-petroleum/10 border-petroleum-600'
-                    : 'bg-white border-transparent hover:bg-slate-50 hover:border-slate-200'
+                  className={`w-full group flex flex-col gap-2 p-4 rounded-lg cursor-pointer transition-all duration-200 ease-in-out relative border text-left shadow-none active:scale-[0.98] ${isSelected
+                    ? 'bg-slate-50 border-slate-100 z-10'
+                    : 'bg-white border-transparent hover:bg-slate-50/50 hover:border-slate-100'
                     }`}
                 >
-                  <div className="shrink-0 relative">
-                    <div className={`size-11 rounded-xl flex items-center justify-center text-sm font-bold transition-all shadow-sm ${isSelected ? 'bg-petroleum-900 text-white' : 'bg-slate-100 text-slate-400 group-hover/item:bg-slate-200'
-                      }`}>
-                      {(lead.name || 'S').charAt(0).toUpperCase()}
+                  {isSelected && <div className="absolute left-0 top-3 bottom-3 w-1 bg-solar rounded-r-full" />}
+
+                  <div className="flex items-start justify-between w-full">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {/* Avatar with Status Dot */}
+                      <div className="relative">
+                        <div className={`size-10 rounded-full flex items-center justify-center ds-label transition-all duration-300 ${isSelected ? 'text-slate-800 bg-slate-100 border border-slate-200 shadow-none' : 'bg-slate-50 text-slate-400 border border-transparent'}`}>
+                          {lead.name ? lead.name.substring(0, 2).toUpperCase() : 'L'}
+                        </div>
+                        {/* Origin Icon Badge */}
+                        <div className={`absolute -bottom-1 -right-1 size-4 rounded-full border border-white flex items-center justify-center shadow-none ${originConfig.bg}`}>
+                          <span className={`material-symbols-outlined ds-icon-w300 text-[10px] ${originConfig.color}`}>{originConfig.icon}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col items-start min-w-0">
+                        <div className="flex items-center gap-2 w-full">
+                          <span className={`text-sm font-semibold truncate max-w-[140px] ${isSelected ? 'text-slate-800' : 'text-slate-700'} ${hasUnread ? 'text-slate-800' : ''}`}>
+                            {lead.name || 'Sem Nome'}
+                          </span>
+                          {hasUnread && <span className="size-2 rounded-full bg-solar animate-pulse"></span>}
+                        </div>
+                        <span className="text-[11px] text-slate-400 font-medium truncate">
+                          {lead.city || 'Local desconhecido'}
+                        </span>
+                      </div>
                     </div>
-                    {lead.unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 size-3.5 bg-emerald-500 border-2 border-white rounded-full" />
-                    )}
+
+                    <span className="text-[10px] font-semibold text-slate-300 whitespace-nowrap">
+                      {new Date(lead.createdAt).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit' })}
+                    </span>
                   </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start mb-1">
-                      <h4 className={`text-[13px] font-bold truncate tracking-tight transition-colors ${isSelected ? 'text-petroleum-900' : 'text-slate-700'
-                        }`}>
-                        {lead.name || 'Sem nome'}
-                      </h4>
-                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${lead.status === 'CONVERTED' ? 'bg-emerald-100 text-emerald-700' :
-                          lead.status === 'NEW' ? 'bg-slate-100 text-slate-600' :
-                            'bg-solar-100 text-solar-700'
-                        }`}>
-                        {getStageLabel(lead.status)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-[11px] text-slate-400 font-medium truncate">
-                        {lead.email || 'No email'}
-                      </p>
-                      <span className="text-[10px] font-bold text-slate-300">
-                        {new Date(lead.createdAt).toLocaleDateString([], { month: '2-digit', day: '2-digit' })}
-                      </span>
-                    </div>
-
-                    {isHighPriority && (
-                      <div className="mt-2 flex items-center gap-1.5">
-                        <span className="size-1.5 bg-solar-500 rounded-full animate-pulse" />
-                        <span className="text-[9px] font-black text-solar-600 uppercase tracking-widest">Lead de Alta Performance</span>
+                  <div className="flex items-center justify-between w-full pl-[52px] mt-1">
+                    <span className={`badge-kanban ${stageLabels[lead.status] === 'Novo' ? 'border-amber-100 text-amber-700' : ''}`}>
+                      {stageLabels[lead.status] || lead.status}
+                    </span>
+                    {hasUnread && (
+                      <div className="flex items-center gap-1 text-[10px] font-semibold text-solar uppercase tracking-tighter">
+                        <span>{lead.unreadCount} nova(s)</span>
                       </div>
                     )}
                   </div>
@@ -201,7 +208,7 @@ export function ConversationList({ leads, selectedId, onSelectLead, loading, sea
               </li>
             );
           })}
-        </ul>
+        </ul >
       )}
     </>
   );

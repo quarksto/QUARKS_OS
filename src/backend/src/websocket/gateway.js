@@ -6,10 +6,12 @@ const { wsAuthenticate } = require('./auth');
 
 let io;
 
+const origins = process.env.WS_CORS_ORIGIN ? process.env.WS_CORS_ORIGIN.split(',') : '*';
+
 const initWebSocket = async (server) => {
     io = new Server(server, {
         cors: {
-            origin: process.env.WS_CORS_ORIGIN || '*',
+            origin: origins,
             methods: ['GET', 'POST'],
             credentials: true
         },
@@ -55,20 +57,27 @@ const initWebSocket = async (server) => {
             }
         });
 
-        socket.on('copilot:message', async ({ sessionId, message }) => {
+        socket.on('copilot:message', async ({ sessionId, message, context }) => {
             const { maestro } = require('../orchestrator/maestro');
             try {
-                // O middleware de auth já colocou o user no socket
-                const userId = socket.user?.userId || 'anonymous';
+                const userId = socket.user?.id || 'anonymous';
 
                 logger.info(`[WS] Copilot message from ${userId} (session: ${sessionId})`);
 
-                // Dispara o stream sem travar o event loop do socket
-                // O agente vai emitir os chunks via broadcaster.broadcastCopilotChunk
+                // Callback para garantir que o socket entre na sala antes de receber chunks
+                // (quando sessionId é null, o backend cria sessão e precisa juntar o socket à sala)
+                const onSessionReady = (newSessionId) => {
+                    socket.join(`copilot:${newSessionId}`);
+                    socket.emit('copilot:session', { sessionId: newSessionId });
+                    logger.debug(`[WS] Socket ${socket.id} joined copilot:${newSessionId}`);
+                };
+
                 maestro.agents['copilot'].execute('CHAT_STREAM', {
                     sessionId,
                     userId,
-                    message
+                    message,
+                    context,
+                    onSessionReady
                 }).catch(err => {
                     logger.error(`[WS] Copilot stream error: ${err.message}`);
                     socket.emit('copilot:error', { message: err.message });
@@ -87,7 +96,7 @@ const initWebSocket = async (server) => {
                 socket.to(`lead:${leadId}`).emit('chat:typing', {
                     leadId,
                     isTyping,
-                    userId: socket.user?.userId
+                    userId: socket.user?.id
                 });
             }
         });

@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, ScrollArea, TextInput, ActionIcon, Group, Text, Avatar, Paper, Transition, Stack } from '@mantine/core';
-import { IconSend, IconPlus, IconDotsVertical, IconCheck, IconChecks } from '@tabler/icons-react';
 import { useRealtime } from '../../providers/RealtimeProvider';
 import api from '../../services/api';
 
@@ -8,6 +6,8 @@ export function QuickChatPanel({ leadId }) {
     const [messages, setMessages] = useState([]);
     const [chatInput, setChatInput] = useState('');
     const [loading, setLoading] = useState(false);
+    const [sending, setSending] = useState(false);
+    const [sendError, setSendError] = useState(null);
     const [isOtherTyping, setIsOtherTyping] = useState(false);
     const scrollRef = useRef(null);
     const typingTimeoutRef = useRef(null);
@@ -16,25 +16,23 @@ export function QuickChatPanel({ leadId }) {
     useEffect(() => {
         if (!leadId) return;
 
-        // Carregar histórico
-        // setLoading(true);
+        setLoading(true);
         api.get(`/messages/lead/${leadId}`)
             .then(res => setMessages(res.data))
             .catch(err => console.error('Load messages error:', err))
             .finally(() => setLoading(false));
 
-        // Marcar como lidas
         api.patch(`/messages/read/${leadId}`).catch(() => { });
 
-        // Listen for events
         if (socket && connected) {
+            socket.emit('subscribe:lead', { leadId });
+
             const handleNewMessage = (msg) => {
                 if (msg.leadId === leadId) {
                     setMessages(prev => {
                         if (prev.find(m => m.id === msg.id)) return prev;
                         return [...prev, msg];
                     });
-                    // Se estamos com o chat aberto, marca como lida
                     api.patch(`/messages/read/${leadId}`).catch(() => { });
                 }
             };
@@ -49,6 +47,7 @@ export function QuickChatPanel({ leadId }) {
             socket.on('chat:typing', handleTyping);
 
             return () => {
+                socket.emit('unsubscribe:lead', { leadId });
                 socket.off('message:new', handleNewMessage);
                 socket.off('chat:typing', handleTyping);
             };
@@ -64,14 +63,9 @@ export function QuickChatPanel({ leadId }) {
     const handleInputChange = (val) => {
         setChatInput(val);
 
-        // Emitir typing start
         if (socket && connected && leadId) {
             socket.emit('chat:typing', { leadId, isTyping: true });
-
-            // Cleanup timeout anterior
             if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-
-            // Definir timeout para parar o typing
             typingTimeoutRef.current = setTimeout(() => {
                 socket.emit('chat:typing', { leadId, isTyping: false });
             }, 2000);
@@ -79,12 +73,14 @@ export function QuickChatPanel({ leadId }) {
     };
 
     const handleSend = async () => {
-        if (!chatInput.trim() || !leadId) return;
+        if (!chatInput.trim() || !leadId || sending) return;
 
-        const content = chatInput;
+        const content = chatInput.trim();
+        const leadIdStr = String(leadId);
         setChatInput('');
+        setSendError(null);
+        setSending(true);
 
-        // Optimistic Update
         const tempId = 'temp-' + Date.now();
         const optimisticMsg = {
             id: tempId,
@@ -96,126 +92,152 @@ export function QuickChatPanel({ leadId }) {
         setMessages(prev => [...prev, optimisticMsg]);
 
         try {
-            await api.post('/messages', { leadId, content });
-            // A mensagem real virá via WebSocket
+            const response = await api.post('/messages', { leadId: leadIdStr, content });
+            const created = response?.data;
+            if (created && created.id) {
+                setMessages(prev => prev.map(m => m.id === tempId ? { ...created, createdAt: created.createdAt || new Date().toISOString() } : m));
+            } else {
+                setMessages(prev => prev.filter(m => m.id !== tempId));
+                setSendError('Resposta inválida do servidor.');
+            }
         } catch (err) {
-            console.error('Send message error:', err);
-            // Remover a otimista se falhar
+            console.error('[QuickChat] Send message error:', err);
             setMessages(prev => prev.filter(m => m.id !== tempId));
+            const msg = err.response?.data?.error || err.message || 'Falha ao enviar. Tente novamente.';
+            setSendError(typeof msg === 'string' ? msg : 'Falha ao enviar. Tente novamente.');
+        } finally {
+            setSending(false);
         }
     };
 
     if (!leadId) return null;
 
     return (
-        <Box style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#F8FAFC' }}>
-            {/* Header do Chat (Opcional, se o LeadContextPanel já não tiver) */}
-
+        <div className="flex flex-col h-full bg-white">
             {/* Messages Area */}
-            <ScrollArea viewportRef={scrollRef} style={{ flex: 1, padding: 16 }}>
-                <Stack gap="xs">
-                    {messages.map((msg) => (
-                        <MessageBubble key={msg.id} msg={msg} />
-                    ))}
-                    {loading && <Text size="xs" c="dimmed" ta="center">Carregando mensagens...</Text>}
+            <div
+                ref={scrollRef}
+                className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6"
+            >
+                <div className="flex justify-center mb-4">
+                    <span className="ds-meta text-slate-400 bg-slate-50 border border-slate-100 px-3 py-1 rounded-full uppercase tracking-widest">
+                        Histórico de Atendimento
+                    </span>
+                </div>
 
-                    {isOtherTyping && (
-                        <Box style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 8, padding: '4px 12px' }}>
-                            <Text size="xs" c="dimmed">Digitando</Text>
-                            <Group gap={4}>
-                                <Box className="animate-bounce" style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: '#CBD5E1' }} />
-                                <Box className="animate-bounce" style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: '#CBD5E1', animationDelay: '0.2s' }} />
-                                <Box className="animate-bounce" style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: '#CBD5E1', animationDelay: '0.4s' }} />
-                            </Group>
-                        </Box>
-                    )}
-                </Stack>
-            </ScrollArea>
+                {messages.map((msg) => (
+                    <MessageBubble key={msg.id} msg={msg} />
+                ))}
+
+                {isOtherTyping && (
+                    <div className="flex gap-4 max-w-[85%]">
+                        <div className="size-8 bg-white border border-slate-100 rounded-full flex items-center justify-center">
+                            <div className="size-1.5 bg-solar rounded-full animate-pulse"></div>
+                            <div className="size-1.5 bg-solar rounded-full animate-pulse delay-75 mx-0.5"></div>
+                            <div className="size-1.5 bg-solar rounded-full animate-pulse delay-150"></div>
+                        </div>
+                    </div>
+                )}
+
+                {loading && messages.length === 0 && (
+                    <div className="flex justify-center p-8">
+                        <div className="animate-spin size-6 border-2 border-solar border-t-transparent rounded-full"></div>
+                    </div>
+                )}
+            </div>
 
             {/* Input Area */}
-            <Box p="md" style={{ borderTop: '1px solid #E2E8F0', backgroundColor: 'white' }}>
-                <Group gap="xs">
-                    <ActionIcon variant="subtle" color="gray" radius="xl" size="lg">
-                        <IconPlus size={20} />
-                    </ActionIcon>
-                    <TextInput
-                        placeholder="Digite uma mensagem..."
-                        style={{ flex: 1 }}
+            <div className="p-4 bg-white border-t border-slate-100">
+                <div className="flex items-end gap-2 bg-slate-50 rounded-lg p-2 border border-slate-100 transition-all focus-within:border-petroleum/40">
+                    <button className="p-2 rounded-full text-slate-400 hover:text-petroleum hover:bg-white/50 transition-all">
+                        <span className="material-symbols-outlined ds-icon-w300 text-xl">add_circle</span>
+                    </button>
+                    <textarea
+                        className="flex-1 bg-transparent border-none focus:ring-0 focus:outline-none text-[13px] text-slate-700 placeholder:text-slate-400 resize-none py-2.5 max-h-32"
+                        placeholder="Digite sua mensagem..."
+                        rows="1"
                         value={chatInput}
-                        onChange={(e) => handleInputChange(e.currentTarget.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                        radius="xl"
-                        size="md"
-                        variant="filled"
-                        styles={{ input: { backgroundColor: '#F1F5F9' } }}
-                    />
-                    <ActionIcon
-                        color="solar"
-                        radius="xl"
-                        size="lg"
-                        variant="filled"
+                        onChange={(e) => handleInputChange(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                if (!sending) handleSend();
+                            }
+                        }}
+                    ></textarea>
+                    <button
+                        type="button"
                         onClick={handleSend}
-                        disabled={!chatInput.trim()}
+                        disabled={!chatInput.trim() || sending}
+                        className={`p-2 rounded-full transition-all shadow-none h-10 w-10 flex items-center justify-center active:scale-95 ${chatInput.trim() && !sending ? 'bg-solar text-white hover:bg-amber-600' : 'bg-slate-100 text-slate-300'}`}
                     >
-                        <IconSend size={20} />
-                    </ActionIcon>
-                </Group>
-            </Box>
-        </Box>
+                        {sending ? (
+                            <span className="animate-spin size-5 border-2 border-slate-300 border-t-slate-600 rounded-full" />
+                        ) : (
+                            <span className="material-symbols-outlined ds-icon-w300 text-xl">send</span>
+                        )}
+                    </button>
+                </div>
+                <div className="mt-2 px-1 flex items-center justify-between gap-2">
+                    <span className="ds-meta text-slate-400 font-medium">Pressione Enter para enviar, Shift + Enter para nova linha</span>
+                    {sendError && (
+                        <span className="ds-meta text-red-600 font-medium flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[14px]">error</span>
+                            {sendError}
+                        </span>
+                    )}
+                </div>
+            </div>
+        </div>
     );
 }
 
 function MessageBubble({ msg }) {
-    const isUser = msg.role === 'USER';
+    const isUser = msg.role === 'USER' || msg.role === 'AGENT' || msg.role === 'ASSISTANT';
     const isLead = msg.role === 'LEAD';
     const isSystem = msg.role === 'SYSTEM';
 
     if (isSystem) {
         return (
-            <Text size="xs" c="dimmed" ta="center" my="xs" fs="italic">
-                {msg.content}
-            </Text>
+            <div className="flex justify-center my-4">
+                <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 italic bg-slate-100 dark:bg-slate-800/50 px-3 py-1 rounded-lg">
+                    {msg.content}
+                </span>
+            </div>
         );
     }
 
     return (
-        <Box style={{
-            alignSelf: isUser ? 'flex-end' : 'flex-start',
-            maxWidth: '80%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: isUser ? 'flex-end' : 'flex-start'
-        }}>
-            <Paper
-                px="sm"
-                py={6}
-                radius="lg"
-                shadow="xs"
-                style={{
-                    backgroundColor: isUser ? 'var(--mantine-color-solar-6)' : 'white',
-                    color: isUser ? 'white' : 'var(--mantine-color-slate-9)',
-                    borderBottomRightRadius: isUser ? 4 : 16,
-                    borderBottomLeftRadius: isLead ? 4 : 16,
-                }}
-            >
-                <Text size="sm">{msg.content}</Text>
-                <Group gap={4} justify="flex-end" mt={2} style={{ opacity: 0.7 }}>
-                    <Text size="10px" c={isUser ? 'white' : 'dimmed'}>
+        <div className={`flex gap-4 max-w-[85%] ${isUser ? 'ml-auto flex-row-reverse' : ''}`}>
+            {!isUser && (
+                <div className="bg-slate-50 border border-slate-100 rounded-full size-8 shrink-0 mt-1 flex items-center justify-center ds-meta text-slate-400">
+                    {isLead ? 'L' : 'S'}
+                </div>
+            )}
+            <div className={`flex flex-col gap-1 ${isUser ? 'items-end' : ''}`}>
+                <div className="flex items-baseline gap-2">
+                    {!isUser && <span className="ds-meta text-slate-600">{isLead ? 'Lead' : 'Sistema'}</span>}
+                    <span className="ds-meta text-slate-400 font-medium">
                         {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </Text>
-                    {isUser && (
-                        msg.isOptimistic ? (
-                            <IconCheck size={12} stroke={1.5} />
-                        ) : (
-                            <IconChecks
-                                size={12}
-                                stroke={2}
-                                color={msg.isRead ? '#FCD34D' : 'rgba(255,255,255,0.7)'}
-                            />
-                        )
-                    )}
-                </Group>
-            </Paper>
-        </Box>
+                    </span>
+                    {isUser && <span className="ds-meta text-slate-600 uppercase">Você</span>}
+                </div>
+                <div className={`p-4 rounded-2xl shadow-none text-sm leading-relaxed ${isUser
+                    ? 'bg-slate-100 text-slate-800 rounded-tr-sm'
+                    : 'bg-white text-slate-700 border border-slate-100 rounded-tl-sm'
+                    }`}>
+                    {msg.content}
+                </div>
+                {isUser && (
+                    <div className="ds-meta text-slate-400 flex items-center gap-1 mt-1 font-medium">
+                        {msg.isOptimistic ? 'Enviando...' : (
+                            <>
+                                Lida <span className="material-symbols-outlined ds-icon-w300 text-[12px] text-solar">done_all</span>
+                            </>
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }

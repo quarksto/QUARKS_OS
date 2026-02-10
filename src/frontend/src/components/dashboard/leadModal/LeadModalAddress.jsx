@@ -13,7 +13,7 @@ export const LeadModalAddress = ({ lead }) => {
         <section className="technical-card p-5">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="ds-title flex items-center gap-2 text-slate-900">
-                    <span className="material-symbols-outlined text-slate-400 text-[18px]">map</span>
+                    <span className="material-symbols-outlined text-slate-400 text-[18px] ds-icon-w300">map</span>
                     Endereço e Instalação
                 </h3>
             </div>

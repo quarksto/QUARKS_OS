@@ -13,14 +13,14 @@ import {
 export const LeadPipelineList = ({ rows = [], onLeadClick }) => {
     if (!rows.length) {
         return (
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
+            <div className="rounded-lg border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
                 Nenhum lead encontrado com os filtros atuais.
             </div>
         );
     }
 
     return (
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
             <div className="max-h-[520px] overflow-y-auto">
                 <table className="min-w-full border-collapse text-left text-sm text-slate-600">
                     <thead className="sticky top-0 bg-slate-50 text-[12px] font-semibold text-slate-500 uppercase tracking-wide">

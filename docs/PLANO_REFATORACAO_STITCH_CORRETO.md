@@ -43,10 +43,10 @@ O Stitch MCP é para **GERAR NOVAS TELAS A PARTIR DE TEXTO**.
 
 ## 🎯 PROMPT TEMPLATE PARA GERAÇÃO
 
-### Template Base (Design System v1.3)
+### Template Base (Design System v1.4)
 
 ```
-Design System obrigatório — Quarks OS v1.3 (light theme, sem gradientes):
+Design System obrigatório — Quarks OS v1.4 (light theme, sem gradientes):
 
 CORES:
 - Primária/marca: petroleum #0F4C5C (sidebar, botões primários, bordas ativas, nav ativo). Usar: bg-petroleum, text-petroleum, border-petroleum, hover:bg-petroleum-600.
@@ -89,7 +89,7 @@ TELA A GERAR: [DESCRIÇÃO DA TELA]
 **Prompt para `generate_screen_from_text`**:
 
 ```
-Design System obrigatório — Quarks OS v1.3 (light theme, sem gradientes):
+Design System obrigatório — Quarks OS v1.4 (light theme, sem gradientes):
 [... incluir template base ...]
 
 TELA A GERAR: 
@@ -112,7 +112,7 @@ Página de Login do Quarks OS: layout centralizado com card de login (max-w-md).
 **Prompt para `generate_screen_from_text`**:
 
 ```
-Design System obrigatório — Quarks OS v1.3 (light theme, sem gradientes):
+Design System obrigatório — Quarks OS v1.4 (light theme, sem gradientes):
 [... incluir template base ...]
 
 TELA A GERAR:
@@ -237,7 +237,7 @@ const projectId = project.name.split('/')[1]; // Extrair ID
 const screen = await mcp_stitch_generate_screen_from_text({
   projectId: projectId,
   prompt: `
-    Design System obrigatório — Quarks OS v1.3 (light theme, sem gradientes):
+    Design System obrigatório — Quarks OS v1.4 (light theme, sem gradientes):
     
     CORES:
     - Primária: petroleum #0F4C5C

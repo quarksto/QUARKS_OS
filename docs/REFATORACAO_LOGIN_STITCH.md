@@ -14,7 +14,7 @@ Primeira página refatorada usando **Stitch MCP** com geração de texto para UI
 ### ✅ O que foi feito
 
 1. ✅ Criado projeto Stitch "Quarks OS - Login Page Refactored"
-2. ✅ Gerado tela de login com prompt do Design System v1.3
+2. ✅ Gerado tela de login com prompt do Design System v1.4
 3. ✅ Obtido código HTML gerado pelo Gemini 3 Flash
 4. ✅ Obtido screenshot da tela gerada
 5. ✅ Adaptado código para React (`LoginPageStitch.jsx`)
@@ -45,7 +45,7 @@ Primeira página refatorada usando **Stitch MCP** com geração de texto para UI
 ## 📋 PROMPT USADO
 
 ```
-Design System obrigatório — Quarks OS v1.3 (light theme, sem gradientes):
+Design System obrigatório — Quarks OS v1.4 (light theme, sem gradientes):
 
 CORES:
 - Primária/marca: petroleum #0F4C5C
@@ -177,7 +177,7 @@ Requisitos: Light theme, sem gradientes, petroleum + solar, responsivo.
 - ❌ Gradientes no painel esquerdo
 - ❌ Botões Google/SSO (não funcionais)
 - ❌ Complexidade visual alta
-- ❌ Não seguia DS v1.3 estritamente
+- ❌ Não seguia DS v1.4 estritamente
 
 ### Depois (LoginPageStitch.jsx)
 
@@ -185,7 +185,7 @@ Requisitos: Light theme, sem gradientes, petroleum + solar, responsivo.
 - ✅ SEM gradientes (apenas decorativo sutil)
 - ✅ Foco no essencial (email, senha, entrar)
 - ✅ Minimalista e profissional
-- ✅ 100% conforme DS v1.3
+- ✅ 100% conforme DS v1.4
 - ✅ Gerado por IA (Gemini 3 Flash)
 
 ---

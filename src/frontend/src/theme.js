@@ -6,70 +6,56 @@ import { createTheme, rem } from '@mantine/core';
 // Status Colors: Success #16A34A, Warning #D97706, Danger #DC2626
 
 const theme = createTheme({
-    primaryColor: 'solarBlue',
+    primaryColor: 'petroleum',
     colors: {
-        // Custom Solar Blue Palette (Primary)
-        // 0-9 scale generated based on #1E3A8A
-        solarBlue: [
-            '#E6F0FF', // 0 (Lightest)
-            '#CCE0FF', // 1
-            '#99C2FF', // 2
-            '#66A3FF', // 3
-            '#3385FF', // 4
-            '#1E3A8A', // 5 (Base - Primary)
-            '#172E6E', // 6
-            '#102252', // 7
-            '#0A1536', // 8
-            '#03091A', // 9 (Darkest)
+        petroleum: [
+            '#f1f5f9', // 0: slate-100 (fallback light)
+            '#e2e8f0', // 1: slate-200
+            '#cbd5e1', // 2: slate-300
+            '#94a3b8', // 3: slate-400
+            '#64748b', // 4: slate-500
+            '#475569', // 5: slate-600
+            '#334155', // 6: slate-700
+            '#1e293b', // 7: slate-800
+            '#0F4C5C', // 8: Petroleum 900 (BASE)
+            '#08323d', // 9: Petroleum 950
         ],
-        // Custom Solar Gold Palette (Accent)
-        solarGold: [
-            '#FFF9E6',
-            '#FFEDCC',
-            '#FFE099',
-            '#FFD466',
-            '#FFC733',
-            '#F59E0B', // Base - Accent
-            '#C47E09',
-            '#935E07',
-            '#623F04',
-            '#311F02',
+        solar: [
+            '#fffbeb', '#fef3c7', '#fde68a', '#fcd34d', '#fbbf24',
+            '#f59e0b', // 5: Solar 500 (BASE)
+            '#d97706', '#b45309', '#92400e', '#78350f',
         ],
     },
     fontFamily: 'Geist, system-ui, sans-serif',
+    fontFamilyMonospace: 'Geist Mono, ui-monospace, monospace',
     headings: {
         fontFamily: 'Geist, system-ui, sans-serif',
         sizes: {
-            h1: { fontSize: rem(28), fontWeight: '700' },
-            h2: { fontSize: rem(22), fontWeight: '600' },
-            h3: { fontSize: rem(18), fontWeight: '600' },
+            h1: { fontSize: rem(32), fontWeight: '700' },
+            h2: { fontSize: rem(24), fontWeight: '700' },
+            h3: { fontSize: rem(16), fontWeight: '600' },
         },
     },
     defaultRadius: 'md',
     components: {
         Card: {
             defaultProps: {
-                shadow: 'sm',
-                padding: 'md', // >= 16px as per spec
-                radius: 'md', // 16px approx
+                shadow: 'none', // Super Flat rule
+                padding: 'md',
+                radius: 'lg', // 8px per DS v1.4
                 withBorder: true,
             },
-            styles: (theme) => ({
-                root: {
-                    backgroundColor: theme.white,
-                },
-            }),
         },
         Button: {
             defaultProps: {
-                radius: 'md', // 12px approx
-                h: 44, // 44px height rule
+                radius: 'xl', // Pills rule
+                h: 32, // h-8 base rule
             },
         },
         Paper: {
             defaultProps: {
-                radius: 'md',
-                shadow: 'sm'
+                radius: 'lg',
+                shadow: 'none'
             }
         }
     },

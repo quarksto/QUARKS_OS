@@ -9,7 +9,7 @@
 ### Existing Architecture
 - **Backend**: `/api/proposals` CRUD endpoints exist (Node/Prisma).
 - **Frontend**: React + Vite + Tailwind.
-- **Design System**: Quarks OS v1 (Stitch-aligned).
+- **Design System**: Quarks OS v1.4 (Stitch-aligned).
   - Forbidden: Purple colors, background fills for badges.
   - Required: `StandardAvatar`, `AdaptiveHeader`, `DashboardShell`.
 

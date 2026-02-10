@@ -154,7 +154,7 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-solar hover:bg-amber-600 text-white font-bold py-3 rounded-lg shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-4"
+                            className="w-full bg-solar hover:bg-amber-600 text-white font-bold py-3 rounded-lg shadow-sm hover:shadow-sm active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-4"
                         >
                             {loading ? (
                                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

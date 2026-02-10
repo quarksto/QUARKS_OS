@@ -68,13 +68,15 @@ class ServiceDomainAgent extends BaseDomainAgent {
         return service;
     }
 
-    async createService({ name, type, description }) {
+    async createService({ name, type, code, baseCost, description }) {
         if (!name || !type) throw new Error('Missing name or type');
 
         return await prisma.service.create({
             data: {
                 name,
                 type,
+                code: code || null,
+                baseCost: baseCost ? parseFloat(baseCost) : null,
                 description,
                 active: true
             }

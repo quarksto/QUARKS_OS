@@ -1,26 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap');
+/* Fontes carregadas em index.html (Geist + Geist Mono) para evitar duplicidade e erros de carregamento */
 
 :root {
     /* Fontes (Vercel Stack) */
     --font-primary: "Geist", sans-serif;
     --font-data: "Geist Mono", monospace;
 
-    /* Cores de Texto (Hierarquia) */
-    --text-high-contrast: #0f172a;
-    /* Títulos e valores principais */
-    --text-medium-contrast: #475569;
-    /* Corpo de texto e descrições */
+    /* Cores de Texto (Hierarquia Semântica DS v1.4) */
+    --text-high-contrast: #334155;
+    /* Slate 700 */
+    --text-medium-contrast: #64748b;
+    /* Slate 500 */
     --text-low-contrast: #94a3b8;
-    /* Labels e metadados */
+    /* Slate 400 */
 
     /* Cores de Marca & Semântica */
     --quarks-solar: #f59e0b;
-    /* Laranja Solar (Ação/Geração) */
-    --quarks-energy: #334155;
-    /* Slate Dark (Consumo/Interface) */
+    /* Solar 500 */
+    --quarks-energy: #475569;
+    /* Slate 600 */
     --success: #10b981;
-    --border-light: #e2e8f0;
+    /* Emerald 500 */
+
+    /* Tokens de Borda (DS v1.4) */
+    --border-light: #f1f5f9;
+    /* Slate 100 */
+    --border-subtle: #f8fafc;
+    /* Slate 50 */
 }
 
 @tailwind base;
@@ -28,12 +33,17 @@
 @tailwind utilities;
 
 @layer base {
-    body {
-        @apply font-sans text-slate-900 antialiased;
-        background-color: theme('colors.canvas');
+    html {
+        font-family: var(--font-primary), system-ui, -apple-system, sans-serif;
     }
 
-    /* Global Scrollbar styling */
+    body {
+        @apply font-sans text-slate-800 antialiased;
+        background-color: #F8FAFC;
+        /* Canvas (Slate 50) */
+    }
+
+    /* Standardized Scrollbar styling */
     ::-webkit-scrollbar {
         width: 6px;
         height: 6px;
@@ -44,225 +54,130 @@
     }
 
     ::-webkit-scrollbar-thumb {
-        background-color: #cbd5e1;
+        background-color: #e2e8f0;
+        /* slate-200 */
         border-radius: 3px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-        background-color: #94a3b8;
+        background-color: #cbd5e1;
+        /* slate-300 */
     }
 }
 
-/* Custom Component Classes from Artifact */
-/* Custom Component Classes from Artifact */
 @layer components {
 
-    /* --- Card Structure (Unified: 8px + Shadows) --- */
-    .technical-card {
-        @apply bg-white border border-slate-200 rounded-lg transition-all flex flex-col shadow-sm hover:shadow-md;
-    }
-
     /* --- Atomic UI Elements --- */
-    .badge-ultra-compact {
-        @apply px-2 py-0.5 border border-slate-200 rounded-lg text-[9px] font-sans font-bold text-slate-500 flex items-center justify-center;
+    .ds-card {
+        @apply bg-white border border-slate-100 rounded-lg shadow-none transition-all duration-300;
     }
 
-    /* --- Kanban Card Badges (MCP + DS) --- */
-    /* --- Kanban Card Badges (DS v1.3 Outline Mode) --- */
+    .technical-card {
+        @apply ds-card;
+        /* Unified card base */
+    }
+
     .badge-kanban {
-        @apply px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider inline-flex w-fit items-center gap-1.5 shrink-0 leading-none bg-white border border-slate-200 text-slate-500 shadow-sm;
+        @apply px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider inline-flex w-fit items-center gap-1.5 shrink-0 leading-none bg-white border border-slate-200 text-slate-500;
     }
 
-    .badge-kanban-temp {
-        @apply badge-kanban text-slate-700;
+    .badge-ultra-compact {
+        @apply px-1.5 py-0.5 border border-slate-200 rounded-md text-[9px] font-semibold text-slate-400 flex items-center justify-center;
     }
 
-    .badge-kanban-origin {
-        @apply badge-kanban bg-slate-50/50; /* Sutil diferenciacao para origem */
+    .ds-icon-w300 {
+        font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
     }
 
-    .badge-kanban-consumption {
-        @apply badge-kanban border-slate-200 text-slate-600;
-    }
+    /* --- Unified Typography Tokens (DS v1.4 Standards) --- */
 
-    .badge-kanban-dot {
-        @apply size-1.5 rounded-full shrink-0;
-    }
-
-    .icon-circle {
-        @apply w-10 h-10 rounded-lg border border-slate-200/40 flex items-center justify-center shrink-0 transition-colors;
-    }
-
-    .btn-pill {
-        @apply rounded-lg transition-all flex items-center justify-center border border-slate-200 shadow-sm font-bold text-[11px];
-    }
-
-    .nav-item-active {
-        @apply bg-white/10 text-white rounded-md font-semibold;
-    }
-
-    .nav-item-inactive {
-        @apply text-white/90 hover:text-white hover:bg-white/5 rounded-md;
-    }
-
-    /* --- Unified Typography Tokens (DS using Root Vars) --- */
-
-    /* 1. Headings & Titles */
     .ds-title-page {
-        @apply font-sans font-semibold text-[24px] tracking-tight;
-        color: var(--text-high-contrast);
+        @apply text-[24px] font-semibold text-slate-800 tracking-tight;
     }
 
-    .ds-title-section {
-        @apply font-sans font-medium text-[16px];
-        color: var(--text-high-contrast);
-    }
-
-    .ds-title {
-        @apply font-sans font-medium text-[14px];
-        color: var(--text-high-contrast);
-    }
-
-    /* 2. Data & KPIs (Geist Sans, Bold) */
     .ds-display-xl {
-        @apply font-sans font-bold text-[42px] tracking-tight tabular-nums;
-        color: var(--text-high-contrast);
-        letter-spacing: -0.03em;
+        @apply text-[35px] font-semibold text-slate-800 leading-none tracking-tighter tabular-nums;
     }
 
     .ds-display-l {
-        @apply font-sans font-bold text-[32px] tracking-tight tabular-nums;
-        color: var(--text-high-contrast);
-        letter-spacing: -0.02em;
+        @apply text-[32px] font-semibold text-slate-800 leading-none tracking-tight tabular-nums;
     }
 
-    .ds-data {
-        @apply font-sans font-medium text-[13px];
-        color: var(--text-high-contrast);
+    .ds-title-section {
+        @apply text-[16px] font-medium text-slate-700;
     }
 
-    /* 3. Metadata & Labels */
+    .ds-title-card {
+        @apply text-[16px] font-medium text-slate-700;
+    }
+
+    /* DS §3: Rótulos (Input/Listas) — 11px font-medium */
     .ds-label {
-        @apply font-sans font-medium text-[11px] text-slate-500;
+        @apply text-[11px] font-medium text-slate-500 uppercase tracking-widest;
     }
 
     .ds-meta {
-        @apply font-sans font-medium text-[10px] text-slate-500;
+        @apply text-[10px] font-semibold text-slate-400 uppercase tracking-tight;
+    }
+
+    /* DS §3: Micro-labels (Caps) — 10px font-bold (700) obrigatório */
+    .text-meta {
+        @apply text-[10px] uppercase tracking-wider text-slate-500;
+        font-weight: 700 !important;
     }
 
     .ds-body {
-        @apply font-sans font-normal text-[13px] leading-relaxed;
-        color: var(--text-medium-contrast);
+        @apply text-[13px] font-normal leading-relaxed text-slate-600;
     }
 
-    /* 4. Support Helpers */
-    .kpi-title {
-        @apply ds-meta;
+    /* --- Standardized Inputs & Interactive Elements --- */
+
+    .ds-input {
+        @apply h-9 w-full rounded-lg border border-slate-100 bg-transparent px-3 text-[13px] text-slate-700 placeholder:text-slate-300 focus:border-petroleum/60 focus:outline-none focus:ring-0 transition-all duration-200 disabled:bg-slate-50 disabled:text-slate-400;
     }
 
-    .kpi-value {
-        @apply ds-display-l;
+    .btn-pill {
+        @apply rounded-full border border-slate-100 px-4 py-2 text-[11px] font-semibold text-slate-600 hover:bg-slate-50 active:scale-95 transition-all;
     }
 
-    /* 5. Component Specific Titles */
-    .ds-title-card {
-        @apply font-sans font-medium text-[16px] text-slate-500 leading-tight mb-1;
+    /* Vertical Rhythm Utilities */
+    .h-small {
+        @apply h-8;
+    }
+
+    .h-base {
+        @apply h-9;
+    }
+
+    .h-medium {
+        @apply h-10;
+    }
+
+    .h-large {
+        @apply h-12;
     }
 }
 
-/* Material Symbols Override for Vercel Aesthetic */
+/* Material Symbols Override */
 .material-symbols-outlined {
-    font-family: 'Material Symbols Outlined';
+    font-family: 'Material Symbols Outlined' !important;
     font-weight: 300 !important;
-    /* Thinner stroke */
-    font-variation-settings:
-        'FILL' 0,
-        'wght' 300,
-        'GRAD' 0,
-        'opsz' 20 !important;
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24 !important;
     font-size: 20px !important;
+    @apply antialiased;
 }
 
 @layer utilities {
-    @keyframes shake {
-
-        0%,
-        100% {
-            transform: translateX(0);
-        }
-
-        20%,
-        60% {
-            transform: translateX(-4px);
-        }
-
-        40%,
-        80% {
-            transform: translateX(4px);
-        }
-    }
-
-    .animate-shake {
-        animation: shake 0.4s ease-in-out;
-    }
-
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-8px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .animate-slideDown {
-        animation: slideDown 0.3s ease-out;
-    }
-
-    @keyframes fadeInScale {
-        from {
-            opacity: 0;
-            transform: scale(0.98);
-        }
-
-        to {
-            opacity: 1;
-            transform: scale(1);
-        }
-    }
-
-    .animate-fadeInScale {
-        animation: fadeInScale 0.2s ease-out;
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
 
     .scrollbar-hide::-webkit-scrollbar {
         display: none;
     }
 
-    .scrollbar-hide {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
-
-    .scrollbar-custom::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .scrollbar-custom::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    .scrollbar-custom::-webkit-scrollbar-thumb {
-        background-color: #e2e8f0;
-        /* slate-200 */
-        border-radius: 20px;
-    }
-
-    .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-        background-color: #cbd5e1;
-        /* slate-300 */
+    .transition-ui {
+        @apply transition-all duration-200 ease-in-out;
     }
 }

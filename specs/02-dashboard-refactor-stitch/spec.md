@@ -24,7 +24,7 @@ O utilizador (Integrador/Comercial) abre a aplicação e vê uma Dashboard que r
 
 ### User Story 2 - Referência Stitch MCP e Design System (Priority: P1)
 
-A nova Dashboard utiliza o MCP Stitch como referência de design (projeto/screens listados) e obedece ao Design System (DS v1): classes `.technical-card`, `.kpi-title`, `.kpi-value`, `.btn-pill`, `.section-title`, cores petroleum/solar, layout documentado em QUARKS_OS_Design_System_v1.md.
+A nova Dashboard utiliza o MCP Stitch como referência de design (projeto/screens listados) e obedece ao Design System (DS v1.4): classes `.technical-card`, `.kpi-title`, `.kpi-value`, `.btn-pill`, `.section-title`, cores petroleum/solar, layout documentado em QUARKS_OS_Design_System_v1.md.
 
 **Why this priority**: Consistência visual e rastreabilidade ao Stitch (list_projects, list_screens) e ao DS.
 

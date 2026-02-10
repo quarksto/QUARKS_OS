@@ -85,7 +85,7 @@ router.patch('/:id/status', async (req, res) => {
     }
 });
 
-// GET /api/leads/:id/solar - Solar API insights (Google Solar API proxy)
+// GET /api/leads/:id/solar - Solar insights (Google Solar API ou estimativa por consumo)
 router.get('/:id/solar', async (req, res) => {
     try {
         const { id } = req.params;
@@ -93,17 +93,14 @@ router.get('/:id/solar', async (req, res) => {
         if (!leadAgent) throw new Error('Lead Agent not initialized');
 
         const lead = await leadAgent.execute('GET_LEAD', { id });
-        if (!lead || !lead.location) return res.status(404).json({ error: 'Lead or location not found' });
+        if (!lead) return res.status(404).json({ error: 'Lead not found' });
 
-        // TODO: Quando GOOGLE_MAPS_API_KEY e Solar API estiverem configurados:
-        // 1. Geocodificar lead.location
-        // 2. Chamar Solar API buildingInsights
-        // 3. Retornar { roofArea, yearlyEnergy, recommendedCapacity, savingsAnnual }
-        const hasSolarConfig = !!process.env.GOOGLE_MAPS_API_KEY;
-        if (!hasSolarConfig) return res.status(404).json({ error: 'Solar API not configured' });
+        const solarService = require('../../services/solarService');
+        const insights = await solarService.getLeadSolarInsights(lead);
 
-        // Placeholder - implementar chamada real quando config disponível
-        res.status(404).json({ error: 'Solar API not configured' });
+        if (!insights) return res.status(404).json({ error: 'Insufficient data for solar estimate' });
+
+        res.json(insights);
     } catch (error) {
         console.error('Solar Error:', error);
         res.status(500).json({ error: error.message });

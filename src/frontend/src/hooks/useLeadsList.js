@@ -8,7 +8,7 @@ import { useDashboardData } from './useDashboardData';
 export function useLeadsList() {
     // Reuse the existing hook to fetch data.
     // In the future, this should call a dedicated endpoint api.get('/leads?page=1')
-    const { pipeline, loading } = useDashboardData();
+    const { pipeline, loading, refresh } = useDashboardData();
 
     const leadsList = useMemo(() => {
         if (!pipeline) return [];
@@ -38,5 +38,5 @@ export function useLeadsList() {
         return allLeads;
     }, [pipeline]);
 
-    return { leads: leadsList, loading };
+    return { leads: leadsList, loading, refresh };
 }

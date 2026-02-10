@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
+import { CustomSelect } from '../shared/CustomSelect';
 
 const ROOF_OPTIONS = [
-    { value: '', label: 'Selecione' },
+    { value: '', label: 'Selecione o telhado' },
     { value: 'CERAMICA', label: 'Cerâmica' },
     { value: 'METALICO', label: 'Metálico' },
     { value: 'LAJE', label: 'Laje' },
@@ -11,14 +12,14 @@ const ROOF_OPTIONS = [
 ];
 
 const CONNECTION_OPTIONS = [
-    { value: '', label: 'Selecione' },
+    { value: '', label: 'Selecione a conexão' },
     { value: 'MONOFASICO', label: 'Monofásico' },
     { value: 'BIFASICO', label: 'Bifásico' },
     { value: 'TRIFASICO', label: 'Trifásico' },
 ];
 
 const DISTRIBUTOR_OPTIONS = [
-    { value: '', label: 'Selecione' },
+    { value: '', label: 'Selecione a distribuidora' },
     { value: 'CEMIG', label: 'Cemig' },
     { value: 'CPFL_PAULISTA', label: 'CPFL Paulista' },
     { value: 'ENEL', label: 'Enel' },
@@ -26,8 +27,12 @@ const DISTRIBUTOR_OPTIONS = [
     { value: 'OUTRO', label: 'Outro' },
 ];
 
-export const LeadQualificationForm = ({ lead, onSave }) => {
-    const [form, setForm] = useState({
+/**
+ * LeadQualificationForm — Refatorado para Design System v1.4.
+ * Suporta modo isDrawer para integração fluida com LeadDetailDrawer e modo standalone para a aba.
+ */
+export const LeadQualificationForm = ({ lead, onSave, onChange, isDrawer = false }) => {
+    const [localForm, setLocalForm] = useState({
         cep: '',
         fullAddress: '',
         roofType: '',
@@ -36,9 +41,20 @@ export const LeadQualificationForm = ({ lead, onSave }) => {
     });
     const [saving, setSaving] = useState(false);
 
+    // Se temos onChange (Drawer), usamos os dados do prop 'lead'.
+    // Caso contrário (Tab), usamos o estado local sincronizado no início.
+    const isControlled = typeof onChange === 'function';
+    const formValues = isControlled ? {
+        cep: lead?.cep || '',
+        fullAddress: lead?.fullAddress || '',
+        roofType: lead?.roofType || '',
+        connectionType: lead?.connectionType || '',
+        distributor: lead?.distributor || '',
+    } : localForm;
+
     useEffect(() => {
-        if (lead) {
-            setForm({
+        if (!isControlled && lead) {
+            setLocalForm({
                 cep: lead.cep || '',
                 fullAddress: lead.fullAddress || '',
                 roofType: lead.roofType || '',
@@ -46,98 +62,105 @@ export const LeadQualificationForm = ({ lead, onSave }) => {
                 distributor: lead.distributor || '',
             });
         }
-    }, [lead?.id, lead?.cep, lead?.fullAddress, lead?.roofType, lead?.connectionType, lead?.distributor]);
+    }, [lead, isControlled]);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
+    const handleFieldChange = (name, value) => {
+        if (isControlled) {
+            onChange(name, value);
+        } else {
+            setLocalForm(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
+        if (isControlled) return; // Se for controlado, o Drawer cuida do submit
+
         setSaving(true);
         try {
-            await api.patch(`/leads/${lead.id}`, form);
-            onSave?.();
+            const res = await api.patch(`/leads/${lead.id}`, formValues);
+            onSave?.(res.data);
         } catch (err) {
             console.error('Erro ao salvar qualificação:', err);
-            alert('Erro ao salvar. Tente novamente.');
         } finally {
             setSaving(false);
         }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-                <label className="block ds-meta text-slate-500 uppercase tracking-wider mb-1">CEP</label>
-                <input
-                    type="text"
-                    name="cep"
-                    placeholder="00000-000"
-                    value={form.cep}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-petroleum focus:ring-1 focus:ring-petroleum"
+        <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1 md:col-span-1">
+                    <label className="ds-label text-slate-400">CEP</label>
+                    <input
+                        type="text"
+                        name="cep"
+                        placeholder="00000-000"
+                        value={formValues.cep}
+                        onChange={(e) => handleFieldChange('cep', e.target.value)}
+                        className="ds-input h-8"
+                    />
+                </div>
+                <div className="space-y-1 md:col-span-2">
+                    <label className="ds-label text-slate-400">Endereço completo</label>
+                    <input
+                        type="text"
+                        name="fullAddress"
+                        placeholder="Rua, número, bairro..."
+                        value={formValues.fullAddress}
+                        onChange={(e) => handleFieldChange('fullAddress', e.target.value)}
+                        className="ds-input h-8"
+                    />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                    <CustomSelect
+                        label="Tipo de telhado"
+                        options={ROOF_OPTIONS.filter(o => o.value !== '')}
+                        value={formValues.roofType}
+                        onChange={(val) => handleFieldChange('roofType', val)}
+                        placeholder="Selecione o telhado"
+                    />
+                </div>
+                <div className="space-y-1">
+                    <CustomSelect
+                        label="Tipo de ligação"
+                        options={CONNECTION_OPTIONS.filter(o => o.value !== '')}
+                        value={formValues.connectionType}
+                        onChange={(val) => handleFieldChange('connectionType', val)}
+                        placeholder="Selecione a ligação"
+                    />
+                </div>
+            </div>
+
+            <div className="space-y-1">
+                <CustomSelect
+                    label="Distribuidora"
+                    options={DISTRIBUTOR_OPTIONS.filter(o => o.value !== '')}
+                    value={formValues.distributor}
+                    onChange={(val) => handleFieldChange('distributor', val)}
+                    placeholder="Selecione a distribuidora"
                 />
             </div>
-            <div>
-                <label className="block ds-meta text-slate-500 uppercase tracking-wider mb-1">Endereço completo</label>
-                <input
-                    type="text"
-                    name="fullAddress"
-                    placeholder="Rua, número, bairro"
-                    value={form.fullAddress}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-petroleum focus:ring-1 focus:ring-petroleum"
-                />
-            </div>
-            <div>
-                <label className="block ds-meta text-slate-500 uppercase tracking-wider mb-1">Tipo de telhado</label>
-                <select
-                    name="roofType"
-                    value={form.roofType}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-petroleum focus:ring-1 focus:ring-petroleum"
-                >
-                    {ROOF_OPTIONS.map((o) => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                </select>
-            </div>
-            <div>
-                <label className="block ds-meta text-slate-500 uppercase tracking-wider mb-1">Tipo de ligação</label>
-                <select
-                    name="connectionType"
-                    value={form.connectionType}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-petroleum focus:ring-1 focus:ring-petroleum"
-                >
-                    {CONNECTION_OPTIONS.map((o) => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                </select>
-            </div>
-            <div>
-                <label className="block ds-meta text-slate-500 uppercase tracking-wider mb-1">Distribuidora</label>
-                <select
-                    name="distributor"
-                    value={form.distributor}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-petroleum focus:ring-1 focus:ring-petroleum"
-                >
-                    {DISTRIBUTOR_OPTIONS.map((o) => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                </select>
-            </div>
-            <button
-                type="submit"
-                disabled={saving}
-                className="btn-pill bg-petroleum text-white hover:bg-petroleum-600 px-4 py-2 flex items-center gap-2"
-            >
-                {saving && <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>}
-                Salvar qualificação
-            </button>
+
+            {!isDrawer && (
+                <div className="pt-4">
+                    <button
+                        type="submit"
+                        disabled={saving}
+                        className="h-8 px-6 rounded-full bg-petroleum text-white text-[11px] font-bold uppercase tracking-widest hover:bg-petroleum/90 transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50"
+                    >
+                        {saving ? (
+                            <span className="material-symbols-outlined animate-spin text-[18px] ds-icon-w300">sync</span>
+                        ) : (
+                            <span className="material-symbols-outlined text-[18px] ds-icon-w300">save</span>
+                        )}
+                        Salvar Qualificação
+                    </button>
+                </div>
+            )}
         </form>
     );
 };

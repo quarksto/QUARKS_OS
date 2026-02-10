@@ -18,7 +18,7 @@ export const DashboardRightSidebar = ({ isOpen: _isOpen, onClose: _onClose }) =>
             {/* Header */}
             <div className="h-16 border-b border-slate-200/40 flex items-center justify-between px-4 flex-shrink-0 bg-white">
                 <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-solar-500 text-[24px]">smart_toy</span>
+                    <span className="material-symbols-outlined text-solar text-[24px]">smart_toy</span>
                     <span className="font-semibold text-sm tracking-wide text-slate-900">Copiloto Solar</span>
                 </div>
                 <button className="text-slate-400 hover:text-petroleum-700 transition-colors">
@@ -31,7 +31,7 @@ export const DashboardRightSidebar = ({ isOpen: _isOpen, onClose: _onClose }) =>
 
                 {/* Assistant Message (Simulated from Stitch Design) */}
                 <div className="flex gap-3 animate-fadeIn">
-                    <div className="w-8 h-8 rounded-full bg-solar-50 border border-solar-200 flex items-center justify-center flex-shrink-0 text-solar-600">
+                    <div className="w-8 h-8 rounded-full bg-solar-50 border border-solar-200 flex items-center justify-center flex-shrink-0 text-solar">
                         <span className="material-symbols-outlined text-[18px]">smart_toy</span>
                     </div>
                     <div className="flex flex-col gap-1 max-w-[90%]">
@@ -50,10 +50,10 @@ export const DashboardRightSidebar = ({ isOpen: _isOpen, onClose: _onClose }) =>
 
                 {/* Suggestion Chips */}
                 <div className="flex flex-wrap gap-2 pt-2">
-                    <button className="text-xs bg-white hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg border border-slate-200 transition-all hover:border-solar-400 shadow-sm hover:shadow-md hover:text-solar-700">
+                    <button className="text-xs bg-white hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg border border-slate-200 transition-all hover:border-solar-400 shadow-sm hover:shadow-sm hover:text-solar-700">
                         Criar Campanha
                     </button>
-                    <button className="text-xs bg-white hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg border border-slate-200 transition-all hover:border-solar-400 shadow-sm hover:shadow-md hover:text-solar-700">
+                    <button className="text-xs bg-white hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg border border-slate-200 transition-all hover:border-solar-400 shadow-sm hover:shadow-sm hover:text-solar-700">
                         Ver Leads Industriais
                     </button>
                 </div>
@@ -69,7 +69,7 @@ export const DashboardRightSidebar = ({ isOpen: _isOpen, onClose: _onClose }) =>
                     </div>
 
                     <input
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-10 text-sm text-slate-700 placeholder-slate-400 focus:ring-1 focus:ring-solar-500 focus:border-solar-500 transition-all shadow-inner focus:bg-white focus:outline-none font-sans"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-10 text-sm text-slate-700 placeholder-slate-400 focus:border-petroleum/60 focus:ring-0 focus:outline-none transition-all shadow-inner focus:bg-white focus:outline-none font-sans"
                         placeholder="Perguntar ao Copiloto..."
                         type="text"
                         value={inputValue}
@@ -78,7 +78,7 @@ export const DashboardRightSidebar = ({ isOpen: _isOpen, onClose: _onClose }) =>
                     />
 
                     <button
-                        className={`absolute right-2 top-2 p-1 rounded-lg text-white transition-all duration-200 ${inputValue.trim() ? 'bg-solar-500 hover:bg-solar-600 shadow-sm' : 'bg-slate-300 cursor-not-allowed'
+                        className={`absolute right-2 top-2 p-1 rounded-lg text-white transition-all duration-200 ${inputValue.trim() ? 'bg-solar hover:bg-amber-600 shadow-sm' : 'bg-slate-300 cursor-not-allowed'
                             }`}
                         disabled={!inputValue.trim()}
                     >

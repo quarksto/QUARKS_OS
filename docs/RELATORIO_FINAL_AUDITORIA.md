@@ -14,7 +14,7 @@
 
 ### Principais Descobertas
 
-1. **✅ Dashboard (/)** - 100% conforme ao Design System v1.3 (referência)
+1. **✅ Dashboard (/)** - 100% conforme ao Design System v1.4 (referência)
 2. **❌ Workspace (/workspace)** - Usa `HybridShell` customizado, NÃO conforme ao DS
 3. **⚠️ Demais rotas** - Usam `UnifiedShell` (ProtectedLayout), precisam de validação
 

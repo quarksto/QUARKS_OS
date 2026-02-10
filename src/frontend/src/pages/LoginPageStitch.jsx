@@ -110,7 +110,7 @@ export default function LoginPage() {
                                         mail
                                     </span>
                                     <input
-                                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-petroleum/20 focus:border-petroleum transition-all placeholder:text-slate-400"
+                                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 focus:outline-none focus:border-petroleum/60 focus:ring-0 transition-all placeholder:text-slate-400"
                                         placeholder="seu@email.com"
                                         type="email"
                                         required
@@ -130,7 +130,7 @@ export default function LoginPage() {
                                         lock
                                     </span>
                                     <input
-                                        className="w-full pl-10 pr-10 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-petroleum/20 focus:border-petroleum transition-all placeholder:text-slate-400"
+                                        className="w-full pl-10 pr-10 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 focus:outline-none focus:border-petroleum/60 focus:ring-0 transition-all placeholder:text-slate-400"
                                         placeholder="••••••••"
                                         type={showPassword ? "text" : "password"}
                                         required
@@ -172,7 +172,7 @@ export default function LoginPage() {
 
                             {/* CTA Button */}
                             <button
-                                className="w-full bg-solar-500 hover:bg-solar-600 text-white font-bold py-3.5 rounded-lg shadow-md transition-all transform active:scale-[0.98] mt-2 flex items-center justify-center gap-2"
+                                className="w-full bg-solar hover:bg-amber-600 text-white font-bold py-3.5 rounded-lg shadow-sm transition-all transform active:scale-[0.98] mt-2 flex items-center justify-center gap-2"
                                 type="submit"
                                 disabled={loading}
                             >

@@ -16,6 +16,8 @@ class MaestroAgent {
         this.registerAgent('proposal', proposalAgent);
         this.registerAgent('product', productAgent);
         this.registerAgent('pricing', require('../agents/pricing-domain'));
+        this.registerAgent('project', require('../agents/project-domain'));
+        this.registerAgent('message', require('../agents/message-domain'));
         const CopilotDomainAgent = require('../agents/copilot-domain');
         this.registerAgent('copilot', new CopilotDomainAgent(this));
         // Visual Design (Sprint 6)
@@ -40,6 +42,8 @@ class MaestroAgent {
                     return await this.workflowCreateLead(payload);
                 case 'PREVIEW_PROPOSAL_WORKFLOW':
                     return await this.workflowPreviewProposal(payload);
+                case 'DIMENSIONAMENTO':
+                    return await this.workflowDimensionamento(payload);
                 case 'GET_PROJECTS_SUMMARY':
                     return await this.agents['project'].execute('GET_PROJECTS', payload);
                 case 'GET_PROJECT_DETAILS':
@@ -103,10 +107,30 @@ class MaestroAgent {
         // 2. Select Kit (Node)
         if (!this.agents['product']) throw new Error('Product Agent not available');
 
-        let selectedKit = reqPayload.kit;
+        let selectedKit = kit;
         // If no custom kit passed, find best preset
         if (!selectedKit || (!selectedKit.id && !selectedKit.isCustom)) {
             selectedKit = await this.agents['product'].execute('FIND_BEST_KIT', calculation.systemSizeKwp ?? calculation.system_size_kwp ?? 5);
+        } else if (selectedKit.isCustom) {
+            // Map frontend custom kit to backend items format
+            const items = [];
+            if (selectedKit.module) {
+                items.push({
+                    product: selectedKit.module,
+                    quantity: parseFloat(selectedKit.modulesCount) || 0
+                });
+            }
+            if (selectedKit.inverter) {
+                items.push({
+                    product: selectedKit.inverter,
+                    quantity: 1
+                });
+            }
+            selectedKit = {
+                ...selectedKit,
+                name: "Kit Customizado",
+                items: items
+            };
         }
 
         // 3. Pricing (Node)
@@ -177,6 +201,52 @@ class MaestroAgent {
                 total: pricing.totalPrice,
                 breakdown: pricing.breakdown
             }
+        };
+    }
+
+    /**
+     * Dimensionamento: consumption + distributor -> system size, ROI, payback.
+     * Usado pela DimensionamentoPage e Copilot.
+     */
+    async workflowDimensionamento({ consumption, distributor, state = 'SP' }) {
+        if (!this.agents['calc']) throw new Error('Calc Agent not available');
+        const calculation = await this.agents['calc'].execute('CALCULATE_GENERATION', { consumption });
+
+        if (!this.agents['product']) throw new Error('Product Agent not available');
+        const kit = await this.agents['product'].execute('FIND_BEST_KIT', calculation.systemSizeKwp ?? calculation.system_size_kwp ?? 5);
+
+        if (!this.agents['pricing']) throw new Error('Pricing Agent not available');
+        const pricing = await this.agents['pricing'].execute('CALCULATE_PRICE', {
+            kit,
+            state: state || 'SP',
+            kWp: calculation.systemSizeKwp ?? calculation.system_size_kwp ?? 5
+        });
+
+        const tariffData = await this.agents['calc'].execute('GET_TARIFF', {
+            distributor: distributor || 'CEMIG',
+            state: state || 'SP',
+            consumption
+        });
+
+        const roiData = await this.agents['calc'].execute('CALCULATE_ROI', {
+            systemCost: pricing?.totalPrice || 15000,
+            generationMonthly: calculation.generationMonthly,
+            tariffPrice: tariffData.price_kwh || 0.95
+        });
+
+        return {
+            consumption,
+            distributor: tariffData.distributor || distributor,
+            state,
+            systemSizeKwp: calculation.systemSizeKwp ?? calculation.system_size_kwp,
+            generationMonthly: calculation.generationMonthly,
+            panelsCount: calculation.panelsCount ?? calculation.panels_count,
+            areaRequired: calculation.areaRequired ?? calculation.area_required_m2,
+            kitName: kit?.name,
+            totalPrice: pricing?.totalPrice,
+            monthlySavings: roiData.monthly_savings,
+            paybackYears: roiData.payback_years,
+            tariffPrice: tariffData.price_kwh
         };
     }
 }

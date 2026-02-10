@@ -49,7 +49,7 @@ const Avatar = ({ name, url }) => {
 // Stitch-style Kanban Badge
 const StitchBadge = ({ label, colorClass, dotColor }) => (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border ${colorClass} bg-white shadow-sm`}>
-        {dotColor && <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />}
+        {dotColor && <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} aria-hidden />}
         {label}
     </span>
 );
@@ -137,7 +137,7 @@ export const LeadListTable = ({ leads, loading, filters, onRefresh, onLeadClick,
             </div>
 
             {/* Main Table Container - Stitch Style: Clean card, no inner borders, hover states */}
-            <div className="flex-1 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+            <div className="flex-1 bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden flex flex-col">
                 <div className="overflow-auto custom-scrollbar flex-1">
                     <table className="w-full text-left border-collapse">
                         <thead className="bg-[#F8FAFC] sticky top-0 z-10 border-b border-slate-200">
@@ -210,13 +210,13 @@ export const LeadListTable = ({ leads, loading, filters, onRefresh, onLeadClick,
 
                                             {/* Temp */}
                                             <td className="py-4 px-6">
-                                                <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium border ${temp.label === 'Quente' ? 'bg-red-50 border-red-100 text-red-700' :
-                                                    temp.label === 'Morno' ? 'bg-amber-50 border-amber-100 text-amber-700' :
-                                                        'bg-slate-50 border-slate-100 text-slate-600'
+                                                <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium border bg-white ${temp.label === 'Quente' ? 'border-red-200 text-red-700' :
+                                                    temp.label === 'Morno' ? 'border-amber-200 text-amber-700' :
+                                                        'border-slate-200 text-slate-600'
                                                     }`}>
-                                                    <span className={`w-1.5 h-1.5 rounded-full ${temp.label === 'Quente' ? 'bg-red-500' :
-                                                        temp.label === 'Morno' ? 'bg-amber-500' : 'bg-slate-400'
-                                                        }`} />
+                                                    <span className={`w-1.5 h-1.5 rounded-full ${temp.label === 'Quente' ? 'bg-red-400' :
+                                                        temp.label === 'Morno' ? 'bg-amber-400' : 'bg-slate-400'
+                                                        }`} aria-hidden />
                                                     {temp.label}
                                                 </span>
                                             </td>
@@ -295,7 +295,7 @@ export const LeadListTable = ({ leads, loading, filters, onRefresh, onLeadClick,
                         <button
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage(p => p > 1 ? p - 1 : 1)}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 disabled:opacity-30 transition-colors"
+                            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-500 disabled:opacity-30 transition-colors"
                         >
                             <span className="material-symbols-outlined text-[18px]">chevron_left</span>
                         </button>
@@ -305,7 +305,7 @@ export const LeadListTable = ({ leads, loading, filters, onRefresh, onLeadClick,
                         <button
                             disabled={currentPage >= totalPages}
                             onClick={() => setCurrentPage(p => p < totalPages ? p + 1 : p)}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 disabled:opacity-30 transition-colors"
+                            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-500 disabled:opacity-30 transition-colors"
                         >
                             <span className="material-symbols-outlined text-[18px]">chevron_right</span>
                         </button>

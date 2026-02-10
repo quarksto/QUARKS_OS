@@ -15,7 +15,7 @@ O que **foi usado com sucesso**:
 - **list_projects** — descobrir o projeto "Quarks OS Sales Dashboard" e os IDs.
 - **list_screens** — obter os ecrãs e `screenId` para referência.
 - **create_project** — criar projeto para futuras gerações.
-- **Referência de design** — o layout (sidebar, KPIs, barra de insight IA, kanban em 4 colunas) foi alinhado ao que existe no Stitch; a UI React foi implementada manualmente seguindo o DS v1.
+- **Referência de design** — o layout (sidebar, KPIs, barra de insight IA, kanban em 4 colunas) foi alinhado ao que existe no Stitch; a UI React foi implementada manualmente seguindo o DS v1.4.
 
 **Conclusão:** O MCP foi usado corretamente para **descoberta e referência**. O fluxo completo (gerar ecrã a partir de texto e obter código) ficou bloqueado por limitações da API Stitch; quando a API estabilizar, deve-se tentar de novo `generate_screen_from_text` e `fetch_screen_code` com os IDs documentados abaixo e adaptar o resultado ao DS.
 
@@ -49,7 +49,7 @@ Quando **fetch_screen_code** ou **get_screen** funcionarem com a API, usar o `pr
 
 ## Layout único e módulos (2026-02)
 
-Todos os módulos usam o **mesmo shell** (Sidebar + Header + main) e o **Design System v1**:
+Todos os módulos usam o **mesmo shell** (Sidebar + Header + main) e o **Design System v1.4**:
 
 - **DashboardShell** (`src/frontend/src/components/dashboard/DashboardShell.jsx`) — layout reutilizável: Sidebar + DashboardHeader + main. Usado por Dashboard, Leads, Propostas, Chat IA, Projetos, Dimensionamento IA, Cronograma.
 - **DashboardSidebar** — navegação com rotas reais: `/`, `/dashboard`, `/leads`, `/chat`, `/proposals`, `/projetos`, `/dimensionamento`, `/cronograma`. Estado colapsado persistido em `localStorage` (LayoutContext).

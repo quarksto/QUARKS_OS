@@ -4,7 +4,7 @@ import { LeadListTableRefactored } from './LeadListTableRefactored';
 import api from '../../services/api';
 import { StandardAvatar } from '../ui/StandardAvatar';
 import { FaWhatsapp, FaGoogle, FaFacebookF, FaInstagram, FaLinkedinIn, FaGlobe, FaBuilding, FaBolt } from 'react-icons/fa6';
-import { MdOutlineMoreVert, MdLocationOn, MdFactory, MdBolt, MdHistory, MdCalendarToday, MdArchive, MdVisibility, MdSwapHoriz, MdSolarPower, MdChevronRight, MdCheck, MdAdd, MdSettings, MdViewKanban, MdTableRows } from 'react-icons/md';
+import { MdOutlineMoreVert, MdLocationOn, MdFactory, MdBolt, MdHistory, MdCalendarToday, MdArchive, MdVisibility, MdSwapHoriz, MdSolarPower, MdPayments, MdChevronRight, MdCheck, MdAdd, MdSettings, MdClose } from 'react-icons/md';
 
 import {
     formatCurrencyCompact,
@@ -20,17 +20,18 @@ import {
 // Configuration & Helpers
 // ----------------------------------------------------------------------
 
+/* DS: bordas sutis slate-100/200; indicador de coluna em outline (sem bg sólido); sem roxo/indigo */
 const SALES_FUNNEL = {
     id: 'sales_default',
     name: 'Funil de Vendas',
     icon: MdSolarPower,
     columns: [
-        { title: 'Novos Leads', id: 'NEW', color: 'blue', accent: 'bg-blue-500', text: 'text-blue-700', bg: 'bg-blue-100' },
-        { title: 'Qualificação', id: 'CONTACTED', color: 'yellow', accent: 'bg-amber-400', text: 'text-amber-700', bg: 'bg-amber-100' },
-        { title: 'Proposta', id: 'PROPOSAL_SENT', color: 'cyan', accent: 'bg-cyan-500', text: 'text-cyan-700', bg: 'bg-cyan-100' },
-        { title: 'Negociação', id: 'NEGOTIATION', color: 'orange', accent: 'bg-orange-500', text: 'text-orange-700', bg: 'bg-orange-100' },
-        { title: 'Fechados', id: 'CLOSED_WON', color: 'emerald', accent: 'bg-emerald-500', text: 'text-emerald-700', bg: 'bg-emerald-100' },
-        { title: 'Perdidos', id: 'CLOSED_LOST', color: 'slate', accent: 'bg-slate-400', text: 'text-slate-700', bg: 'bg-slate-100' },
+        { title: 'Novos Leads', id: 'NEW', borderDot: 'border-slate-300' },
+        { title: 'Qualificação', id: 'CONTACTED', borderDot: 'border-amber-200' },
+        { title: 'Proposta', id: 'PROPOSAL_SENT', borderDot: 'border-slate-300' },
+        { title: 'Negociação', id: 'NEGOTIATION', borderDot: 'border-slate-300' },
+        { title: 'Fechados', id: 'CLOSED_WON', borderDot: 'border-emerald-200' },
+        { title: 'Perdidos', id: 'CLOSED_LOST', borderDot: 'border-slate-200' },
     ]
 };
 
@@ -39,11 +40,11 @@ const PARTNERSHIP_FUNNEL = {
     name: 'Funil de Parcerias',
     icon: MdSwapHoriz,
     columns: [
-        { title: 'Novos Parceiros', id: 'NEW_PARTNER', color: 'indigo', accent: 'bg-indigo-500', text: 'text-indigo-700', bg: 'bg-indigo-100' },
-        { title: 'Reunião Agendada', id: 'MEETING_SCHEDULED', color: 'blue', accent: 'bg-blue-500', text: 'text-blue-700', bg: 'bg-blue-100' },
-        { title: 'Em Análise', id: 'UNDER_REVIEW', color: 'amber', accent: 'bg-amber-400', text: 'text-amber-700', bg: 'bg-amber-100' },
-        { title: 'Contrato Enviado', id: 'CONTRACT_SENT', color: 'cyan', accent: 'bg-cyan-500', text: 'text-cyan-700', bg: 'bg-cyan-100' },
-        { title: 'Parceria Ativa', id: 'ACTIVE_PARTNER', color: 'emerald', accent: 'bg-emerald-500', text: 'text-emerald-700', bg: 'bg-emerald-100' },
+        { title: 'Novos Parceiros', id: 'NEW_PARTNER', borderDot: 'border-slate-300' },
+        { title: 'Reunião Agendada', id: 'MEETING_SCHEDULED', borderDot: 'border-slate-300' },
+        { title: 'Em Análise', id: 'UNDER_REVIEW', borderDot: 'border-amber-200' },
+        { title: 'Contrato Enviado', id: 'CONTRACT_SENT', borderDot: 'border-slate-300' },
+        { title: 'Parceria Ativa', id: 'ACTIVE_PARTNER', borderDot: 'border-emerald-200' },
     ]
 };
 
@@ -84,17 +85,19 @@ const KanbanCard = ({ lead, onClick, onDragStart, isDragError, activeMenuId, onT
     const handleMenuAction = (e, action) => {
         e.stopPropagation();
         onToggleMenu(null);
-        if (action === 'edit') onClick(lead);
+        if (action === 'edit') navigate(`/leads/${lead.id}`);
     };
 
     // Helper for Origin Icon
+    /* DS: apenas petroleum, solar, slate, white — ícones de origem em slate */
     const getOriginIcon = (origin) => {
         const o = origin?.toLowerCase() || '';
-        if (o.includes('google')) return <FaGoogle size={14} className="text-slate-500" />;
-        if (o.includes('facebook')) return <FaFacebookF size={14} className="text-blue-600" />;
-        if (o.includes('instagram')) return <FaInstagram size={14} className="text-pink-600" />;
-        if (o.includes('linkedin')) return <FaLinkedinIn size={14} className="text-blue-700" />;
-        return <FaGlobe size={14} className="text-slate-400" />;
+        const cls = 'text-slate-500 shrink-0';
+        if (o.includes('google')) return <FaGoogle size={10} className={cls} aria-hidden="true" />;
+        if (o.includes('facebook')) return <FaFacebookF size={10} className={cls} aria-hidden="true" />;
+        if (o.includes('instagram')) return <FaInstagram size={10} className={cls} aria-hidden="true" />;
+        if (o.includes('linkedin')) return <FaLinkedinIn size={10} className={cls} aria-hidden="true" />;
+        return <FaGlobe size={10} className="text-slate-400 shrink-0" aria-hidden="true" />;
     };
 
     return (
@@ -102,133 +105,130 @@ const KanbanCard = ({ lead, onClick, onDragStart, isDragError, activeMenuId, onT
             draggable
             onDragStart={(e) => onDragStart(e, lead, lead.status)}
             onClick={() => onClick(lead)}
-            className={`technical-card p-3 rounded-xl border border-slate-200/60 hover:border-slate-300 shadow-sm hover:shadow-md group relative overflow-visible active:cursor-grabbing transition-all duration-200 ${isDragError ? 'border-red-400 ring-4 ring-red-50 animate-shake' : ''} ${isMenuOpen ? 'z-40 ring-1 ring-slate-200 shadow-xl' : ''}`}
+            className={`flex flex-col gap-4 p-5 rounded-lg border border-slate-200 bg-white hover:border-slate-300 transition-colors cursor-pointer group relative overflow-visible shadow-none active:scale-[0.98] ${isDragError ? 'border-red-400 animate-shake' : ''} ${isMenuOpen ? 'z-40' : ''}`}
         >
             {/* 1. Header: Avatar & Primary Metadata */}
-            <div className="flex justify-between items-start gap-3 mb-3">
-                <div className="flex gap-3 flex-1 min-w-0">
-                    <StandardAvatar
-                        name={lead.name}
-                        src={avatarSrc}
-                        size="md"
-                        channel={channel}
-                        className="bg-slate-50 border-slate-100 shadow-sm shrink-0"
-                    />
-                    <div className="flex-1 min-w-0 pt-0.5">
-                        <h4 className="ds-title text-slate-900 font-bold truncate group-hover:text-amber-600 transition-colors leading-tight mb-0.5">
-                            {lead.name}
-                        </h4>
-                        <div className="flex items-center gap-1.5 ds-meta text-slate-400 truncate font-semibold">
-                            <MdLocationOn size={14} className="shrink-0 opacity-40" />
-                            <span className="truncate">{address}</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Quick Actions Menu */}
-                <div className={`flex items-center gap-0.5 shrink-0 transition-all duration-300 ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0'}`}>
-                    <button
-                        onClick={(e) => handleAction(e, 'whatsapp')}
-                        className="w-8 h-8 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 flex items-center justify-center transition-colors"
-                        title="WhatsApp"
-                    >
-                        <FaWhatsapp size={18} />
-                    </button>
-                    <div className="relative">
-                        <button
-                            onClick={(e) => handleAction(e, 'more')}
-                            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isMenuOpen ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-100'}`}
-                        >
-                            <MdOutlineMoreVert size={20} />
-                        </button>
-                        {isMenuOpen && (
-                            <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl shadow-2xl border border-slate-100 py-1.5 z-[100] animate-fadeIn origin-top-right overflow-hidden">
-                                <button onClick={(e) => handleMenuAction(e, 'edit')} className="w-full text-left px-4 py-3 ds-body hover:bg-slate-50 hover:text-amber-600 flex items-center gap-3 transition-colors">
-                                    <MdVisibility size={18} className="opacity-40 text-slate-400" />
-                                    <span className="font-medium">Detalhes do Lead</span>
-                                </button>
-                                <button onClick={(e) => handleMenuAction(e, 'move')} className="w-full text-left px-4 py-3 ds-body hover:bg-slate-50 hover:text-amber-600 flex items-center gap-3 transition-colors">
-                                    <MdSwapHoriz size={18} className="opacity-40 text-slate-400" />
-                                    <span className="font-medium">Mover Funil</span>
-                                </button>
-                                <div className="border-t border-slate-50 my-1 mx-2"></div>
-                                <button onClick={(e) => handleMenuAction(e, 'archive')} className="w-full text-left px-4 py-3 ds-body text-rose-500 hover:bg-rose-50 flex items-center gap-3 transition-colors font-bold">
-                                    <MdArchive size={18} />
-                                    <span>Arquivar Lead</span>
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* 2. Secondary Context: Technical Details */}
-            <div className="grid grid-cols-2 gap-2 mb-3">
-                <div className="flex flex-col gap-1 min-w-0 bg-slate-50/50 p-2 rounded-lg border border-slate-100/50">
-                    <span className="ds-label uppercase tracking-[0.1em] text-[8.5px] font-black opacity-40">Distribuidora</span>
-                    <div className="flex items-center gap-2 ds-data text-slate-700 truncate font-bold">
-                        <MdFactory size={16} className="text-slate-300" />
-                        <span className="truncate">{distributor}</span>
-                    </div>
-                </div>
-                <div className="flex flex-col gap-1 min-w-0 bg-slate-50/50 p-2 rounded-lg border border-slate-100/50">
-                    <span className="ds-label uppercase tracking-[0.1em] text-[8.5px] font-black opacity-40">Consumo Médio</span>
-                    <div className="flex items-center gap-2 ds-data text-slate-700 truncate font-bold">
-                        <MdBolt size={16} className="text-slate-300" />
-                        <span className="truncate">{consumption}</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* 3. Indicators: Badges & Tags */}
-            <div className="flex flex-wrap items-center gap-1.5 mb-3">
-                <div className={`badge-kanban !rounded-full px-3 gap-2 py-1 border transition-colors bg-white ${temperature.label === 'Quente' ? 'border-rose-200 text-rose-600' :
-                    temperature.label === 'Morno' ? 'border-amber-200 text-amber-600' :
-                        'border-slate-200 text-slate-500'
-                    }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${temperature.label === 'Quente' ? 'bg-rose-500 shadow-[0_0_5px_rgba(244,63,94,0.5)]' :
-                        temperature.label === 'Morno' ? 'bg-amber-500' :
-                            'bg-slate-400'
-                        }`} />
-                    <span className="font-black tracking-widest">{temperature.label}</span>
-                </div>
-                <div className="badge-kanban-origin !rounded-full px-3 gap-2 py-1 border border-slate-200 bg-white text-slate-600 flex items-center">
-                    {getOriginIcon(captureMethod)}
-                    <span className="font-bold tracking-tight">{captureMethod}</span>
-                </div>
-            </div>
-
-            {/* 4. IA Engine Results: Score & Potential */}
-            <div className="bg-slate-50/50 border border-slate-100/50 rounded-xl p-3 flex items-center justify-between gap-4 mb-3">
-                <div className="flex flex-col gap-0.5">
-                    <span className="ds-label uppercase text-[9px] font-black opacity-40 tracking-wider">IA Score</span>
-                    <div className="flex items-baseline gap-1.5">
-                        <span className={`ds-title !text-xl font-black tabular-nums transition-colors ${score >= 70 ? 'text-emerald-600' : score >= 40 ? 'text-amber-500' : 'text-slate-400'}`}>
-                            {score}
+            <div className="flex items-center gap-4">
+                <div className="relative shrink-0">
+                    <div className="size-12 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100">
+                        <span className="text-slate-600 font-bold text-lg">
+                            {(lead.name || 'Lead').split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                         </span>
-                        <span className="ds-meta text-[10px] opacity-30 font-bold">PTS</span>
+                    </div>
+                    {/* WhatsApp Badge */}
+                    <div className="absolute -bottom-1 -right-1 border border-emerald-200 bg-white size-5 rounded-full flex items-center justify-center text-emerald-600">
+                        <FaWhatsapp size={10} />
                     </div>
                 </div>
-                <div className="h-8 w-px bg-slate-200/60"></div>
-                <div className="flex flex-col items-end gap-0.5">
-                    <span className="ds-label uppercase text-[9px] font-black opacity-40 tracking-wider">Potencial</span>
-                    <span className="ds-data !text-[17px] font-black text-slate-900 tracking-tight tabular-nums">
+
+                <div className="flex flex-col min-w-0 flex-1">
+                    <h4 className="text-[15px] font-bold text-slate-700 truncate leading-tight group-hover:text-petroleum transition-colors">
+                        {lead.name}
+                    </h4>
+                    <div className="flex items-center gap-1 mt-0.5">
+                        <MdLocationOn className="text-slate-400 size-3.5" />
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+                            {address}
+                        </span>
+                    </div>
+                </div>
+
+                <div className="relative shrink-0">
+                    <button
+                        onClick={(e) => handleAction(e, 'more')}
+                        className={`size-8 rounded-full flex items-center justify-center transition-colors border border-transparent ${isMenuOpen ? 'bg-petroleum text-white' : 'text-slate-300 hover:bg-slate-50 hover:text-slate-500'}`}
+                        aria-label="Mais ações"
+                    >
+                        <MdOutlineMoreVert size={20} aria-hidden="true" />
+                    </button>
+                    {isMenuOpen && (
+                        <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-lg shadow-sm border border-slate-200 py-1.5 z-50 overflow-hidden" role="menu">
+                            <button onClick={(e) => handleMenuAction(e, 'edit')} className="w-full text-left px-4 py-3 ds-body hover:bg-slate-50 hover:text-petroleum flex items-center gap-3 transition-colors focus:outline-none">
+                                <MdVisibility size={18} className="opacity-40 text-slate-400" aria-hidden="true" />
+                                <span className="ds-body font-medium">Detalhes do Lead</span>
+                            </button>
+                            <button onClick={(e) => handleMenuAction(e, 'move')} className="w-full text-left px-4 py-3 ds-body hover:bg-slate-50 hover:text-petroleum flex items-center gap-3 transition-colors focus:outline-none">
+                                <MdSwapHoriz size={18} className="opacity-40 text-slate-400" aria-hidden="true" />
+                                <span className="ds-body font-medium">Mover Funil</span>
+                            </button>
+                            <div className="border-t border-slate-50 my-1 mx-2"></div>
+                            <button onClick={(e) => handleMenuAction(e, 'archive')} className="w-full text-left px-4 py-3 ds-body text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors font-medium">
+                                <MdArchive size={18} aria-hidden="true" />
+                                <span>Arquivar Lead</span>
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* 2. Metrics Grid: Consumption & Distributor */}
+            <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col p-3 rounded-lg border border-slate-100 bg-white group-hover:border-slate-200 transition-colors">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                        Distribuidora
+                    </span>
+                    <div className="flex items-center gap-2">
+                        <MdFactory className="text-slate-300 size-4" />
+                        <span className="text-[13px] font-semibold text-slate-700 truncate">{distributor}</span>
+                    </div>
+                </div>
+                <div className="flex flex-col p-3 rounded-lg border border-slate-100 bg-white group-hover:border-slate-200 transition-colors">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                        Consumo Médio
+                    </span>
+                    <div className="flex items-center gap-2">
+                        <MdBolt className="text-slate-300 size-4" />
+                        <span className="text-[13px] font-semibold text-slate-700">{consumption}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* 3. Indicators: Badges em outline — altura do menor badge */}
+            <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-100 bg-white shrink-0 min-h-0">
+                    <div className={`size-1.5 rounded-full shrink-0 ${temperature.label === 'Quente' ? 'bg-red-400' : temperature.label === 'Morno' ? 'bg-amber-400' : 'bg-slate-300'}`} />
+                    <span className="text-[10px] font-bold text-slate-500 tracking-wide uppercase leading-none">{temperature.label}</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-100 bg-white shrink-0 min-h-0">
+                    <span aria-hidden="true" className="flex items-center shrink-0 leading-none">{getOriginIcon(captureMethod)}</span>
+                    <span className="text-[10px] font-bold text-slate-500 tracking-wide uppercase leading-none">{captureMethod}</span>
+                </div>
+            </div>
+
+            {/* 4. IA Score & Potencial — DS: Rounded-lg, divide-x */}
+            <div className="flex rounded-lg border border-slate-100 bg-slate-50/50 overflow-hidden divide-x divide-slate-100">
+                <div className="flex-1 p-3">
+                    <div className="flex items-center gap-1.5 mb-1">
+                        <MdSolarPower className="text-solar size-3.5" />
+                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">IA Score</span>
+                    </div>
+                    <div className="flex items-baseline gap-1">
+                        <span className="text-xl font-bold text-slate-700 tabular-nums">{score}</span>
+                        <span className="text-[9px] font-bold text-slate-400">PTS</span>
+                    </div>
+                </div>
+                <div className="flex-1 p-3 flex flex-col items-end">
+                    <div className="flex items-center gap-1.5 mb-1">
+                        <MdPayments className="text-slate-400 size-3.5" />
+                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Potencial</span>
+                    </div>
+                    <span className="text-lg font-bold text-slate-700 tabular-nums">
                         {formatCurrencyCompact(potential)}
                     </span>
                 </div>
             </div>
 
-            {/* 5. Persistence: Tasks & Aging */}
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100/50">
-                <div className="flex items-center gap-2 text-slate-400 group/footer min-w-0 max-w-[75%]">
-                    <MdCalendarToday size={16} className={`transition-colors ${nextAction.icon === 'priority_high' ? 'text-rose-500' : 'group-hover/footer:text-slate-600'}`} />
-                    <span className="ds-meta font-black truncate group-hover/footer:text-slate-600 transition-colors uppercase tracking-widest text-[9.5px]">
+            {/* 5. Footer: Próxima ação e tempo na etapa */}
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-slate-500 hover:text-petroleum transition-colors min-w-0">
+                    <MdCalendarToday size={14} className={`shrink-0 ${nextAction.icon === 'priority_high' ? 'text-red-500' : ''}`} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest truncate">
                         {nextAction.label || 'Nenhuma Agenda'}
                     </span>
                 </div>
-                <div className="flex items-center gap-1.5 ds-meta font-black text-slate-400 tabular-nums px-2 py-0.5 bg-slate-50/50 rounded border border-slate-100/50" title="Tempo nesta etapa">
-                    <MdHistory size={14} className="opacity-40" />
-                    <span>{daysInStage}D</span>
+                <div className="flex items-center gap-1.5 px-0.5 py-0.5 rounded-[93px] border border-slate-100 text-slate-400 bg-white text-xs">
+                    <MdHistory size={14} />
+                    <span className="text-[10px] font-bold tabular-nums">{daysInStage}D</span>
                 </div>
             </div>
         </div>
@@ -288,9 +288,9 @@ export const KanbanBoard = ({
             name,
             icon: 'filter_alt',
             columns: [
-                { title: 'Início', id: `start_${Date.now()}`, color: 'blue', accent: 'bg-blue-500', text: 'text-blue-700', bg: 'bg-blue-100' },
-                { title: 'Em Progresso', id: `wip_${Date.now()}`, color: 'amber', accent: 'bg-amber-500', text: 'text-amber-700', bg: 'bg-amber-100' },
-                { title: 'Concluído', id: `done_${Date.now()}`, color: 'emerald', accent: 'bg-emerald-500', text: 'text-emerald-700', bg: 'bg-emerald-100' }
+                { title: 'Início', id: `start_${Date.now()}`, borderDot: 'border-slate-300' },
+                { title: 'Em Progresso', id: `wip_${Date.now()}`, borderDot: 'border-amber-200' },
+                { title: 'Concluído', id: `done_${Date.now()}`, borderDot: 'border-emerald-200' }
             ]
         };
         setAllFunnels([...allFunnels, newFunnel]);
@@ -304,7 +304,7 @@ export const KanbanBoard = ({
     };
 
     const handleAddColumn = () => {
-        setAllFunnels(prev => prev.map(funnel => funnel.id === currentFunnelId ? { ...funnel, columns: [...funnel.columns, { title: 'Nova Coluna', id: `COL_${Date.now()}`, color: 'slate', accent: 'bg-slate-400', text: 'text-slate-700', bg: 'bg-slate-100' }] } : funnel));
+        setAllFunnels(prev => prev.map(funnel => funnel.id === currentFunnelId ? { ...funnel, columns: [...funnel.columns, { title: 'Nova Coluna', id: `COL_${Date.now()}`, borderDot: 'border-slate-200' }] } : funnel));
     };
 
     const handleDeleteColumn = (colId) => {
@@ -312,7 +312,7 @@ export const KanbanBoard = ({
             setAllFunnels(prev => prev.map(funnel => funnel.id === currentFunnelId ? { ...funnel, columns: funnel.columns.filter(col => col.id !== colId) } : funnel));
     };
 
-    const handleCardClick = (lead) => onLeadClick ? onLeadClick(lead) : navigate(`/leads/${lead.id}`);
+    const handleCardClick = (lead) => navigate(`/leads/${lead.id}`);
     const handleToggleMenu = (leadId) => setActiveMenuLeadId(prev => prev === leadId ? null : leadId);
 
     const passesFilters = (lead) => {
@@ -358,46 +358,37 @@ export const KanbanBoard = ({
     };
 
     return (
-        <div className="flex flex-col gap-4 h-full relative" onClick={e => e.stopPropagation()}>
-            <div className="flex flex-wrap items-center justify-between gap-4 py-3 px-1 border-b border-dashed border-slate-200">
-                <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-2 h-full relative" onClick={e => e.stopPropagation()}>
+            <div className="flex flex-wrap items-center justify-between gap-2 py-2 px-1 border-b border-dashed border-slate-100">
+                <div className="flex items-center gap-2">
                     <div className="relative">
-                        <button onClick={e => { e.stopPropagation(); setIsFunnelSelectOpen(!isFunnelSelectOpen); }} className="flex items-center gap-2 text-slate-800 font-bold text-lg hover:text-primary transition-colors px-2 py-1 -ml-2 rounded-lg hover:bg-slate-50">
-                            <currentFunnel.icon size={20} className="text-slate-500" />
-                            {currentFunnel.name}
-                            <MdChevronRight size={20} className={`text-slate-400 transition-transform ${isFunnelSelectOpen ? 'rotate-90' : ''}`} />
+                        <button onClick={e => { e.stopPropagation(); setIsFunnelSelectOpen(!isFunnelSelectOpen); }} className="flex items-center gap-1.5 text-slate-700 font-semibold text-sm hover:text-petroleum transition-colors px-2 py-1 -ml-2 rounded-md hover:bg-slate-50 focus:outline-none focus-visible:border-petroleum border border-transparent" aria-expanded={isFunnelSelectOpen} aria-haspopup="true">
+                            <currentFunnel.icon size={16} className="text-slate-500 shrink-0" aria-hidden="true" />
+                            <span className="truncate max-w-[140px]">{currentFunnel.name}</span>
+                            <MdChevronRight size={16} className={`text-slate-400 transition-transform shrink-0 ${isFunnelSelectOpen ? 'rotate-90' : ''}`} aria-hidden="true" />
                         </button>
                         {isFunnelSelectOpen && (
-                            <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-50 animate-slideDown">
-                                <div className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">Seus Funis</div>
+                            <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-sm border border-slate-200 py-1 z-50 animate-slideDown" role="menu">
+                                <div className="px-3 py-2 text-meta border-b border-slate-100">Seus Funis</div>
                                 {allFunnels.map(f => (
-                                    <button key={f.id} onClick={() => setCurrentFunnelId(f.id)} className={`w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-slate-50 ${currentFunnel.id === f.id ? 'bg-slate-50 text-indigo-600' : 'text-slate-600'}`}>
-                                        <f.icon size={18} className={currentFunnel.id === f.id ? 'text-indigo-600' : 'text-slate-400'} />
+                                    <button key={f.id} onClick={() => setCurrentFunnelId(f.id)} className={`w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-slate-50 focus:outline-none focus-visible:bg-slate-50 ${currentFunnel.id === f.id ? 'bg-slate-50 text-petroleum' : 'text-slate-600'}`} role="menuitem">
+                                        <f.icon size={18} className={currentFunnel.id === f.id ? 'text-petroleum' : 'text-slate-400'} aria-hidden="true" />
                                         <span className="font-medium text-sm">{f.name}</span>
-                                        {currentFunnel.id === f.id && <MdCheck size={18} className="text-indigo-600 ml-auto" />}
+                                        {currentFunnel.id === f.id && <MdCheck size={18} className="text-petroleum ml-auto" aria-hidden="true" />}
                                     </button>
                                 ))}
-                                <div className="border-t border-slate-50 mt-1 pt-1">
-                                    <button onClick={e => { e.stopPropagation(); handleCreateFunnel(); }} className="w-full text-left px-4 py-2 flex items-center gap-3 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 text-xs font-medium">
-                                        <MdAdd size={16} /> Criar Novo Funil
+                                <div className="border-t border-slate-100 mt-1 pt-1">
+                                    <button onClick={e => { e.stopPropagation(); handleCreateFunnel(); }} className="w-full text-left px-4 py-2 flex items-center gap-3 text-slate-500 hover:text-petroleum hover:bg-slate-50 text-xs font-medium focus:outline-none focus-visible:bg-slate-50" role="menuitem">
+                                        <MdAdd size={16} aria-hidden="true" /> Criar Novo Funil
                                     </button>
                                 </div>
                             </div>
                         )}
                     </div>
-                    <span className="w-px h-6 bg-slate-200"></span>
-                    <button onClick={e => { e.stopPropagation(); setIsEditMode(!isEditMode); }} className={`p-1.5 rounded-lg transition-colors ${isEditMode ? 'bg-indigo-50 text-indigo-600' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`} title="Editar Funil">
-                        <MdSettings size={20} />
+                    <button onClick={e => { e.stopPropagation(); setIsEditMode(!isEditMode); }} className={`p-1 rounded-md transition-colors focus:outline-none focus-visible:border-petroleum border border-transparent shrink-0 ${isEditMode ? 'bg-slate-100 text-petroleum' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`} title="Editar Funil" aria-label="Editar funil">
+                        <MdSettings size={18} aria-hidden="true" />
                     </button>
-                    {isEditMode && <span className="text-xs text-indigo-600 font-medium animate-fadeIn">Modo de Edição</span>}
-                </div>
-                <div className="flex bg-slate-100 rounded-lg p-1">
-                    <button onClick={() => onChangeView?.('board')} className={`flex h-8 items-center gap-2 rounded-md px-3 text-xs transition-colors ${view === 'board' ? 'bg-white shadow-sm text-slate-800 font-bold' : 'text-slate-500 font-medium hover:bg-white/50'}`}>
-                        <MdViewKanban size={18} /> Board
-                    </button>
-                    <button onClick={() => onChangeView?.('list')} className={`flex h-8 items-center gap-2 rounded-md px-3 text-xs transition-colors ${view === 'list' ? 'bg-white shadow-sm text-slate-800 font-bold' : 'text-slate-500 font-medium hover:bg-white/50'}`}>
-                        <MdTableRows size={18} /> Lista
-                    </button>
+                    {isEditMode && <span className="text-[10px] text-petroleum font-semibold uppercase tracking-wide animate-fadeIn">Edição</span>}
                 </div>
             </div>
 
@@ -407,19 +398,19 @@ export const KanbanBoard = ({
                         const leads = filteredPipeline[col.id] || [];
                         const isDragOver = dragOverColId === col.id;
                         return (
-                            <div key={col.id} className={`flex flex-col w-[340px] shrink-0 h-full max-h-full rounded-xl bg-slate-50 border border-slate-200/60 p-2 transition-all ${isDragOver ? 'ring-2 ring-indigo-500/20 bg-slate-100' : ''}`} onDragOver={e => { e.preventDefault(); setDragOverColId(col.id); }} onDragLeave={() => setDragOverColId(null)} onDrop={e => handleDrop(e, col.id)}>
+                            <div key={col.id} className={`flex flex-col w-[340px] shrink-0 h-full max-h-full rounded-lg bg-slate-50/50 border border-slate-100 p-2 transition-colors duration-200 ${isDragOver ? 'border-petroleum/40 bg-slate-100/50' : ''}`} onDragOver={e => { e.preventDefault(); setDragOverColId(col.id); }} onDragLeave={() => setDragOverColId(null)} onDrop={e => handleDrop(e, col.id)}>
                                 <div className="flex items-center justify-between mb-3 px-2">
                                     <div className="flex items-center gap-2">
-                                        <div className={`size-3 rounded-full ${col.accent.replace('bg-', 'bg-')} shadow-sm`}></div>
-                                        {isEditMode ? <input type="text" value={col.title} onChange={e => handleUpdateColumnTitle(col.id, e.target.value)} className="text-sm font-bold text-slate-900 bg-white border border-slate-200 rounded px-1 py-0.5 outline-none max-w-[150px]" /> : <h3 className="text-sm font-bold text-slate-900">{col.title}</h3>}
-                                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white text-slate-600 border border-slate-200 shadow-sm">{leads.length}</span>
+                                        <div className={`size-3 rounded-full border bg-transparent ${col.borderDot || 'border-slate-200'}`} aria-hidden="true" />
+                                        {isEditMode ? <input type="text" value={col.title} onChange={e => handleUpdateColumnTitle(col.id, e.target.value)} className="text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg px-2 py-0.5 outline-none max-w-[150px] focus:border-petroleum/60" aria-label="Nome da coluna" /> : <h3 className="ds-title-section text-slate-700">{col.title}</h3>}
+                                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white text-slate-600 border border-slate-200">{leads.length}</span>
                                     </div>
-                                    {!isEditMode ? <span className="text-xs font-medium text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200 shadow-sm">{formatCurrencyCompact(getColumnTotal(leads))}</span> : <button onClick={() => handleDeleteColumn(col.id)} className="text-slate-400 hover:text-red-500 transition-colors p-1"><MdClose size={18} /></button>}
+                                    {!isEditMode ? <span className="text-xs font-medium text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200">{formatCurrencyCompact(getColumnTotal(leads))}</span> : <button onClick={() => handleDeleteColumn(col.id)} className="text-slate-400 hover:text-red-600 p-1 rounded-full focus:outline-none focus-visible:border-petroleum border border-transparent" aria-label="Excluir coluna"><MdClose size={18} aria-hidden="true" /></button>}
                                 </div>
                                 <div className="flex-1 flex flex-col gap-3 overflow-y-auto custom-scrollbar px-1 pb-1">
-                                    {leads.length > 0 ? leads.map(l => <KanbanCard key={l.id} lead={l} onClick={handleCardClick} onDragStart={handleDragStart} isDragError={dragErrorLeadId === l.id} activeMenuId={activeMenuLeadId} onToggleMenu={handleToggleMenu} />) : <div className="h-32 rounded-xl border-2 border-dashed border-slate-200/50 flex flex-col items-center justify-center text-slate-300 gap-2 hover:bg-slate-100/50 transition-colors bg-slate-50/50"><MdArchive size={24} className="opacity-30" /><span className="text-xs font-medium opacity-50">Vazio</span></div>}
+                                    {leads.length > 0 ? leads.map(l => <KanbanCard key={l.id} lead={l} onClick={handleCardClick} onDragStart={handleDragStart} isDragError={dragErrorLeadId === l.id} activeMenuId={activeMenuLeadId} onToggleMenu={handleToggleMenu} />) : <div className="h-32 rounded-lg border border-dashed border-slate-100 flex flex-col items-center justify-center text-slate-500 gap-2 bg-slate-50/50"><MdArchive size={24} className="text-slate-300" aria-hidden="true" /><span className="text-xs font-medium">Vazio</span></div>}
                                 </div>
-                                {isEditMode && <div onClick={handleAddColumn} className="mt-3 p-3 rounded-xl border border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:bg-white text-slate-400 hover:text-indigo-600 transition-all text-xs font-bold"><MdAdd size={16} className="mr-1" /> Nova Coluna</div>}
+                                {isEditMode && <button type="button" onClick={handleAddColumn} className="mt-3 p-3 rounded-lg border border-dashed border-slate-200 flex items-center justify-center cursor-pointer hover:bg-white text-slate-500 hover:text-petroleum transition-colors duration-200 text-xs font-bold focus:outline-none focus-visible:border-petroleum"><MdAdd size={16} className="mr-1" aria-hidden="true" /> Nova Coluna</button>}
                             </div>
                         );
                     })}

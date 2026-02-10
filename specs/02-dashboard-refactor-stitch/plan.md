@@ -4,7 +4,7 @@
 
 ## Summary
 
-Refatorar a Dashboard usando agentes speckit (spec → plan → tasks → implement) e referência MCP Stitch. Nova Dashboard composta por componentes reutilizáveis, alinhada ao DS v1 e à estrutura do sistema (PRD, Technical Architecture). Dados via useDashboardData (APIs /analytics/dashboard e /leads/pipeline). Strangler: nova página + componentes; rota `/` passa a usar a nova Dashboard.
+Refatorar a Dashboard usando agentes speckit (spec → plan → tasks → implement) e referência MCP Stitch. Nova Dashboard composta por componentes reutilizáveis, alinhada ao DS v1.4 e à estrutura do sistema (PRD, Technical Architecture). Dados via useDashboardData (APIs /analytics/dashboard e /leads/pipeline). Strangler: nova página + componentes; rota `/` passa a usar a nova Dashboard.
 
 ## Technical Context
 
@@ -60,7 +60,7 @@ src/frontend/src/
 ## MCP Stitch Usage
 
 - **list_projects** / **list_screens**: Referência de design (projeto Quarks OS Sales Dashboard, screens listados). Documentação em docs/DASHBOARD_STITCH_MCP.md.
-- **Design**: Layout e tokens seguem DS v1; Stitch usado como referência visual quando fetch_screen_code/get_screen estiverem disponíveis na API.
+- **Design**: Layout e tokens seguem DS v1.4; Stitch usado como referência visual quando fetch_screen_code/get_screen estiverem disponíveis na API.
 
 ## Data Model
 

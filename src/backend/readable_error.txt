@@ -1,0 +1,26 @@
+
+> backend@1.0.0 start
+> node src/server.js
+
+[dotenv@17.2.3] injecting env (5) from .env -- tip: ??????  override existing env vars with { override: true }
+[Maestro] Registered agent: lead
+[Maestro] Registered agent: calc
+[Maestro] Registered agent: proposal
+[Maestro] Registered agent: product
+[Maestro] Registered agent: pricing
+[Maestro] Registered agent: project
+[Maestro] Registered agent: copilot
+[Maestro] Registered agent: visual
+[Maestro] Registered agent: analytics
+[Maestro] Registered agent: lead
+[Maestro] Registered agent: calc
+[Maestro] Registered agent: proposal
+[Maestro] Registered agent: inventory
+[Maestro] Registered agent: project
+[Maestro] Registered agent: service
+[Maestro] Registered agent: pricing
+[Maestro] Registered agent: analytics
+??? Default user ready: system@quarks.solar (ID: ab5e63e0-443d-4575-bce5-3f4a41e8a34f)
+[01:55:43.930] [32mINFO[39m (23252): [36m[WS] WebSocket Gateway initialized[39m
+[01:55:43.930] [33mWARN[39m (23252): [36m[REDIS] REDIS_URL not found. Skipping Redis adapter (Falling back to default memory adapter).[39m
+[01:55:43.930] [32mINFO[39m (23252): [36mServer running on port 3001[39m

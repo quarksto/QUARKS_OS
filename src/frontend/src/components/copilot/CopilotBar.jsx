@@ -48,7 +48,7 @@ export const CopilotBar = () => {
                             {[1, 2, 3].map(i => (
                                 <div
                                     key={i}
-                                    className="w-1 h-1 bg-solar-500 rounded-full animate-bounce"
+                                    className="w-1 h-1 bg-solar rounded-full animate-bounce"
                                     style={{ animationDelay: `${i * 0.15}s` }}
                                 />
                             ))}
@@ -59,7 +59,7 @@ export const CopilotBar = () => {
                 <div className="flex flex-col min-w-[140px] max-w-[300px]">
                     <div className="flex items-center gap-1.5">
                         <span className="text-[10px] font-bold text-petroleum-900 tracking-tight font-sans">SOLAR COPILOT</span>
-                        {!isThinking && <span className="material-symbols-outlined text-[12px] text-solar-500 opacity-60">auto_awesome</span>}
+                        {!isThinking && <span className="material-symbols-outlined text-[12px] text-solar opacity-60">auto_awesome</span>}
                     </div>
                     <span className="text-[10px] font-medium text-slate-500 truncate lowercase font-sans">
                         {isThinking

@@ -14,13 +14,14 @@ export const LeadModalProposal = ({ proposal, onViewDetails }) => {
     if (!proposal) {
         return (
             <div className="technical-card p-5 border-dashed border-slate-200">
-                <p className="ds-meta text-slate-500 mb-4">Nenhuma proposta ativa</p>
+                <p className="ds-meta text-slate-500 mb-4">Nenhuma proposta ainda. Crie a primeira para enviar ao lead.</p>
                 <button
                     type="button"
                     onClick={onViewDetails}
-                    className="w-full py-2.5 bg-slate-100 text-slate-600 text-sm font-bold rounded-lg hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"
+                    aria-label="Criar primeira proposta"
+                    className="w-full h-8 rounded-full bg-[#F59E0B] hover:bg-amber-600 text-white font-bold text-[11px] px-4 py-2 flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:border-2 focus-visible:border-petroleum border border-transparent"
                 >
-                    <span className="material-symbols-outlined text-[16px]">add</span>
+                    <span className="material-symbols-outlined text-[16px] ds-icon-w300" aria-hidden="true">add</span>
                     Criar proposta
                 </button>
             </div>
@@ -35,8 +36,8 @@ export const LeadModalProposal = ({ proposal, onViewDetails }) => {
             role="button"
             tabIndex={0}
             onClick={onViewDetails}
-            onKeyDown={(e) => e.key === 'Enter' && onViewDetails()}
-            className="technical-card p-5 cursor-pointer transition-all hover:border-petroleum/30 hover:shadow-md"
+            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onViewDetails())}
+            className="technical-card p-5 cursor-pointer transition-all hover:border-petroleum/30 hover:shadow-sm focus:outline-none focus-visible:border-petroleum border border-transparent"
         >
             <div className="flex justify-between items-start mb-4">
                 <div>
@@ -58,9 +59,9 @@ export const LeadModalProposal = ({ proposal, onViewDetails }) => {
             <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); onViewDetails(); }}
-                className="w-full py-2.5 bg-petroleum text-white text-sm font-bold rounded-lg hover:bg-petroleum-600 transition-colors flex items-center justify-center gap-2"
+                className="w-full py-2.5 bg-petroleum text-white text-sm font-bold rounded-lg hover:bg-petroleum-600 transition-colors flex items-center justify-center gap-2 focus:outline-none focus-visible:border-2 focus-visible:border-petroleum border border-transparent"
             >
-                Ver Detalhes <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                Ver Detalhes <span className="material-symbols-outlined text-[16px] ds-icon-w300" aria-hidden="true">arrow_forward</span>
             </button>
         </div>
     );

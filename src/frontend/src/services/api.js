@@ -20,6 +20,20 @@ api.interceptors.request.use(async (config) => {
     return config;
 });
 
+// Interceptor para lidar com erros de autenticação
+api.interceptors.response.use(
+    response => response,
+    error => {
+        if (error.response?.status === 403 || error.response?.status === 401) {
+            console.warn('[API] Token inválido ou expirado. Redirecionando para login...');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
+    }
+);
+
 /** Open proposal document in new tab (fetches with auth, then opens as blob URL). */
 export async function openProposalDocument(proposalId) {
     const res = await api.get(`/proposals/${proposalId}/document`, { responseType: 'blob' });

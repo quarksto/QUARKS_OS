@@ -17,7 +17,7 @@ Pacote de documentos:
 - Sprint Plan
 - QA Plan
 - Copilot Spec
-- **Design System (DS v1)** — **Referência oficial**
+- **Design System (DS v1.4)** — **Referência oficial**
 
 ## Design System de Referência
 
@@ -28,7 +28,7 @@ O **Design System de referência** do projeto é o que está **na tela hoje** (D
 Esse documento é a **fonte única de verdade** para:
 
 - Novas telas e componentes no frontend
-- **Referências via MCP** (Stitch ou outros): ao gerar ou adaptar UI, seguir os tokens, classes e padrões descritos no DS v1
+- **Referências via MCP** (Stitch ou outros): ao gerar ou adaptar UI, seguir os tokens, classes e padrões descritos no DS v1.4
 - Code reviews e consistência visual
 
 Todos os documentos estão versionados e prontos para uso em repositório.

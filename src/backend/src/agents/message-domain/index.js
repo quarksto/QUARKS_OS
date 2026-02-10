@@ -68,8 +68,7 @@ class MessageDomainAgent extends BaseDomainAgent {
                     content,
                     role: role || 'USER',
                     leadId,
-                    senderId: senderId || null,
-                    mentions
+                    senderId: senderId || null
                 },
                 include: {
                     sender: {
@@ -79,13 +78,17 @@ class MessageDomainAgent extends BaseDomainAgent {
             });
         } catch (dbError) {
             console.error('CRITICAL: Failed to save message:', dbError);
-            throw new Error('Failed to send message. Please try again.');
+            throw new Error('Failed to send message. Please try again.', { cause: dbError });
         }
 
         // Broadcast real-time
-        const io = require('../../websocket/gateway').getIO();
-        if (io) {
-            io.to(`lead:${leadId}`).emit('message:new', message);
+        try {
+            const io = require('../../websocket/gateway').getIO();
+            if (io) {
+                io.to(`lead:${leadId}`).emit('message:new', message);
+            }
+        } catch (ioError) {
+            console.warn('[MessageDomainAgent] Real-time broadcast failed:', ioError.message);
         }
 
         // Trigger Notifications
@@ -108,9 +111,13 @@ class MessageDomainAgent extends BaseDomainAgent {
         });
 
         // Broadcast update for counts
-        const io = require('../../websocket/gateway').getIO();
-        if (io) {
-            io.to('all_leads').emit('lead:unread_reset', { leadId });
+        try {
+            const io = require('../../websocket/gateway').getIO();
+            if (io) {
+                io.to('all_leads').emit('lead:unread_reset', { leadId });
+            }
+        } catch (ioError) {
+            console.warn('[MessageDomainAgent] Real-time broadcast (unread_reset) failed:', ioError.message);
         }
 
         return { success: true };

@@ -5,7 +5,7 @@
 **Input**: Roadmap Goal "Integração Frontend (Phase 3)" from 07-proposal-engine.
 
 ## Contexto
-O backend de propostas está completo (07). O frontend existe (`ProposalsListPage.jsx`, `ProposalDetailPage.jsx`) mas precisa ser alinhado com o Design System Stitch (v1), usando componentes padronizados (`LeadListTable` style, `AdaptiveHeader`, `StatusBadge`).
+O backend de propostas está completo (07). O frontend existe (`ProposalsListPage.jsx`, `ProposalDetailPage.jsx`) mas precisa ser alinhado com o Design System Stitch (v1.4), usando componentes padronizados (`LeadListTable` style, `AdaptiveHeader`, `StatusBadge`).
 
 ## User Scenarios
 

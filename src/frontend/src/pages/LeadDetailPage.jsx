@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useCopilot } from '../context/CopilotContext';
-import api, { openProposalDocument } from '../services/api';
+import api from '../services/api';
 import { DashboardShell } from '../components/dashboard/DashboardShell';
+import { LeadDetailCanvas } from '../components/dashboard/LeadDetailCanvas';
 import { LeadModalProfile } from '../components/dashboard/leadModal/LeadModalProfile';
 import { LeadModalContact } from '../components/dashboard/leadModal/LeadModalContact';
 import { LeadModalSolar } from '../components/dashboard/leadModal/LeadModalSolar';
 import { LeadModalAddress } from '../components/dashboard/leadModal/LeadModalAddress';
 import { LeadModalSolarInsights } from '../components/dashboard/leadModal/LeadModalSolarInsights';
 import { LeadModalProposal } from '../components/dashboard/leadModal/LeadModalProposal';
-import { LeadBasicsEditForm } from '../components/dashboard/leadModal/LeadBasicsEditForm';
+import { LeadDetailDrawer } from '../components/dashboard/leadModal/LeadDetailDrawer';
 import { LeadModalTimeline } from '../components/dashboard/leadModal/LeadModalTimeline';
 import { LeadQualificationForm } from '../components/dashboard/LeadQualificationForm';
-import { getNextAction, getLeadCompleteness, stageLabels, getTemperature, getTemperatureClass } from '../utils/pipeline';
+import { LeadDocumentsTab } from '../components/dashboard/LeadDocumentsTab';
+import { LeadTechnicalSheet } from '../components/dashboard/LeadTechnicalSheet';
+import { PageContent } from '../components/dashboard/PageContent';
+import { getNextAction, stageLabels, getTemperature, getTemperatureClass } from '../utils/pipeline';
 
 const PIPELINE_STEPS = [
     { id: 'NEW' },
@@ -24,13 +28,18 @@ const PIPELINE_STEPS = [
 ];
 
 const TABS = [
-    { id: 'basicos', label: 'Dados básicos', icon: 'person' },
-    { id: 'qualificacao', label: 'Qualificação técnica', icon: 'home_work' },
-    { id: 'proposta', label: 'Proposta', icon: 'description' },
+    { id: 'perfil', label: 'Executive Profile', icon: 'assignment_ind' },
+    { id: 'visao_geral', label: 'Command Center', icon: 'dashboard' },
+    { id: 'basicos', label: 'Data Hub', icon: 'database' },
+    { id: 'qualificacao', label: 'Qualificação', icon: 'home_work' },
     { id: 'documentos', label: 'Documentos', icon: 'folder' },
     { id: 'historico', label: 'Histórico', icon: 'history' },
 ];
 
+/**
+ * LeadDetailPage — Refatorado para Design System v1.4 + Side Drawer Flow.
+ * Foco em h-8, Super Flat, Data-First, e conformidade rigorosa com dsoficial.md.
+ */
 export default function LeadDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -38,15 +47,18 @@ export default function LeadDetailPage() {
     const [lead, setLead] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [activeTab, setActiveTab] = useState('basicos');
-    const [isEditing, setIsEditing] = useState(false);
-    const [editedLead, setEditedLead] = useState(null);
+    const [activeTab, setActiveTab] = useState('perfil');
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [statusUpdating, setStatusUpdating] = useState(false);
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         if (!id) return;
+        loadLead();
+    }, [id]);
+
+    const loadLead = () => {
         setLoading(true);
-        setError(null);
         api.get(`/leads/${id}`)
             .then((res) => {
                 setLead(res.data);
@@ -60,10 +72,10 @@ export default function LeadDetailPage() {
                 setError(err?.response?.status === 404 ? 'Lead não encontrado' : 'Erro ao carregar');
             })
             .finally(() => setLoading(false));
-    }, [id, setContext]);
+    };
 
     const handleQualificationSave = () => {
-        api.get(`/leads/${id}`).then((res) => setLead(res.data));
+        loadLead();
     };
 
     const handleNewProposal = () => {
@@ -71,7 +83,6 @@ export default function LeadDetailPage() {
         openSidebar?.();
     };
 
-    const [statusUpdating, setStatusUpdating] = useState(false);
     const handleStatusChange = (e) => {
         const newStatus = e.target.value;
         if (!lead?.id || !newStatus || newStatus === lead.status) return;
@@ -82,20 +93,13 @@ export default function LeadDetailPage() {
             .finally(() => setStatusUpdating(false));
     };
 
-    const handleEditToggle = () => {
-        if (!isEditing) {
-            setEditedLead({ ...lead });
-        }
-        setIsEditing(!isEditing);
-    };
-
-    const handleSaveLead = async () => {
-        if (!editedLead?.id) return;
+    const handleSaveLead = async (data) => {
+        if (!data?.id) return;
         setSaving(true);
         try {
-            const res = await api.patch(`/leads/${editedLead.id}`, editedLead);
+            const res = await api.patch(`/leads/${data.id}`, data);
             setLead(res.data);
-            setIsEditing(false);
+            setIsDrawerOpen(false);
         } catch (err) {
             console.error('Erro ao salvar lead:', err);
         } finally {
@@ -103,35 +107,26 @@ export default function LeadDetailPage() {
         }
     };
 
-    const handleInputChange = (field, value) => {
-        setEditedLead(prev => ({ ...prev, [field]: value }));
-    };
-
     const nextStep = lead ? getNextAction(lead) : null;
-    const { percent } = lead ? getLeadCompleteness(lead) : { percent: 0 };
-
     const temperature = lead ? getTemperature(lead) : { color: 'gray', label: '—' };
 
     const headerRight = (
         <div className="flex items-center gap-3">
-            {!isEditing ? (
+            {lead && (
                 <>
-                    {/* Indicador de Temperatura do Lead */}
-                    {lead && (
-                        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg shadow-sm">
-                            <span className={`w-2 h-2 rounded-full ${getTemperatureClass(temperature.color)}`} />
-                            <span className="ds-meta font-bold text-slate-700 uppercase tracking-tight">{temperature.label}</span>
-                        </div>
-                    )}
+                    <div className="hidden sm:flex items-center gap-2 px-3 h-8 bg-white border border-slate-100 rounded-full">
+                        <span className={`w-2.5 h-2.5 rounded-full ${getTemperatureClass(temperature.color)} animate-pulse-subtle`} />
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{temperature.label}</span>
+                    </div>
 
-                    {/* Seletor de Estágio Integrado */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center">
                         <select
                             id="lead-stage-header"
-                            value={lead?.status || ''}
+                            value={lead.status || ''}
                             onChange={handleStatusChange}
                             disabled={statusUpdating}
-                            className="h-10 px-3 bg-white border border-slate-200 rounded-lg text-[11px] font-bold text-slate-700 uppercase focus:outline-none focus:border-petroleum focus:ring-1 focus:ring-petroleum disabled:opacity-60 transition-all cursor-pointer hover:bg-slate-50 shadow-sm"
+                            className="h-8 px-4 bg-white border border-slate-100 rounded-full text-[11px] font-bold text-slate-700 uppercase tracking-widest focus:outline-none focus:border-petroleum transition-all cursor-pointer hover:bg-slate-50 appearance-none bg-no-repeat bg-[right_0.8rem_center] pr-8"
+                            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='20' viewBox='0 96 960 960' width='20'%3E%3Cpath d='M480 711 240 471l43-43 197 197 197-197 43 43-240 240Z'/%3E%3C/svg%3E")`, backgroundSize: '14px' }}
                         >
                             {Object.entries(stageLabels).map(([value, label]) => (
                                 <option key={value} value={value}>{label}</option>
@@ -139,49 +134,22 @@ export default function LeadDetailPage() {
                         </select>
                     </div>
 
-                    <div className="h-6 w-px bg-slate-200 mx-1" />
-
                     <button
                         type="button"
-                        onClick={handleEditToggle}
-                        className="btn-pill h-10 px-4 bg-white text-slate-600 hover:bg-slate-50 border-slate-200 gap-2 uppercase tracking-wider"
+                        onClick={() => setIsDrawerOpen(true)}
+                        className="h-8 px-4 bg-white text-slate-600 border border-slate-100 hover:bg-slate-50 rounded-full flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest transition-all active:scale-95 border-transparent"
                     >
-                        <span className="material-symbols-outlined text-[18px]">edit</span>
+                        <span className="material-symbols-outlined text-[18px] ds-icon-w300">edit_square</span>
                         Editar
                     </button>
 
-                    {lead?.id && (
-                        <button
-                            type="button"
-                            onClick={() => navigate(`/proposals/new?leadId=${lead.id}`)}
-                            className="h-10 bg-solar-500 text-white hover:bg-solar-600 border-0 px-4 rounded-lg flex items-center gap-2 font-bold text-[11px] transition-all shadow-sm hover:shadow-md active:scale-95 uppercase tracking-wider"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">add_circle</span>
-                            Proposta
-                        </button>
-                    )}
-                </>
-            ) : (
-                <>
                     <button
                         type="button"
-                        onClick={() => setIsEditing(false)}
-                        className="btn-pill h-10 px-4 bg-white text-slate-500 hover:bg-slate-50 border-slate-200 gap-2 uppercase tracking-wider"
+                        onClick={() => navigate(`/proposals/new?leadId=${lead.id}`)}
+                        className="h-8 bg-solar text-white hover:bg-amber-600 px-4 rounded-full flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest transition-all active:scale-95 shadow-none border border-transparent"
                     >
-                        Cancelar
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleSaveLead}
-                        disabled={saving}
-                        className="h-10 bg-petroleum text-white hover:bg-petroleum-600 border-0 px-6 rounded-lg flex items-center gap-2 font-bold text-[11px] transition-all shadow-sm hover:shadow-md disabled:opacity-50 uppercase tracking-wider"
-                    >
-                        {saving ? (
-                            <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                        ) : (
-                            <span className="material-symbols-outlined text-[18px]">check</span>
-                        )}
-                        Salvar Alterações
+                        <span className="material-symbols-outlined text-[18px] ds-icon-w300">add_circle</span>
+                        Proposta
                     </button>
                 </>
             )}
@@ -200,180 +168,176 @@ export default function LeadDetailPage() {
                 { label: 'Ficha do Lead', path: null }
             ]}
         >
-            <div className="flex-1 overflow-hidden flex flex-col p-4 md:p-6 lg:p-10">
+            <PageContent className="flex flex-col">
                 {error && (
-                    <div className="mb-4 p-6 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 max-w-xl">
-                        <p className="font-medium mb-1">{error}</p>
-                        <p className="text-sm text-amber-700/90 mb-4">
-                            Este lead pode não existir, ter sido removido ou o link está incorreto. Verifique o ID na URL ou use os botões abaixo.
-                        </p>
-                        <div className="flex flex-wrap gap-3">
-                            <button
-                                type="button"
-                                onClick={() => navigate('/leads')}
-                                className="btn-pill bg-petroleum text-white hover:bg-petroleum-600 px-4 py-2 text-sm inline-flex items-center gap-2"
-                            >
-                                <span className="material-symbols-outlined text-[18px]">list</span>
-                                Ver lista de leads
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => navigate('/dashboard')}
-                                className="btn-pill bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 px-4 py-2 text-sm inline-flex items-center gap-2"
-                            >
-                                <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-                                Voltar ao Dashboard
-                            </button>
+                    <div className="p-8 bg-white border border-slate-100 rounded-lg max-w-xl animate-fade-in">
+                        <div className="flex items-center gap-3 text-amber-600 mb-2">
+                            <span className="material-symbols-outlined">warning</span>
+                            <p className="font-bold uppercase text-[12px] tracking-widest">{error}</p>
                         </div>
+                        <p className="text-[13px] text-slate-500 mb-6 leading-relaxed">
+                            Este lead pode não existir, ter sido removido ou o link está incorreto. Verifique a URL ou retorne à listagem.
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => navigate('/leads')}
+                            className="h-8 px-4 rounded-full bg-petroleum text-white text-[11px] font-bold uppercase tracking-widest hover:bg-petroleum/90 transition-all flex items-center gap-2"
+                        >
+                            <span className="material-symbols-outlined text-[18px] ds-icon-w300">list</span>
+                            Ver lista de leads
+                        </button>
                     </div>
                 )}
 
                 {lead && !error && (
                     <>
-                        <div className="flex items-center gap-0 mb-8 overflow-x-auto py-2 scrollbar-hide">
+                        <div className="flex items-center gap-0 mb-6 overflow-x-auto py-2 scrollbar-none">
                             {PIPELINE_STEPS.map((step, index) => {
+                                const activeIndex = PIPELINE_STEPS.findIndex((s) => s.id === lead.status);
+                                const isDone = index < activeIndex;
                                 const isActive = lead.status === step.id;
                                 const label = stageLabels[step.id] || step.id;
+
                                 return (
                                     <React.Fragment key={step.id}>
                                         {index > 0 && (
-                                            <div className={`flex-shrink-0 w-6 h-0.5 mx-0.5 ${index <= PIPELINE_STEPS.findIndex((s) => s.id === lead.status) ? 'bg-petroleum' : 'bg-slate-200'}`} />
+                                            <div className="flex-shrink-0 w-8 h-px mx-1 relative">
+                                                <div className={`absolute inset-0 transition-colors duration-500 ${index <= activeIndex ? 'bg-petroleum' : 'bg-slate-100'}`} />
+                                            </div>
                                         )}
                                         <div
-                                            className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border ${isActive
-                                                ? 'bg-white border-petroleum text-petroleum shadow-sm'
-                                                : 'text-slate-400 border-transparent bg-transparent'
+                                            className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 border ${isActive
+                                                ? 'bg-white border-petroleum text-petroleum'
+                                                : isDone
+                                                    ? 'bg-petroleum/5 border-transparent text-petroleum/60'
+                                                    : 'text-slate-300 border-transparent bg-transparent'
                                                 }`}
                                         >
-                                            <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-petroleum' : 'bg-slate-300'}`} />
-                                            {label}
+                                            {isDone ? (
+                                                <span className="material-symbols-outlined text-[14px] text-petroleum ds-icon-w300">check_circle</span>
+                                            ) : (
+                                                <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-petroleum animate-pulse' : 'bg-slate-200'}`} />
+                                            )}
+                                            <span className="text-meta">{label}</span>
                                         </div>
                                     </React.Fragment>
                                 );
                             })}
                         </div>
 
-                        <div className="flex gap-2 border-b border-slate-200 mb-6 overflow-x-auto">
+                        <div role="tablist" aria-label="Seções da ficha do lead" className="flex gap-4 border-b border-slate-100 mb-6 overflow-x-auto scrollbar-none">
                             {TABS.map((tab) => (
                                 <button
                                     key={tab.id}
                                     type="button"
+                                    role="tab"
+                                    id={`tab-${tab.id}`}
+                                    aria-selected={activeTab === tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 -mb-px transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === tab.id
-                                        ? 'border-petroleum text-petroleum bg-white'
-                                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                                    className={`px-4 pb-3 pt-1 transition-all relative whitespace-nowrap focus:outline-none ${activeTab === tab.id
+                                        ? 'text-petroleum'
+                                        : 'text-slate-400 hover:text-slate-600'
                                         }`}
                                 >
-                                    <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
-                                    {tab.label}
+                                    <div className="flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-[18px] ds-icon-w300">{tab.icon}</span>
+                                        <span className="ds-label">{tab.label}</span>
+                                    </div>
+                                    {activeTab === tab.id && (
+                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-petroleum rounded-full animate-scale-x" />
+                                    )}
                                 </button>
                             ))}
                         </div>
 
-                        <div className="flex-1 overflow-y-auto min-h-0 scrollbar-custom pr-2">
-                            {activeTab === 'basicos' && (
-                                <>
-                                    {!isEditing ? (
-                                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 animate-fadeInScale">
-                                            {/* Coluna da Esquerda: Perfil e Contato */}
-                                            <div className="xl:col-span-4 space-y-6">
-                                                <LeadModalProfile lead={lead} />
-                                                <LeadModalContact lead={lead} />
-                                            </div>
-
-                                            {/* Coluna da Direita: Solar, Endereço e Insights */}
-                                            <div className="xl:col-span-8 space-y-6">
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                    <LeadModalSolar lead={lead} />
-                                                    <LeadModalAddress lead={lead} />
-                                                </div>
-                                                <LeadModalSolarInsights lead={lead} onDimensionar={handleNewProposal} />
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="max-w-3xl mx-auto py-4">
-                                            <LeadBasicsEditForm
-                                                lead={editedLead}
-                                                onChange={handleInputChange}
-                                            />
-                                        </div>
-                                    )}
-                                </>
+                        <div className="flex-1 overflow-y-auto min-h-0 scrollbar-thin scrollbar-thumb-slate-100">
+                            {/* Perfil Executivo — max-w-2xl para foco */}
+                            {activeTab === 'perfil' && (
+                                <div id="panel-perfil" role="tabpanel" className="max-w-2xl animate-fade-in shadow-none pr-4">
+                                    <LeadTechnicalSheet
+                                        lead={lead}
+                                        onUpdate={loadLead}
+                                        onNewProposal={handleNewProposal}
+                                        onAIPress={() => openSidebar?.()}
+                                        hideNameHeader={true}
+                                    />
+                                </div>
                             )}
 
+                            {/* Command Center — Full Bleed */}
+                            {activeTab === 'visao_geral' && (
+                                <div id="panel-visao_geral" role="tabpanel" className="animate-fade-in">
+                                    <LeadDetailCanvas lead={lead} loading={false} />
+                                </div>
+                            )}
+
+                            {/* Data Hub */}
+                            {activeTab === 'basicos' && (
+                                <div id="panel-basicos" role="tabpanel" className="animate-fade-in space-y-6">
+                                    <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+                                        <div className="xl:col-span-4 space-y-6">
+                                            <LeadModalProfile lead={lead} />
+                                            <LeadModalContact lead={lead} />
+                                        </div>
+                                        <div className="xl:col-span-8 space-y-6">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <LeadModalSolar lead={lead} />
+                                                <LeadModalAddress lead={lead} />
+                                            </div>
+                                            <LeadModalSolarInsights lead={lead} onDimensionar={handleNewProposal} />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Qualificação */}
                             {activeTab === 'qualificacao' && (
-                                <div className="max-w-xl">
-                                    <div className="technical-card p-6">
-                                        <h3 className="ds-title text-slate-900 mb-4">Qualificação técnica</h3>
-                                        <p className="ds-body text-slate-500 mb-6">
-                                            Preencha os dados para gerar propostas precisas e dimensionar o sistema.
+                                <div id="panel-qualificacao" role="tabpanel" className="max-w-2xl animate-fade-in">
+                                    <div className="bg-white border border-slate-100 rounded-lg p-8">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <span className="material-symbols-outlined text-slate-400 ds-icon-w300">home_work</span>
+                                            <h3 className="ds-title-section">Qualificação Técnica</h3>
+                                        </div>
+                                        <p className="text-[13px] text-slate-500 mb-8 leading-relaxed font-medium">
+                                            Preencha as informações estruturais e de rede para um dimensionamento preciso.
                                         </p>
                                         <LeadQualificationForm lead={lead} onSave={handleQualificationSave} />
                                     </div>
                                 </div>
                             )}
 
-                            {activeTab === 'proposta' && (
-                                <div className="max-w-xl">
-                                    <LeadModalProposal
-                                        proposal={lead?.proposals?.[0] || null}
-                                        onViewDetails={handleNewProposal}
-                                    />
-                                </div>
-                            )}
-
+                            {/* Documentos */}
                             {activeTab === 'documentos' && (
-                                <div className="max-w-2xl space-y-6">
-                                    <div className="technical-card p-6">
-                                        <h3 className="ds-title text-slate-900 mb-2 flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-slate-400 text-[18px]">description</span>
-                                            Propostas (PDF)
-                                        </h3>
-                                        <p className="ds-body text-slate-500 mb-4">PDFs gerados das propostas deste lead.</p>
-                                        <ul className="space-y-2">
-                                            {(lead?.proposals || []).filter((p) => p?.pdfUrl).length === 0 ? (
-                                                <li className="ds-body text-slate-500">Nenhum PDF de proposta ainda.</li>
-                                            ) : (
-                                                (lead?.proposals || []).filter((p) => p?.pdfUrl).map((p) => (
-                                                    <li key={p.id} className="flex items-center gap-2">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => openProposalDocument(p.id)}
-                                                            className="btn-pill text-petroleum hover:bg-petroleum/5 border-slate-200 px-3 py-2 text-sm inline-flex items-center gap-2"
-                                                        >
-                                                            <span className="material-symbols-outlined text-[18px]">download</span>
-                                                            {p.title || 'Proposta'} — Ver documento
-                                                        </button>
-                                                    </li>
-                                                ))
-                                            )}
-                                        </ul>
-                                    </div>
-                                    <div className="technical-card p-6 border border-dashed border-slate-200">
-                                        <h3 className="ds-title text-slate-700 mb-2 flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-slate-400 text-[18px]">photo_library</span>
-                                            Documentos do imóvel / lead
-                                        </h3>
-                                        <p className="ds-body text-slate-500">Fotos do telhado, contrato e outros anexos — em breve.</p>
-                                    </div>
+                                <div id="panel-documentos" role="tabpanel" className="animate-fade-in">
+                                    <LeadDocumentsTab leadId={lead?.id} />
                                 </div>
                             )}
 
+                            {/* Histórico */}
                             {activeTab === 'historico' && (
-                                <div className="max-w-2xl">
+                                <div id="panel-historico" role="tabpanel" className="max-w-2xl animate-fade-in">
                                     <LeadModalTimeline activities={lead?.activity || []} loading={false} />
                                 </div>
                             )}
                         </div>
+
+                        <LeadDetailDrawer
+                            lead={lead}
+                            isOpen={isDrawerOpen}
+                            onClose={() => setIsDrawerOpen(false)}
+                            onSave={handleSaveLead}
+                            loading={saving}
+                        />
                     </>
                 )}
 
                 {loading && !lead && (
-                    <div className="flex-1 flex items-center justify-center">
-                        <span className="w-10 h-10 border-2 border-slate-200 border-t-petroleum rounded-full animate-spin" />
+                    <div className="flex-1 flex flex-col items-center justify-center text-slate-300">
+                        <span className="material-symbols-outlined animate-spin text-[32px] mb-4 ds-icon-w300">progress_activity</span>
+                        <p className="text-[10px] font-bold uppercase tracking-widest">Sincronizando Dados...</p>
                     </div>
                 )}
-            </div>
+            </PageContent>
         </DashboardShell>
     );
 }

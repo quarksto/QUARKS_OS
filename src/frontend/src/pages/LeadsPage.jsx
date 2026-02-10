@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { useDashboardData } from '../hooks/useDashboardData';
+import { useNavigate } from 'react-router-dom';
+import { usePipelineData } from '../hooks/usePipelineData';
 import { DashboardShell } from '../components/dashboard/DashboardShell';
+import { PageContent } from '../components/dashboard/PageContent';
 import { KanbanBoard } from '../components/dashboard/KanbanBoard';
-import { LeadPipelineFilters } from '../components/dashboard/LeadPipelineFilters';
+import { LeadListTableRefactored } from '../components/dashboard/LeadListTableRefactored';
+import { LeadsCommandBar } from '../components/dashboard/LeadsCommandBar';
 import { CreateLeadModal } from '../components/dashboard/CreateLeadModal';
-import { LeadDetailModal } from '../components/dashboard/LeadDetailModal';
-import { MdSearch, MdAdd, MdViewKanban } from 'react-icons/md';
+// Removed react-icons import as per DS v1.4
 
 export default function LeadsPage() {
-    const { pipeline, loading, refresh } = useDashboardData();
+    const navigate = useNavigate();
+    const { pipeline, loading, refresh } = usePipelineData();
     const [pipelineState, setPipelineState] = React.useState(pipeline);
     const [pipelineFilters, setPipelineFilters] = React.useState({
         temp: [],
@@ -16,9 +19,7 @@ export default function LeadsPage() {
         scoreMin: '',
         scoreMax: '',
     });
-    const [pipelineView, setPipelineView] = React.useState('board');
-    const [selectedLead, setSelectedLead] = useState(null);
-    const [isDetailOpen, setIsDetailOpen] = useState(false);
+    const [pipelineView, setPipelineView] = React.useState('list'); // Default to list for premium feel
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [createLeadStage, setCreateLeadStage] = useState('NEW');
     const [searchTerm, setSearchTerm] = useState('');
@@ -28,74 +29,39 @@ export default function LeadsPage() {
     }, [pipeline]);
 
     const handleLeadClick = (lead) => {
-        setSelectedLead(lead);
-        setIsDetailOpen(true);
+        navigate(`/leads/${lead.id}`);
     };
 
     const handleCreateSuccess = () => {
         refresh();
-        window.location.reload();
+        setIsCreateModalOpen(false);
     };
 
-    // Calculate total leads count and options
-    const totalLeads = pipelineState
-        ? Object.values(pipelineState).reduce((acc, leads) => acc + (leads?.length || 0), 0)
-        : 0;
+    const flatLeads = React.useMemo(() => {
+        if (!pipelineState) return [];
+        return Object.values(pipelineState).flat();
+    }, [pipelineState]);
 
     const sourceOptions = React.useMemo(() => {
         if (!pipelineState) return [];
-        const all = Object.values(pipelineState).flat();
-        return [...new Set(all.map(l => l.source).filter(Boolean))];
-    }, [pipelineState]);
+        return [...new Set(flatLeads.map(l => l.source).filter(Boolean))];
+    }, [pipelineState, flatLeads]);
 
     const updateFilters = (partial) => {
         setPipelineFilters(prev => ({ ...prev, ...partial }));
     };
 
     const headerRight = (
-        <div className="flex items-center gap-4">
-            <div className="relative hidden md:block group">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-petroleum transition-colors">
-                    <MdSearch size={20} />
-                </div>
-                <input
-                    type="text"
-                    placeholder="Buscar leads..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-64 pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-[12px] text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-petroleum/60 transition-all font-sans"
-                />
-            </div>
-
-            <LeadPipelineFilters
-                tempFilter={pipelineFilters.temp}
-                onToggleTemp={(id) => {
-                    const exists = pipelineFilters.temp.includes(id);
-                    updateFilters({
-                        temp: exists
-                            ? pipelineFilters.temp.filter(t => t !== id)
-                            : [...pipelineFilters.temp, id]
-                    });
-                }}
-                onClearTemp={() => updateFilters({ temp: [] })}
-                sourceFilter={pipelineFilters.source}
-                onSourceChange={(val) => updateFilters({ source: val })}
-                sourceOptions={sourceOptions}
-                scoreMin={pipelineFilters.scoreMin}
-                scoreMax={pipelineFilters.scoreMax}
-                onScoreMinChange={(val) => updateFilters({ scoreMin: val })}
-                onScoreMaxChange={(val) => updateFilters({ scoreMax: val })}
-            />
-
+        <div className="flex items-center gap-3">
             <button
                 type="button"
                 onClick={() => {
                     setCreateLeadStage('NEW');
                     setIsCreateModalOpen(true);
                 }}
-                className="rounded-lg bg-solar-500 hover:bg-solar-600 text-white px-4 py-2 flex items-center gap-2 font-bold text-[11px] transition-all shadow-sm active:scale-95 uppercase tracking-wider"
+                className="h-8 px-4 rounded-full bg-solar hover:bg-amber-600 text-white flex items-center gap-2 font-bold text-[11px] transition-all shadow-none active:scale-95 uppercase tracking-wider"
             >
-                <MdAdd size={18} />
+                <span className="material-symbols-outlined text-[18px] ds-icon-w300">add</span>
                 Novo Lead
             </button>
         </div>
@@ -104,32 +70,70 @@ export default function LeadsPage() {
     return (
         <DashboardShell
             title="Gestão de Leads"
-            subtitle="Pipeline de Vendas"
-            headerIcon={<MdViewKanban size={24} />}
+            subtitle="Central de Prospecção"
+            headerIcon="group"
             loading={loading}
             headerRight={headerRight}
-            breadcrumbs={[{ label: 'Comercial' }, { label: 'Leads' }]}
         >
-            <div className="flex-1 flex flex-col min-h-0 bg-[#F1F5F9]/50">
-                <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 custom-scrollbar">
-                    <div className="max-w-[1600px] mx-auto">
-                        <KanbanBoard
-                            pipeline={pipelineState || {}}
-                            onPipelineChange={setPipelineState}
-                            filters={pipelineFilters}
-                            onFiltersChange={setPipelineFilters}
-                            searchTerm={searchTerm}
-                            onSearchChange={setSearchTerm}
-                            view={pipelineView}
-                            onChangeView={setPipelineView}
-                            onRequestCreateLead={(stage) => {
-                                setCreateLeadStage(stage);
-                                setIsCreateModalOpen(true);
-                            }}
-                            onLeadClick={handleLeadClick}
-                        />
-                    </div>
+            <div className="flex-1 flex flex-col min-h-0 bg-canvas overflow-hidden p-6 gap-6">
+                <div className="shrink-0 max-w-[1600px] mx-auto w-full">
+                    <LeadsCommandBar
+                        searchTerm={searchTerm}
+                        onSearchChange={setSearchTerm}
+                        view={pipelineView}
+                        onChangeView={setPipelineView}
+                        tempFilter={pipelineFilters.temp}
+                        onToggleTemp={(id) => {
+                            const exists = pipelineFilters.temp.includes(id);
+                            updateFilters({
+                                temp: exists
+                                    ? pipelineFilters.temp.filter(t => t !== id)
+                                    : [...pipelineFilters.temp, id]
+                            });
+                        }}
+                        onClearTemp={() => updateFilters({ temp: [] })}
+                        sourceFilter={pipelineFilters.source}
+                        onSourceChange={(val) => updateFilters({ source: val })}
+                        sourceOptions={sourceOptions}
+                        scoreMin={pipelineFilters.scoreMin}
+                        scoreMax={pipelineFilters.scoreMax}
+                        onScoreMinChange={(val) => updateFilters({ scoreMin: val })}
+                        onScoreMaxChange={(val) => updateFilters({ scoreMax: val })}
+                    />
                 </div>
+
+                <PageContent paddingBottomOnly className="flex flex-col min-h-0">
+                    <div className="h-full min-h-0 flex flex-col">
+                        {pipelineView === 'board' ? (
+                            <KanbanBoard
+                                pipeline={pipelineState || {}}
+                                onPipelineChange={setPipelineState}
+                                filters={pipelineFilters}
+                                onFiltersChange={setPipelineFilters}
+                                searchTerm={searchTerm}
+                                onSearchChange={setSearchTerm}
+                                view={pipelineView}
+                                onChangeView={setPipelineView}
+                                onRequestCreateLead={(stage) => {
+                                    setCreateLeadStage(stage);
+                                    setIsCreateModalOpen(true);
+                                }}
+                                onLeadClick={handleLeadClick}
+                            />
+                        ) : (
+                            <LeadListTableRefactored
+                                leads={flatLeads.filter(l => {
+                                    if (!searchTerm) return true;
+                                    const q = searchTerm.toLowerCase();
+                                    return l.name?.toLowerCase().includes(q) || l.email?.toLowerCase().includes(q);
+                                })}
+                                loading={loading}
+                                onLeadClick={handleLeadClick}
+                                selectedLeadId={null}
+                            />
+                        )}
+                    </div>
+                </PageContent>
             </div>
 
             <CreateLeadModal
@@ -137,12 +141,6 @@ export default function LeadsPage() {
                 onClose={() => setIsCreateModalOpen(false)}
                 onSuccess={handleCreateSuccess}
                 defaultStatus={createLeadStage}
-            />
-
-            <LeadDetailModal
-                isOpen={isDetailOpen}
-                onClose={() => setIsDetailOpen(false)}
-                lead={selectedLead}
             />
         </DashboardShell>
     );

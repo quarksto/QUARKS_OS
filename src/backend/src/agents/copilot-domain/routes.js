@@ -9,8 +9,16 @@ module.exports = (maestro) => {
     // File: 'file' (optional) — image, PDF, video, audio
     router.post('/chat', copilotChatUpload, handleMulterError, async (req, res) => {
         try {
-            const { message, userId, sessionId } = req.body || {};
+            const { message, userId, sessionId, context: contextRaw } = req.body || {};
             const file = req.file;
+            let context = null;
+            if (contextRaw) {
+                try {
+                    context = typeof contextRaw === 'string' ? JSON.parse(contextRaw) : contextRaw;
+                } catch {
+                    context = null;
+                }
+            }
 
             if (!maestro.agents['copilot']) {
                 return res.status(503).json({ error: 'Copilot não inicializado. Verifique o backend.' });
@@ -20,7 +28,8 @@ module.exports = (maestro) => {
                 userId: userId || 'anonymous',
                 sessionId,
                 message: message || '',
-                file
+                file,
+                context
             });
 
             res.json(result);

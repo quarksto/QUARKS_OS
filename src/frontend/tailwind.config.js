@@ -10,9 +10,10 @@ export default {
                 'md': '6px',
                 'pill': '9999px',
                 'sm': '4px',
+                'lg': '8px',
             },
             colors: {
-                canvas: '#F1F5F9', // System Background (Slate-100)
+                canvas: '#F8FAFC', // System Background (Slate-50)
                 petroleum: {
                     DEFAULT: '#0F4C5C',
                     50: '#f0f6f8',
@@ -40,9 +41,9 @@ export default {
                 }
             },
             fontFamily: {
-                "sans": ["Geist", "sans-serif"],
-                "display": ["Geist", "sans-serif"], // Adds support for font-display class used in titles
-                "mono": ["Geist Mono", "monospace"], // Fixes mono to use the correct font
+                "sans": ["Geist", "system-ui", "-apple-system", "sans-serif"],
+                "display": ["Geist", "system-ui", "-apple-system", "sans-serif"],
+                "mono": ["Geist Mono", "ui-monospace", "monospace"],
             }
         },
     },

@@ -20,7 +20,7 @@ export const DashboardShell = ({
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
     return (
-        <div className="flex h-screen w-screen bg-[#F1F5F9] overflow-hidden font-sans text-slate-900 selection:bg-solar-100 selection:text-solar-900">
+        <div className="flex h-screen w-screen bg-canvas overflow-hidden font-sans text-slate-900 selection:bg-solar-100 selection:text-solar-900">
             <DashboardSidebar
                 collapsed={isSidebarCollapsed}
                 onToggle={toggleSidebar}
@@ -46,3 +46,5 @@ export const DashboardShell = ({
         </div>
     );
 };
+
+export default DashboardShell;

@@ -158,7 +158,7 @@ class ProposalDomainAgent extends BaseDomainAgent {
             if (!priceRule) return null;
 
             // Calculate value based on type
-            let cost = 0;
+            let cost;
             switch (priceRule.priceType) {
                 case 'FIXED': cost = priceRule.priceValue; break;
                 case 'PER_WATT': cost = priceRule.priceValue * (systemSizeKwp * 1000); break; // $/Wp * Watts
@@ -207,7 +207,7 @@ class ProposalDomainAgent extends BaseDomainAgent {
         // but typically Margin is Profit Margin on GROSS sale.
 
         const totalCost = equipmentCost + servicesCost;
-        let finalPrice = 0;
+        let finalPrice;
 
         // Safety check
         if ((targetMargin + taxRate) >= 0.9) {

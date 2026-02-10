@@ -31,12 +31,12 @@ export const LeadModalProfile = ({ lead }) => {
                 <div className="flex-1 w-full min-w-0 text-center sm:text-left">
                     <h1 className="font-sans font-bold text-[20px] text-slate-900 mb-1 truncate leading-tight">{lead?.name || '—'}</h1>
                     <p className="ds-body text-slate-500 mb-4 flex items-center justify-center sm:justify-start gap-1 truncate">
-                        <span className="material-symbols-outlined text-[16px] text-slate-400 shrink-0">location_on</span>
+                        <span className="material-symbols-outlined text-[16px] text-slate-400 shrink-0 ds-icon-w300">location_on</span>
                         {lead?.location || 'Local não informado'}
                     </p>
                     <div className="flex flex-wrap gap-2 items-center justify-center sm:justify-start">
                         <span className="ds-meta text-slate-400 mr-1 flex items-center gap-1 shrink-0 uppercase tracking-tighter font-bold text-[9px]">
-                            <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
+                            <span className="material-symbols-outlined text-[14px] ds-icon-w300">auto_awesome</span>
                             Insights de IA
                         </span>
                         <span className={`badge-kanban-temp ${getTemperatureOutlineClass(temperature.color)}`} title="Temperatura">

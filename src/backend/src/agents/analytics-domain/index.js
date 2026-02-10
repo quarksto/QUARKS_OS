@@ -3,7 +3,16 @@ const prisma = new PrismaClient();
 
 class AnalyticsDomainAgent {
     constructor() {
+        this._ai = null;
         this.name = 'analytics';
+    }
+
+    get ai() {
+        if (this._ai) return this._ai;
+        if (!process.env.GOOGLE_API_KEY) return null;
+        const { GoogleGenerativeAI } = require('@google/generative-ai');
+        this._ai = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+        return this._ai;
     }
 
     async execute(action, payload) {
@@ -18,6 +27,10 @@ class AnalyticsDomainAgent {
                 return await this.getLeadActivity(payload.leadId);
             case 'GET_ENERGY_BALANCE':
                 return await this.getEnergyBalance();
+            case 'GET_INSIGHT':
+                return await this.getInsight(payload);
+            case 'GET_INSIGHT_LLM':
+                return await this.getInsightLLM(payload);
             default:
                 throw new Error(`Analytics Action ${action} not supported`);
         }
@@ -76,7 +89,6 @@ class AnalyticsDomainAgent {
             revenue: revenueGoal
         };
 
-        // Deltas: optional period-over-period (placeholder when no history)
         // Deltas: Period over Period (Month over Month)
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -90,10 +102,6 @@ class AnalyticsDomainAgent {
 
         const leadsDelta = leadsLastMonth > 0 ? Math.round(((leadsThisMonth - leadsLastMonth) / leadsLastMonth) * 100) : 0;
 
-        // Revenue Delta (Pipeline Created) or Won? Let's use Pipeline Value logic for consistency with KPI
-        // Pipeline Value = Sent + Viewed
-        // But for Delta, "Revenue" usually implies Closed Won.
-        // Let's use Closed Won for Delta Revenue to be more meaningful as "Growth"
         const [wonThisMonth, wonLastMonth] = await Promise.all([
             prisma.proposal.aggregate({
                 _sum: { totalPrice: true },
@@ -111,7 +119,7 @@ class AnalyticsDomainAgent {
 
         const deltas = {
             leads: `${leadsDelta > 0 ? '+' : ''}${leadsDelta}%`,
-            conversion: null, // Harder to calc without snapshots
+            conversion: null,
             revenue: `${revenueDelta > 0 ? '+' : ''}${revenueDelta}%`
         };
 
@@ -136,13 +144,13 @@ class AnalyticsDomainAgent {
             prisma.lead.count({ where: { status: 'CLOSED_WON' } })
         ]);
 
-        return [
-            { name: 'Novos', value: n, fill: '#3b82f6' },
-            { name: 'Contatados', value: c, fill: '#f59e0b' },
-            { name: 'Proposta', value: p, fill: '#8b5cf6' },
-            { name: 'Negociação', value: neg, fill: '#ec4899' },
-            { name: 'Fechado', value: w, fill: '#10b981' }
-        ];
+        return {
+            leads: n,
+            visita: c,
+            proposta: p,
+            contrato: neg,
+            instalacao: w
+        };
     }
 
     async getRecentActivity() {
@@ -161,43 +169,38 @@ class AnalyticsDomainAgent {
             ...recentProposals.map(p => ({
                 id: p.id,
                 type: 'PROPOSAL',
-                title: `Proposta: ${p.title}`,
-                description: `Cliente: ${p.lead?.name || 'N/A'} - Valor: R$ ${p.totalPrice}`,
-                date: p.updatedAt,
+                text: `Proposta: ${p.title} - ${p.lead?.name || 'Cliente N/A'}`,
+                timestamp: p.updatedAt,
                 status: p.status
             })),
             ...recentLeads.map(l => ({
                 id: l.id,
-                type: 'LEAD',
-                title: `Novo Lead: ${l.name}`,
-                description: `Consumo: ${l.consumption} kWh - ${l.location || 'N/A'}`,
-                date: l.createdAt,
+                type: 'NEW',
+                text: `Novo Lead: ${l.name}`,
+                timestamp: l.createdAt,
                 status: l.status
             }))
         ];
 
         return activities
-            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
             .slice(0, 10);
     }
 
     async getLeadActivity(leadId) {
         if (!leadId) throw new Error('Lead ID required');
 
-        // 1. Fetch Proposals for this lead
         const proposals = await prisma.proposal.findMany({
             where: { leadId },
             orderBy: { updatedAt: 'desc' }
         });
 
-        // 2. Fetch Lead creation event
         const lead = await prisma.lead.findUnique({
             where: { id: leadId }
         });
 
         const activity = [];
 
-        // Lead Created Event
         if (lead) {
             activity.push({
                 id: `created-${lead.id}`,
@@ -210,7 +213,6 @@ class AnalyticsDomainAgent {
             });
         }
 
-        // Proposal Events
         proposals.forEach(p => {
             activity.push({
                 id: `prop-created-${p.id}`,
@@ -223,7 +225,6 @@ class AnalyticsDomainAgent {
             });
 
             if (p.status === 'SENT' || p.status === 'VIEWED' || p.status === 'ACCEPTED') {
-                // Logic could be more granular with audit logs, but using p.status for now
                 activity.push({
                     id: `prop-status-${p.id}`,
                     type: 'PROPOSAL_UPDATE',
@@ -238,9 +239,8 @@ class AnalyticsDomainAgent {
 
         return activity.sort((a, b) => new Date(b.date) - new Date(a.date));
     }
+
     async getEnergyBalance() {
-        // Get closed deals from the last 6 months
-        // Since we don't have a 'closedAt' field yet, we use updatedAt for CLOSED_WON leads
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
@@ -258,11 +258,9 @@ class AnalyticsDomainAgent {
             }
         });
 
-        // Group by Month
         const balance = {};
         const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
-        // Initialize last 6 months
         for (let i = 5; i >= 0; i--) {
             const d = new Date();
             d.setMonth(d.getMonth() - i);
@@ -276,7 +274,6 @@ class AnalyticsDomainAgent {
 
             if (balance[key]) {
                 balance[key].consumption += Math.round(lead.consumption || 0);
-
                 const proposal = lead.proposals[0];
                 if (proposal) {
                     balance[key].generation += Math.round(proposal.generationKwh || 0);
@@ -285,6 +282,56 @@ class AnalyticsDomainAgent {
         });
 
         return Object.values(balance);
+    }
+
+    async getInsight() {
+        const metrics = await this.getDashboardMetrics();
+        const conv = parseFloat(String(metrics.conversionRate).replace('%', '')) || 0;
+        const leads = metrics.activeLeads || 0;
+        const proposals = metrics.proposalsSent || 0;
+        const leadsDelta = metrics.deltas?.leads ? parseFloat(metrics.deltas.leads.replace('%', '')) : 0;
+        const revDelta = metrics.deltas?.revenue ? parseFloat(metrics.deltas.revenue.replace('%', '')) : 0;
+
+        if (leads === 0 && proposals === 0) {
+            return 'Comece criando leads e propostas para ver insights personalizados.';
+        }
+        if (conv >= 15 && revDelta > 0) {
+            return `Ótima performance! Taxa de conversão em ${metrics.conversionRate} e receita subiu ${metrics.deltas?.revenue || ''}. Continue assim.`;
+        }
+        if (leadsDelta > 0 && leads > 5) {
+            return `Leads cresceram ${metrics.deltas?.leads || ''} este mês. Foco em qualificar e converter os mais quentes.`;
+        }
+        if (proposals > 0 && conv < 10) {
+            return `Você tem ${proposals} propostas em andamento. Aproveite para follow-up e aumentar a taxa de conversão.`;
+        }
+        if (leads > 0) {
+            return `Você tem ${leads} leads ativos. Dê prioridade aos de maior consumo ou com CEP preenchido.`;
+        }
+        return 'Monitore suas métricas e use o Copilot para dimensionar propostas e tirar dúvidas técnicas.';
+    }
+
+    async getInsightLLM() {
+        const fallback = await this.getInsight();
+        if (!this.ai) return fallback;
+
+        try {
+            const metrics = await this.getDashboardMetrics();
+            const prompt = `Você é um assistente de dashboards de vendas solares. Com base nestas métricas, escreva UMA frase curta e acionável em português (máx. 80 caracteres) para a barra de insight:
+- Leads ativos: ${metrics.activeLeads}
+- Propostas enviadas: ${metrics.proposalsSent}
+- Taxa de conversão: ${metrics.conversionRate}
+- Receita pipeline: ${metrics.revenue}
+- Variação MoM leads: ${metrics.deltas?.leads || '-'}
+- Variação MoM receita: ${metrics.deltas?.revenue || '-'}
+Responda apenas a frase, sem aspas nem explicações.`;
+            const model = this.ai.getGenerativeModel({ model: 'gemini-2.0-flash' });
+            const result = await model.generateContent(prompt);
+            const text = result.response.text().trim();
+            if (text && text.length > 0) return text;
+        } catch (err) {
+            console.warn('[Analytics] getInsightLLM failed, using rules:', err.message);
+        }
+        return fallback;
     }
 }
 

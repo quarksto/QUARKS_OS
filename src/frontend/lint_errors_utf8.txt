@@ -1,0 +1,219 @@
+﻿
+> frontend@0.0.0 lint
+> eslint .
+
+
+D:\QUARKS_OS\src\frontend\src\components\PricingBreakdown.jsx
+  8:37  error  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+
+D:\QUARKS_OS\src\frontend\src\components\chat\InputArea.jsx
+  1:35  warning  'useEffect' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\copilot\CopilotBar.jsx
+   3:48  warning  'rem' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                no-unused-vars
+  11:56  warning  'viewMode' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\copilot\CopilotSidebar.jsx
+  4:10  warning  'format' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\AdaptiveHeader.jsx
+  14:5  warning  'subtitle' is assigned a value but never used. Allowed unused args must match /^_/u  no-unused-vars
+  15:5  warning  'loading' is assigned a value but never used. Allowed unused args must match /^_/u   no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\CreateLeadModal.jsx
+  28:12  warning  'name' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u      no-unused-vars
+  29:12  warning  'email' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+  30:12  warning  'phone' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+  31:12  warning  'status' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u    no-unused-vars
+  32:12  warning  'error' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+  69:11  warning  'pipeline' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\DashboardSidebar.jsx
+   4:10  warning  'useLayout' is defined but never used. Allowed unused vars must match /^[A-Z_]/u               no-unused-vars
+  52:49  error    'MdAttachMoney' is not defined                                                                 no-undef
+  75:21  warning  'isCopilotOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  75:51  warning  'toggleCopilot' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  78:40  warning  'Icon' is defined but never used. Allowed unused args must match /^_/u                         no-unused-vars
+  83:30  warning  'e' is defined but never used. Allowed unused args must match /^_/u                            no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\GlobalSearch.jsx
+  22:18  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\KanbanBoard.jsx
+    1:47  warning  'useRef' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                   no-unused-vars
+   67:11  warning  'segment' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                         no-unused-vars
+  238:1   warning  Unused eslint-disable directive (no problems were reported from 'react-refresh/only-export-components')
+  334:8   warning  React Hook useMemo has a missing dependency: 'passesFilters'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\KpiGrid.jsx
+    3:48  warning  'period' is defined but never used. Allowed unused args must match /^_/u                    no-unused-vars
+    3:56  warning  'meta' is defined but never used. Allowed unused args must match /^_/u                      no-unused-vars
+  139:9   warning  'revenueRaw' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\LeadDetailModal.jsx
+   24:8   warning  React Hook useEffect has a missing dependency: 'loadFiles'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+   49:18  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u                              no-unused-vars
+   60:18  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u                              no-unused-vars
+   70:18  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u                              no-unused-vars
+  145:12  warning  'loading' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                       no-unused-vars
+  147:13  warning  'setContext' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                    no-unused-vars
+  147:25  warning  'triggerAction' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                 no-unused-vars
+  147:40  warning  'openSidebar' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                   no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\LeadDetailPanel.jsx
+  43:8  warning  React Hook useEffect has a missing dependency: 'initialLead'. Either include it or remove the dependency array. If 'setLead' needs the current value of 'initialLead', you can also switch to useReducer instead of useState and read 'initialLead' in the reducer  react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\LeadListTable.jsx
+    2:26  warning  'getTemperatureClass' is defined but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+   18:7   warning  'stringToColor' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  127:73  warning  Unused eslint-disable directive (no problems were reported from 'no-undef')
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\LeadListTableRefactored.jsx
+  1:27  warning  'useMemo' is defined but never used. Allowed unused vars must match /^[A-Z_]/u              no-unused-vars
+  2:26  warning  'getTemperatureClass' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  2:78  warning  'getLeadScore' is defined but never used. Allowed unused vars must match /^[A-Z_]/u         no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\LeadQualificationForm.jsx
+  49:8  warning  React Hook useEffect has a missing dependency: 'lead'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\ProjectDetailModal.jsx
+    7:12  warning  'loading' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  142:65  warning  'idx' is defined but never used. Allowed unused args must match /^_/u                    no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\ProjectKanbanBoard.jsx
+  94:30  warning  'e' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\leadModal\LeadModalFooter.jsx
+  3:41  warning  'onNewProposal' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\leadModal\LeadModalJourneyBanner.jsx
+  7:22  warning  'filled' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  7:30  warning  'total' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u   no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\dashboard\leadModal\LeadModalSolarInsights.jsx
+  13:12  warning  'error' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\shared\ConnectionStatus.jsx
+  49:7  warning  'styles' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\wizard\SalesWizard.jsx
+  69:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  67 |     useEffect(() => {
+  68 |         if (lead) {
+> 69 |             setFormData(prev => ({
+     |             ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  70 |                 ...prev,
+  71 |                 customer: {
+  72 |                     name: lead.name || '',  react-hooks/set-state-in-effect
+
+D:\QUARKS_OS\src\frontend\src\components\wizard\steps\StepConsumption.jsx
+  6:50  warning  'lead' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\components\wizard\steps\StepFinancials.jsx
+   6:49  warning  'onSave' is defined but never used. Allowed unused args must match /^_/u                                                    no-unused-vars
+   6:57  warning  'loading' is defined but never used. Allowed unused args must match /^_/u                                                   no-unused-vars
+  16:8   warning  React Hook useEffect has a missing dependency: 'generateProposalPreview'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\context\CopilotContext.jsx
+  30:43  warning  'chunkSessionId' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\contexts\AuthContext.jsx
+  17:21  warning  'setLoading' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\hooks\useLeadsList.js
+  1:10  warning  'useState' is defined but never used. Allowed unused vars must match /^[A-Z_]/u   no-unused-vars
+  1:20  warning  'useEffect' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\hooks\useRealtime.js
+  63:8  warning  React Hook useEffect has missing dependencies: 'onUpdate', 'subscribeToLead', and 'unsubscribeFromLead'. Either include them or remove the dependency array. If 'onUpdate' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\hybrid\ConversationList.jsx
+   2:25  warning  'stageLabels' is defined but never used. Allowed unused vars must match /^[A-Z_]/u         no-unused-vars
+  28:10  warning  'isNewLead' is defined but never used. Allowed unused vars must match /^[A-Z_]/u           no-unused-vars
+  36:18  warning  'setSortBy' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\hybrid\HybridShell.jsx
+   10:10  warning  'downloadLeadsCsv' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                         no-unused-vars
+  104:6   warning  React Hook useEffect has a missing dependency: 'selectedLead'. Either include it or remove the dependency array                                                                                                                                 react-hooks/exhaustive-deps
+  118:6   warning  React Hook useEffect has missing dependencies: 'leadIdFromUrl', 'searchParams', 'selectedLead', and 'setSearchParams'. Either include them or remove the dependency array                                                                       react-hooks/exhaustive-deps
+  156:6   warning  React Hook useEffect has a missing dependency: 'selectedLead'. Either include it or remove the dependency array                                                                                                                                 react-hooks/exhaustive-deps
+  240:6   warning  React Hook useEffect has a missing dependency: 'currentLead'. Either include it or remove the dependency array                                                                                                                                  react-hooks/exhaustive-deps
+  261:6   warning  React Hook useEffect has a missing dependency: 'selectedLead'. Either include it or remove the dependency array. You can also replace multiple useState variables with useReducer if 'setLeadDetail' needs the current value of 'selectedLead'  react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\hybrid\LeadContextPanel.jsx
+   4:16  warning  'rem' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                         no-unused-vars
+  29:65  warning  'onStatusChange' is defined but never used. Allowed unused args must match /^_/u                   no-unused-vars
+  30:10  warning  'statusUpdating' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+  30:26  warning  'setStatusUpdating' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\hybrid\LeadDetailDrawer.jsx
+   4:10  warning  'ptBR' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                   no-unused-vars
+  63:14  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u                  no-unused-vars
+  78:9   warning  'hasProposals' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\ClientDetailPage.jsx
+  15:8  warning  React Hook useEffect has a missing dependency: 'loadClient'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\pages\DashboardRefactored.jsx
+  21:13  warning  'isOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\ForgotPasswordPage.jsx
+  2:10  warning  'useNavigate' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\LeadDetailPage.jsx
+  111:13  warning  'percent' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\LeadsListPage.jsx
+  14:21  warning  'setFilters' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\LeadsPage.jsx
+  41:11  warning  'totalLeads' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\LoginPage.jsx
+  20:11  warning  'navigate' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\LoginPageAdvanced.jsx
+  23:11  warning  'navigate' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\LoginPageStitch.jsx
+  26:11  warning  'navigate' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\ProposalDetailPage.jsx
+  32:11  warning  'navigate' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\ProposalPage.jsx
+  10:11  warning  'location' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  49:49  warning  'customer' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\QUARKS_OS\src\frontend\src\pages\ProposalViewPublicPage.jsx
+  50:8  warning  React Hook useEffect has missing dependencies: 'markViewed' and 'proposal'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\pages\ProposalsListPage.jsx
+  26:26  warning  'setStatusFilter' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                    no-unused-vars
+  48:8   warning  React Hook useEffect has a missing dependency: 'fetchProposals'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\pages\SalesWorkspace.jsx
+   81:8  warning  React Hook useEffect has a missing dependency: 'selectedLead'. Either include it or remove the dependency array                                                                                                                                 react-hooks/exhaustive-deps
+   95:8  warning  React Hook useEffect has missing dependencies: 'leadIdFromUrl', 'searchParams', 'selectedLead', and 'setSearchParams'. Either include them or remove the dependency array                                                                       react-hooks/exhaustive-deps
+  128:8  warning  React Hook useEffect has a missing dependency: 'selectedLead'. Either include it or remove the dependency array                                                                                                                                 react-hooks/exhaustive-deps
+  207:8  warning  React Hook useEffect has a missing dependency: 'currentLead'. Either include it or remove the dependency array                                                                                                                                  react-hooks/exhaustive-deps
+  228:8  warning  React Hook useEffect has a missing dependency: 'selectedLead'. Either include it or remove the dependency array. You can also replace multiple useState variables with useReducer if 'setLeadDetail' needs the current value of 'selectedLead'  react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\providers\RealtimeProvider.jsx
+   17:13  warning  'user' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                no-unused-vars
+   21:11  warning  'reconnectTimeoutRef' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                 no-unused-vars
+  128:9   warning  React Hook React.useMemo has missing dependencies: 'subscribeToLead' and 'unsubscribeFromLead'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\QUARKS_OS\src\frontend\src\shell\UnifiedShell.jsx
+  59:8  warning  React Hook useEffect has a missing dependency: 'closeSidebar'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+Ô£û 101 problems (3 errors, 98 warnings)
+  0 errors and 2 warnings potentially fixable with the `--fix` option.
+

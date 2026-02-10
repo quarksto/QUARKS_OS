@@ -6,11 +6,15 @@ import { ConversationList } from '../hybrid/ConversationList';
 import { LeadContextPanel } from '../hybrid/LeadContextPanel';
 import { LeadDetailDrawer } from '../hybrid/LeadDetailDrawer';
 import { CreateLeadModal } from '../components/dashboard/CreateLeadModal';
-import { useLeadRealtime } from '../hooks/useRealtime';
+import { usePipelineData } from '../hooks/usePipelineData';
 import { LeadIntelligenceSidebar } from '../hybrid/LeadIntelligenceSidebar';
-import { DashboardShell } from '../components/dashboard/DashboardShell';
+import { SalesDashboardSolar } from '../components/dashboard/SalesDashboardSolar';
+import { SalesDashboardTechnical } from '../components/dashboard/SalesDashboardTechnical';
+import { AdaptiveHeader } from '../components/dashboard/AdaptiveHeader';
+import { DashboardSidebar } from '../components/dashboard/DashboardSidebar';
 
-const SIDEBAR_COLLAPSED_KEY = 'quarks-hybrid-sidebar-collapsed'; // Legacy key, mostly unused now
+import { useLayout } from '../contexts/LayoutContext';
+
 
 function flattenPipeline(pipeline) {
     if (!pipeline || typeof pipeline !== 'object') return [];
@@ -28,18 +32,27 @@ export default function SalesWorkspace() {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const leadIdFromUrl = searchParams.get('leadId') || '';
-    const [pipeline, setPipeline] = useState({});
-    const [loading, setLoading] = useState(true);
-    const [pipelineError, setPipelineError] = useState(null);
+
+    // Core State (via Hook)
+    const { pipeline, loading, error: pipelineError, refresh } = usePipelineData();
+
     const [selectedLead, setSelectedLead] = useState(null);
-    // Sidebar collapsed state removed as we use the main DashboardSidebar
+    const { isSidebarCollapsed, toggleSidebar } = useLayout();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    // Detail State
     const [leadDetailLoading, setLeadDetailLoading] = useState(false);
     const [leadDetail, setLeadDetail] = useState(null);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState('');
     const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
     const [createLeadOpen, setCreateLeadOpen] = useState(false);
     const [showCreatedMessage, setShowCreatedMessage] = useState(false);
+
+    // View State (Geral | Técnico)
+    const [activeView, setActiveView] = useState('geral');
+
+    // Filters
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
 
     useEffect(() => {
         if (!showCreatedMessage) return;
@@ -48,6 +61,7 @@ export default function SalesWorkspace() {
     }, [showCreatedMessage]);
 
     const leads = flattenPipeline(pipeline);
+
     const filteredLeads = React.useMemo(() => {
         if (!leads.length) return [];
         let list = leads;
@@ -69,16 +83,24 @@ export default function SalesWorkspace() {
         }
         return list;
     }, [leads, searchQuery, statusFilter]);
+
     const currentLead = leadDetail ?? selectedLead;
+    const isHomeState = !selectedLead;
 
     useEffect(() => {
-        if (!leadIdFromUrl || !leads.length) return;
-        const id = leadIdFromUrl;
-        const found = leads.find((l) => String(l.id) === String(id));
-        if (found && (!selectedLead || String(selectedLead.id) !== String(id))) {
-            setSelectedLead(found);
+        if (loading) return;
+        if (!leads.length) return;
+
+        if (leadIdFromUrl) {
+            const found = leads.find((l) => String(l.id) === String(leadIdFromUrl));
+            if (found && (!selectedLead || String(selectedLead.id) !== String(leadIdFromUrl))) {
+                setSelectedLead(found);
+            }
+        } else if (!selectedLead) {
+            const first = leads[0];
+            setSelectedLead(first);
         }
-    }, [leadIdFromUrl, leads]);
+    }, [leadIdFromUrl, leads, loading]);
 
     useEffect(() => {
         if (leadIdFromUrl && selectedLead == null) return;
@@ -93,6 +115,7 @@ export default function SalesWorkspace() {
         }
         setSearchParams(next, { replace: true });
     }, [selectedLead?.id]);
+
 
     useEffect(() => {
         const handleKeyDown = (e) => {
@@ -127,78 +150,6 @@ export default function SalesWorkspace() {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [filteredLeads, selectedLead?.id, navigate]);
 
-    const refreshPipeline = React.useCallback(() => {
-        setPipelineError(null);
-        setLoading(true);
-        api
-            .get('/leads/pipeline')
-            .then((res) => {
-                if (res.data) setPipeline(res.data);
-            })
-            .catch((e) => {
-                console.error('SalesWorkspace pipeline load error:', e);
-                setPipelineError(e?.message || 'Falha ao carregar');
-            })
-            .finally(() => setLoading(false));
-    }, []);
-
-    useEffect(() => {
-        let cancelled = false;
-        async function load() {
-            try {
-                const res = await api.get('/leads/pipeline');
-                if (!cancelled && res.data) {
-                    setPipeline(res.data);
-                    setPipelineError(null);
-                }
-            } catch (e) {
-                if (!cancelled) {
-                    console.error('SalesWorkspace pipeline load error:', e);
-                    setPipelineError(e?.message || 'Falha ao carregar');
-                }
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        }
-        load();
-        return () => {
-            cancelled = true;
-        };
-    }, []);
-
-    // Sync real-time optimized
-    useLeadRealtime(null, (event) => {
-        if (event.type === 'message_new') {
-            setPipeline(prev => {
-                const next = { ...prev };
-                for (const status in next) {
-                    next[status] = next[status].map(lead => {
-                        if (lead.id === event.leadId) {
-                            return { ...lead, unreadCount: (lead.unreadCount || 0) + 1 };
-                        }
-                        return lead;
-                    });
-                }
-                return next;
-            });
-        } else if (event.type === 'unread_reset') {
-            setPipeline(prev => {
-                const next = { ...prev };
-                for (const status in next) {
-                    next[status] = next[status].map(lead => {
-                        if (lead.id === event.leadId) {
-                            return { ...lead, unreadCount: 0 };
-                        }
-                        return lead;
-                    });
-                }
-                return next;
-            });
-        } else {
-            refreshPipeline();
-        }
-    });
-
     useEffect(() => {
         const base = 'Quarks OS';
         const title = currentLead ? `${currentLead.name || 'Lead'} - Workspace - ${base}` : `Workspace - ${base}`;
@@ -227,22 +178,12 @@ export default function SalesWorkspace() {
         return () => { cancelled = true; };
     }, [selectedLead?.id]);
 
-    const showList = !selectedLead;
-    const showContext = !!selectedLead;
-
     const handleStatusChange = (leadId, newStatus, onDone) => {
-        api
-            .patch(`/leads/${leadId}/status`, { status: newStatus })
-            .then(() => {
-                return api.get('/leads/pipeline').then((res) => {
-                    if (res.data) setPipeline(res.data);
-                });
-            })
+        api.patch(`/leads/${leadId}/status`, { status: newStatus })
+            .then(() => refresh())
             .then(() => {
                 if (selectedLead?.id === leadId) {
-                    return api.get(`/leads/${leadId}`).then((res) => {
-                        if (res.data) setLeadDetail(res.data);
-                    });
+                    return api.get(`/leads/${leadId}`).then((res) => { if (res.data) setLeadDetail(res.data); });
                 }
             })
             .catch((e) => console.error('Status update error:', e))
@@ -254,8 +195,7 @@ export default function SalesWorkspace() {
             const res = await api.patch(`/leads/${leadId}`, data);
             if (res.data) {
                 setLeadDetail(res.data);
-                const pipelineRes = await api.get('/leads/pipeline');
-                if (pipelineRes.data) setPipeline(pipelineRes.data);
+                refresh();
             }
             return res.data;
         } catch (e) {
@@ -265,94 +205,129 @@ export default function SalesWorkspace() {
     };
 
     const headerActions = (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
             <button
                 onClick={() => setCreateLeadOpen(true)}
-                className="rounded-full bg-solar-500 hover:bg-solar-600 text-white px-3 py-1.5 font-bold text-[10px] flex items-center gap-1 transition-all"
+                className="group relative h-8 px-4 rounded-full bg-solar text-white font-semibold text-[11px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-95"
             >
-                <span className="material-symbols-outlined text-[14px]">add</span>
-                NOVO LEAD
+                <span className="material-symbols-outlined ds-icon-w300 text-[18px]">add</span>
+                <span>Novo Lead</span>
             </button>
-            <div className="badge-ultra-compact px-2 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-bold text-slate-500 flex items-center gap-1">
-                <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                LIVE
-            </div>
         </div>
     );
 
     return (
-        <DashboardShell
-            title="Command Center"
-            subtitle="Workspace de Vendas"
-            headerIcon="forum"
-            loading={loading}
-            headerRight={headerActions}
-        >
-            <div className="flex flex-1 min-w-0 overflow-hidden h-full">
-                {/* LEFTPANEL: Lead Inbox */}
-                <div
-                    className={`shrink-0 flex flex-col bg-white border-r border-slate-200 transition-[width] ${showList ? 'w-full md:w-80 flex' : 'hidden md:flex md:w-80'
-                        }`}
-                >
-                    <div className="shrink-0">
-                        {showCreatedMessage && (
-                            <div className="px-6 py-3 bg-emerald-50 border-b border-emerald-100 flex items-center gap-3 text-[11px] font-bold text-emerald-700 uppercase tracking-widest animate-slideDown">
-                                <span className="material-symbols-outlined text-emerald-500 text-[18px]">check_circle</span>
-                                Lead criado com sucesso
-                            </div>
-                        )}
-                    </div>
-                    <ConversationList
-                        leads={leads}
-                        selectedId={selectedLead?.id}
-                        onSelectLead={setSelectedLead}
-                        loading={loading}
-                        searchQuery={searchQuery}
-                        onSearchChange={setSearchQuery}
-                        statusFilter={statusFilter}
-                        onStatusFilterChange={setStatusFilter}
-                        onRequestCreateLead={() => setCreateLeadOpen(true)}
-                        error={pipelineError}
-                        onRetry={refreshPipeline}
-                    />
+        <div className="flex h-screen bg-canvas overflow-hidden font-sans">
+            <DashboardSidebar
+                collapsed={isSidebarCollapsed}
+                onToggle={toggleSidebar}
+                mobileOpen={mobileMenuOpen}
+                onMobileClose={() => setMobileMenuOpen(false)}
+            />
+
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+                <AdaptiveHeader
+                    title="Dashboard"
+                    subtitle="Workspace de Vendas Inteligente"
+                    headerIcon="hub"
+                    loading={loading}
+                    moduleActions={headerActions}
+                    onMenuClick={() => setMobileMenuOpen(true)}
+                    breadcrumbs={[
+                        { label: 'Gestão' },
+                        { label: 'Workspace' }
+                    ]}
+                />
+
+                <div className="bg-white border-b border-slate-100 px-8 py-3 flex items-center gap-3 shadow-none z-20">
+                    <span className="material-symbols-outlined text-solar ds-icon-w300 text-[20px]">auto_awesome</span>
+                    <p className="text-slate-700 text-sm font-medium">
+                        <span className="font-semibold text-slate-800 uppercase tracking-wider text-[11px]">Quarks IA Insights:</span> Detectada anomalia de eficiência no Inversor B-04. <a className="underline hover:text-solar ml-1 decoration-slate-200 underline-offset-2" href="#">Ver detalhes</a>
+                    </p>
                 </div>
 
-                {/* CENTER PANEL: Command Center */}
-                <div
-                    className={`flex-1 min-w-0 flex flex-col bg-white overflow-hidden ${showContext ? 'flex' : 'hidden lg:flex'}`}
-                >
-                    {selectedLead && (
-                        <div className="lg:hidden flex items-center gap-2 p-3 border-b border-slate-200 shrink-0">
-                            <button
-                                type="button"
-                                onClick={() => setSelectedLead(null)}
-                                className="p-2 -ml-2 rounded-lg hover:bg-slate-100 text-slate-600"
-                                aria-label="Voltar para lista"
-                            >
-                                <span className="material-symbols-outlined">arrow_back</span>
-                            </button>
-                            <span className="text-sm font-medium text-slate-700 truncate">
-                                {currentLead?.name || 'Lead'}
-                            </span>
-                        </div>
-                    )}
-                    <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
-                        <LeadContextPanel
-                            lead={currentLead}
-                            loading={leadDetailLoading && !!selectedLead}
-                            onOpenDetail={currentLead ? () => setDetailDrawerOpen(true) : undefined}
-                            onStatusChange={currentLead ? handleStatusChange : undefined}
-                            onOpenCopilot={currentLead ? () => {
-                                setContext({ type: 'LEAD', leadId: currentLead.id, lead: currentLead });
-                                openSidebar();
-                            } : undefined}
+                <div className="flex flex-1 min-w-0 overflow-hidden h-full bg-slate-50 relative p-6 gap-6">
+                    <div className="absolute inset-0 bg-slate-50 pointer-events-none z-0" />
+
+                    <aside
+                        className={`
+                            shrink-0 flex flex-col bg-white border border-slate-100 rounded-lg overflow-hidden transition-all duration-300 z-20 
+                            ${isHomeState ? 'w-full md:w-[360px] flex' : 'hidden md:flex md:w-[360px]'}
+                        `}
+                    >
+                        <ConversationList
+                            leads={leads}
+                            selectedId={selectedLead?.id}
+                            onSelectLead={(lead) => {
+                                setSelectedLead(lead);
+                                setDetailDrawerOpen(true);
+                            }}
+                            loading={loading}
+                            searchQuery={searchQuery}
+                            onSearchChange={setSearchQuery}
+                            statusFilter={statusFilter}
+                            onStatusFilterChange={setStatusFilter}
+                            onRequestCreateLead={() => setCreateLeadOpen(true)}
+                            error={pipelineError}
+                            onRetry={refresh}
                         />
-                    </div>
-                </div>
+                    </aside>
 
-                {/* RIGHT PANEL: Intelligence Sidebar */}
-                <div className="hidden xl:flex w-80 shrink-0 flex-col bg-white border-l border-slate-200 overflow-hidden">
-                    <LeadIntelligenceSidebar lead={currentLead} loading={leadDetailLoading && !!selectedLead} />
+                    <main
+                        className={`
+                            flex-1 min-w-0 flex flex-col bg-white border border-slate-100 rounded-lg overflow-hidden relative z-10 transition-all duration-300 
+                            ${!isHomeState ? 'flex' : 'hidden md:flex'}
+                        `}
+                    >
+                        <div className="flex-1 min-h-0 overflow-hidden">
+                            {currentLead ? (
+                                <LeadContextPanel
+                                    lead={currentLead}
+                                    loading={leadDetailLoading && !!selectedLead}
+                                    onOpenDetail={() => setDetailDrawerOpen(true)}
+                                    onStatusChange={handleStatusChange}
+                                    onOpenCopilot={() => {
+                                        setContext({ type: 'LEAD', leadId: currentLead.id, lead: currentLead });
+                                        openSidebar();
+                                    }}
+                                />
+                            ) : (
+                                <div className="h-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-slate-50/50">
+                                    <div className="max-w-[1600px] mx-auto p-6 space-y-8">
+                                        <div className="flex flex-col gap-1">
+                                            <h2 className="ds-title-page text-slate-800">
+                                                {activeView === 'tecnico' ? 'Visão Técnica' : 'Visão Geral'}
+                                            </h2>
+                                            <p className="ds-label text-slate-400">
+                                                {activeView === 'tecnico'
+                                                    ? 'Monitoramento de engenharia e performance dos inversores.'
+                                                    : 'Monitoramento em tempo real da operação comercial.'}
+                                            </p>
+                                        </div>
+                                        <div className="rounded-lg border border-slate-100 bg-white overflow-hidden shadow-none">
+                                            {activeView === 'tecnico' ? (
+                                                <SalesDashboardTechnical
+                                                    metrics={pipeline.metrics}
+                                                    loading={loading}
+                                                />
+                                            ) : (
+                                                <SalesDashboardSolar
+                                                    metrics={pipeline.metrics}
+                                                    funnel={pipeline.funnel}
+                                                    activity={pipeline.activity}
+                                                    loading={loading}
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </main>
+
+                    <aside className={`hidden xl:flex w-[320px] shrink-0 flex-col bg-white border border-slate-100 rounded-lg overflow-hidden z-20 ${isHomeState ? 'hidden xl:hidden' : ''}`}>
+                        <LeadIntelligenceSidebar lead={currentLead} loading={leadDetailLoading && !!selectedLead} />
+                    </aside>
                 </div>
             </div>
 
@@ -367,11 +342,20 @@ export default function SalesWorkspace() {
                 isOpen={createLeadOpen}
                 onClose={() => setCreateLeadOpen(false)}
                 onSuccess={() => {
-                    refreshPipeline();
+                    refresh();
                     setShowCreatedMessage(true);
                 }}
                 defaultStatus="NEW"
             />
-        </DashboardShell>
+            {showCreatedMessage && (
+                <div className="fixed bottom-6 right-6 z-[100] px-6 py-4 bg-slate-800 text-white rounded-lg border border-slate-700 flex items-center gap-3 shadow-none animate-in slide-in-from-bottom duration-300" role="status" aria-live="polite">
+                    <span className="material-symbols-outlined text-2xl ds-icon-w300" aria-hidden>check_circle</span>
+                    <div className="flex flex-col">
+                        <span className="text-[13px] font-semibold">Lead criado com sucesso</span>
+                        <span className="text-[11px] text-slate-400">Você já pode iniciar o atendimento.</span>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }

@@ -31,19 +31,47 @@ const InputArea = ({ onSend, disabled, activeContext }) => {
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full max-w-3xl mx-auto">
-            {/* Context Pill (Comet Style) */}
+            {/* Context Pill and Lead Shortcuts */}
             {activeContext && (
-                <div className="flex justify-center -mb-1 animate-fadeIn">
+                <div className="flex flex-col items-center gap-2 -mb-1 animate-fadeIn">
                     <div className="inline-flex h-6 items-center gap-1.5 rounded-full bg-slate-100 px-3 py-0.5 border border-slate-200 cursor-default select-none shadow-sm">
                         <MdGridView size={14} className="text-slate-500" />
                         <span className="text-slate-500 text-[10px] font-medium uppercase tracking-wide">Context: {activeContext.type}</span>
                     </div>
+                    {activeContext?.type?.toLowerCase() === 'lead' && (
+                        <div className="flex flex-wrap justify-center gap-1.5">
+                            <button
+                                type="button"
+                                onClick={() => onSend('Gere uma proposta para este lead.', null)}
+                                disabled={disabled}
+                                className="text-[11px] px-2.5 py-1 rounded-full bg-petroleum/10 text-petroleum hover:bg-petroleum/20 border border-petroleum/20 transition-colors"
+                            >
+                                Gerar proposta
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => onSend('Qual o próximo passo recomendado para este lead?', null)}
+                                disabled={disabled}
+                                className="text-[11px] px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 transition-colors"
+                            >
+                                Qual próximo passo?
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => onSend('Dê um resumo do lead.', null)}
+                                disabled={disabled}
+                                className="text-[11px] px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 transition-colors"
+                            >
+                                Resumo do lead
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
 
             {/* File Preview */}
             {file && (
-                <div className="flex items-center gap-3 mx-4 p-2 bg-slate-50 border border-slate-200 rounded-xl relative group w-fit">
+                <div className="flex items-center gap-3 mx-4 p-2 bg-slate-50 border border-slate-200 rounded-lg relative group w-fit">
                     <div className="w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-slate-400">
                         <MdDescription size={16} />
                     </div>
@@ -51,7 +79,7 @@ const InputArea = ({ onSend, disabled, activeContext }) => {
                     <button
                         type="button"
                         onClick={() => { setFile(null); fileInputRef.current.value = ''; }}
-                        className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-2 -right-2 w-5 h-5 border border-red-200 bg-white text-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
                     >
                         <MdClose size={12} />
                     </button>
@@ -60,15 +88,15 @@ const InputArea = ({ onSend, disabled, activeContext }) => {
 
             {/* Floating Composer Bar */}
             <div className={`
-                relative flex w-full items-center gap-2 rounded-3xl border bg-white p-2 shadow-sm transition-all duration-200
-                ${disabled ? 'opacity-70 bg-slate-50 cursor-not-allowed' : 'hover:shadow-md focus-within:border-petroleum focus-within:ring-1 focus-within:ring-petroleum/20 focus-within:shadow-md'}
+                relative flex w-full items-center gap-2 rounded-lg border bg-white p-2 shadow-sm transition-all duration-200
+                ${disabled ? 'opacity-70 bg-slate-50 cursor-not-allowed' : 'hover:shadow-sm focus-within:border-petroleum/60 focus-within:outline-none focus-within:ring-0'}
                 border-slate-200
             `}>
                 {/* Upload Button */}
                 <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex w-10 h-10 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                    className="flex w-8 h-8 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
                     title="Adicionar Arquivo"
                     disabled={disabled}
                 >
@@ -98,7 +126,7 @@ const InputArea = ({ onSend, disabled, activeContext }) => {
                     {!text && !file && (
                         <button
                             type="button"
-                            className="flex w-10 h-10 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                            className="flex w-8 h-8 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
                             title="Modo de Voz"
                         >
                             <MdMic size={20} />
@@ -109,7 +137,7 @@ const InputArea = ({ onSend, disabled, activeContext }) => {
                     <button
                         type="button"
                         onClick={() => setShowTemplates(!showTemplates)}
-                        className={`flex w-10 h-10 shrink-0 items-center justify-center rounded-full transition-colors ${showTemplates ? 'bg-petroleum/10 text-petroleum' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600'}`}
+                        className={`flex w-8 h-8 shrink-0 items-center justify-center rounded-full transition-colors ${showTemplates ? 'bg-petroleum/10 text-petroleum' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600'}`}
                         title="Templates de Mensagem"
                         disabled={disabled}
                     >
@@ -132,7 +160,7 @@ const InputArea = ({ onSend, disabled, activeContext }) => {
                         <button
                             type="submit"
                             disabled={disabled}
-                            className="flex w-10 h-10 shrink-0 items-center justify-center rounded-full bg-petroleum text-white shadow-md hover:bg-petroleum-600 disabled:bg-slate-300 transition-all duration-300 animate-scaleIn"
+                            className="flex w-8 h-8 shrink-0 items-center justify-center rounded-full bg-petroleum text-white hover:bg-petroleum-600 disabled:bg-slate-300 transition-all duration-300 animate-scaleIn"
                         >
                             <MdArrowUpward size={18} />
                         </button>

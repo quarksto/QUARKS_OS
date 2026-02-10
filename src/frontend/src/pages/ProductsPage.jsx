@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../services/api';
+import api from '../services/api';
 import { DashboardShell } from '../components/dashboard/DashboardShell';
 import { Plus, Search, Filter, Package, Tag, DollarSign, PenTool, Trash2 } from 'lucide-react';
 
@@ -78,14 +78,14 @@ const ProductsPage = () => {
                 </div>
                 <button
                     onClick={() => setShowModal(true)}
-                    className="ds-button-primary bg-solar hover:bg-solar-600 text-white flex items-center gap-2"
+                    className="ds-button-primary bg-solar hover:bg-amber-600 text-white flex items-center gap-2"
                 >
                     <Plus size={18} />
                     Novo Produto
                 </button>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+            <div className="bg-white rounded-lg shadow-sm border border-slate-200">
                 {/* Filters */}
                 <div className="p-4 border-b border-slate-100 flex gap-4">
                     <div className="relative flex-1 max-w-md">
@@ -155,7 +155,7 @@ const ProductsPage = () => {
             {/* Simple Modal for MVP */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+                    <div className="bg-white rounded-lg shadow-sm w-full max-w-md p-6">
                         <h2 className="ds-title-card mb-4">Novo Produto</h2>
                         <form onSubmit={handleSave} className="space-y-4">
                             <div>

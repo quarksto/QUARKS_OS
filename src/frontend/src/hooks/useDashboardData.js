@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 
 export function useDashboardData() {
@@ -10,45 +10,40 @@ export function useDashboardData() {
         automations: '0'
     });
 
-    const [pipeline, setPipeline] = useState({
-        'NEW': [],
-        'CONTACTED': [],
-        'PROPOSAL_SENT': [],
-        'NEGOTIATION': []
-    });
-
     const [activity, setActivity] = useState([]);
     const [funnel, setFunnel] = useState([]);
     const [energyBalance, setEnergyBalance] = useState([]);
+    const [insight, setInsight] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        async function loadData() {
-            try {
-                const [kpisRes, pipelineRes, activityRes, funnelRes, balanceRes] = await Promise.all([
-                    api.get('/analytics/dashboard'),
-                    api.get('/leads/pipeline'),
-                    api.get('/analytics/activity').catch(() => ({ data: [] })),
-                    api.get('/analytics/funnel').catch(() => ({ data: [] })),
-                    api.get('/analytics/energy-balance').catch(() => ({ data: [] }))
-                ]);
+    const loadData = useCallback(async () => {
+        try {
+            setLoading(true);
+            const [kpisRes, activityRes, funnelRes, balanceRes, insightRes] = await Promise.all([
+                api.get('/analytics/dashboard'),
+                api.get('/analytics/activity').catch(() => ({ data: [] })),
+                api.get('/analytics/funnel').catch(() => ({ data: [] })),
+                api.get('/analytics/energy-balance').catch(() => ({ data: [] })),
+                api.get('/analytics/insight').catch(() => ({ data: {} }))
+            ]);
 
-                if (kpisRes.data) setMetrics(kpisRes.data);
-                if (pipelineRes.data) setPipeline(pipelineRes.data);
-                if (activityRes.data && Array.isArray(activityRes.data)) setActivity(activityRes.data);
-                if (funnelRes.data && Array.isArray(funnelRes.data)) setFunnel(funnelRes.data);
-                if (balanceRes.data && Array.isArray(balanceRes.data)) setEnergyBalance(balanceRes.data);
-            } catch (error) {
-                console.error("Dashboard Data Error:", error);
-            } finally {
-                setLoading(false);
-            }
+            if (kpisRes.data) setMetrics(kpisRes.data);
+            if (activityRes.data && Array.isArray(activityRes.data)) setActivity(activityRes.data);
+            if (funnelRes.data && Array.isArray(funnelRes.data)) setFunnel(funnelRes.data);
+            if (balanceRes.data && Array.isArray(balanceRes.data)) setEnergyBalance(balanceRes.data);
+            if (insightRes.data?.insight) setInsight(insightRes.data.insight);
+        } catch (error) {
+            console.error("Dashboard Data Error:", error);
+        } finally {
+            setLoading(false);
         }
+    }, []);
 
+    useEffect(() => {
         loadData();
         const interval = setInterval(loadData, 30000);
         return () => clearInterval(interval);
-    }, []);
+    }, [loadData]);
 
-    return { metrics, pipeline, activity, funnel, energyBalance, loading };
+    return { metrics, activity, funnel, energyBalance, insight, loading, refresh: loadData };
 }

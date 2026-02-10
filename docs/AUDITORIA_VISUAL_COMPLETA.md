@@ -32,7 +32,7 @@
 
 ---
 
-## 🎯 Checklist de Conformidade (Design System v1.3)
+## 🎯 Checklist de Conformidade (Design System v1.4)
 
 ### Obrigatórios (NÃO NEGOCIÁVEIS)
 - [ ] ❌ SEM GRADIENTES

@@ -1,4 +1,4 @@
-# 🎨 Login Page Avançada - Quarks OS v1.3
+# 🎨 Login Page Avançada - Quarks OS v1.4
 
 **Data**: 2026-02-05  
 **Status**: ✅ IMPLEMENTADO  
@@ -8,13 +8,13 @@
 
 ## 📋 RESUMO
 
-Criação de uma **tela de login premium** com componentes avançados, seguindo rigorosamente o **Design System Quarks OS v1.3**. A tela foi gerada usando o **Stitch MCP** (modelo GEMINI_3_PRO) e adaptada para React.
+Criação de uma **tela de login premium** com componentes avançados, seguindo rigorosamente o **Design System Quarks OS v1.4**. A tela foi gerada usando o **Stitch MCP** (modelo GEMINI_3_PRO) e adaptada para React.
 
 ---
 
 ## 🎯 OBJETIVOS ALCANÇADOS
 
-### ✅ Design System v1.3
+### ✅ Design System v1.4
 - **Cores**: Petroleum (#0F4C5C) + Solar (#F59E0B)
 - **Tipografia**: Inter (font-sans)
 - **Tema**: Light apenas, sem gradientes
@@ -410,7 +410,7 @@ px-12 py-16 / px-24 (Padding aumentado)
 
 ## 🔗 REFERÊNCIAS
 
-- [Design System v1.3](./DESIGN_SYSTEM_V1.3.md)
+- [Design System v1.4](./QUARKS_OS_Design_System_v1.md)
 - [Stitch MCP Docs](./MCP_STITCH_DS_PROMPT.md)
 - [CRM Leads Dashboard](https://stitch.google.com/projects/9249328830387004872)
 - [Material Symbols](https://fonts.google.com/icons)
@@ -419,7 +419,7 @@ px-12 py-16 / px-24 (Padding aumentado)
 
 ## ✅ CONCLUSÃO
 
-A **LoginPageAdvanced** foi implementada com sucesso, seguindo **100% do Design System v1.3** e incorporando **componentes avançados** que elevam a experiência do usuário a um nível premium.
+A **LoginPageAdvanced** foi implementada com sucesso, seguindo **100% do Design System v1.4** e incorporando **componentes avançados** que elevam a experiência do usuário a um nível premium.
 
 **Principais Conquistas**:
 1. ✅ Design System compliance total

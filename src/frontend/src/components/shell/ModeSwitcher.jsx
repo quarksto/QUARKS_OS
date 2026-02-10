@@ -1,15 +1,13 @@
 import React from 'react';
-import { SegmentedControl, Group, Center, Box, rem, Text } from '@mantine/core';
-import { IconPhone, IconChartBar, IconTool, IconBriefcase } from '@tabler/icons-react';
-import { useMode, MODES } from '../../providers/ModeProvider';
-
 import { useNavigate } from 'react-router-dom';
+import { useMode, MODES } from '../../providers/ModeProvider';
 
 export const ModeSwitcher = () => {
     const { mode, setMode } = useMode();
     const navigate = useNavigate();
 
     const handleModeChange = (newMode) => {
+        if (newMode === mode) return;
         setMode(newMode);
 
         // Navegação inteligente baseada no modo
@@ -22,57 +20,36 @@ export const ModeSwitcher = () => {
         }
     };
 
+    const options = [
+        { value: MODES.SALES, label: 'Vendas', icon: 'phone_in_talk' },
+        { value: MODES.MANAGE, label: 'Gestão', icon: 'bar_chart' },
+        { value: MODES.PROJECTS, label: 'Projetos', icon: 'business_center' },
+    ];
+
     return (
-        <SegmentedControl
-            value={mode}
-            onChange={handleModeChange}
-            transitionDuration={500}
-            transitionTimingFunction="linear"
-            radius="lg"
-            size="sm"
-            bg="transparent"
-            styles={{
-                root: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.03)',
-                    border: '1px solid rgba(0, 0, 0, 0.05)',
-                },
-                indicator: {
-                    backgroundColor: 'var(--mantine-color-white)',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                },
-                control: {
-                    border: '0 !important',
-                }
-            }}
-            data={[
-                {
-                    value: MODES.SALES,
-                    label: (
-                        <Center style={{ gap: 10 }}>
-                            <IconPhone style={{ width: rem(16), height: rem(16) }} />
-                            <Text size="xs" fw={mode === MODES.SALES ? 600 : 400}>Vendas</Text>
-                        </Center>
-                    ),
-                },
-                {
-                    value: MODES.MANAGE,
-                    label: (
-                        <Center style={{ gap: 10 }}>
-                            <IconChartBar style={{ width: rem(16), height: rem(16) }} />
-                            <Text size="xs" fw={mode === MODES.MANAGE ? 600 : 400}>Gestão</Text>
-                        </Center>
-                    ),
-                },
-                {
-                    value: MODES.PROJECTS,
-                    label: (
-                        <Center style={{ gap: 10 }}>
-                            <IconBriefcase style={{ width: rem(16), height: rem(16) }} />
-                            <Text size="xs" fw={mode === MODES.PROJECTS ? 600 : 400}>Projetos</Text>
-                        </Center>
-                    ),
-                },
-            ]}
-        />
+        <div className="flex bg-slate-100/50 p-1 rounded-full border border-slate-200/50 h-9 items-center shadow-none">
+            {options.map((option) => {
+                const isActive = mode === option.value;
+                return (
+                    <button
+                        key={option.value}
+                        onClick={() => handleModeChange(option.value)}
+                        className={`
+                            relative flex items-center gap-2 px-4 h-7 rounded-full transition-all duration-200 group
+                            ${isActive
+                                ? 'bg-white text-petroleum shadow-none border border-slate-200/50 font-bold'
+                                : 'text-slate-400 hover:text-slate-600 hover:bg-white/40'}
+                        `}
+                    >
+                        <span className={`material-symbols-outlined text-[18px] ds-icon-w300 ${isActive ? 'text-solar' : 'text-slate-400 group-hover:text-slate-500'}`}>
+                            {option.icon}
+                        </span>
+                        <span className={`ds-meta ${isActive ? '!text-petroleum' : '!text-slate-400'} uppercase tracking-widest font-bold`}>
+                            {option.label}
+                        </span>
+                    </button>
+                );
+            })}
+        </div>
     );
 };

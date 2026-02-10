@@ -3,13 +3,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 /**
- * RegisterPage - Quarks OS Design System v1.3
+ * RegisterPage - Quarks OS Design System v1.4
  * 
  * Features:
  * - Split Layout (45/55 - Petroleum / White)
  * - Clean minimal design
- * - No gradients, no blurs
- * - Outline style for everything
+ * - Super Flat (No shadows)
  * - Petroleum + Solar colors
  */
 export default function RegisterPage() {
@@ -54,7 +53,7 @@ export default function RegisterPage() {
         <div className="min-h-screen w-full flex flex-row overflow-hidden font-sans bg-white">
 
             {/* LEFT PANEL */}
-            <div className="hidden lg:flex w-[45%] bg-petroleum flex-col justify-between p-12 relative overflow-hidden text-white">
+            <div className="hidden lg:flex w-[45%] bg-petroleum flex-col justify-between p-12 relative overflow-hidden text-white shadow-none">
                 {/* Geometric Pattern - NO BLUR */}
                 <div className="absolute inset-0 opacity-5">
                     <svg className="w-full h-full" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
@@ -67,25 +66,25 @@ export default function RegisterPage() {
 
                 <div className="z-10 flex items-center gap-3">
                     <div className="w-8 h-8 rounded bg-white/10 flex items-center justify-center border border-white/20">
-                        <span className="material-symbols-outlined text-solar text-lg">bolt</span>
+                        <span className="material-symbols-outlined text-solar text-lg ds-icon-w300">bolt</span>
                     </div>
-                    <span className="font-bold text-lg tracking-tight">Quarks OS</span>
+                    <span className="ds-title-section text-white uppercase tracking-wider">Quarks OS</span>
                 </div>
 
                 <div className="z-10 relative max-w-lg">
-                    <h1 className="text-4xl font-bold leading-tight mb-6 tracking-tight">
+                    <h1 className="ds-display-xl text-white mb-6">
                         Join the <br />
                         <span className="text-solar">Solar Revolution</span>
                     </h1>
-                    <p className="text-slate-300 text-lg font-light leading-relaxed">
+                    <p className="text-slate-300 ds-body leading-relaxed max-w-sm">
                         Faça parte da plataforma que está transformando o mercado de energia solar. Inteligência e gestão em escala.
                     </p>
                 </div>
 
                 <div className="z-10">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/20 bg-transparent">
-                        <span className="material-symbols-outlined text-xs text-solar">groups</span>
-                        <span className="text-xs font-medium text-slate-300">Comunidade de Integradores</span>
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5">
+                        <span className="material-symbols-outlined text-xs text-solar ds-icon-w300">groups</span>
+                        <span className="ds-meta !text-slate-300 uppercase tracking-widest font-bold">Comunidade de Integradores</span>
                     </div>
                 </div>
             </div>
@@ -95,114 +94,106 @@ export default function RegisterPage() {
                 {/* Mobile Brand */}
                 <div className="lg:hidden absolute top-6 left-6 flex items-center gap-2">
                     <div className="w-8 h-8 rounded bg-petroleum flex items-center justify-center text-white">
-                        <span className="material-symbols-outlined text-solar text-lg">bolt</span>
+                        <span className="material-symbols-outlined text-solar text-lg ds-icon-w300">bolt</span>
                     </div>
                 </div>
 
-                <div className="w-full max-w-[440px]">
+                <div className="w-full max-w-[400px]">
                     <div className="mb-10 text-center lg:text-left">
-                        <h2 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Criar nova conta</h2>
-                        <p className="text-slate-500 text-sm">Comece sua jornada no Quarks OS.</p>
+                        <h2 className="ds-display-l text-slate-900 mb-2">Criar nova conta</h2>
+                        <p className="ds-body !text-slate-500">Comece sua jornada no Quarks OS.</p>
                     </div>
 
                     {error && (
-                        <div className="mb-6 p-4 rounded-lg border border-red-200 bg-white shadow-sm flex items-start gap-3">
-                            <span className="material-symbols-outlined text-red-600 text-xl">error</span>
-                            <p className="text-sm font-medium text-red-800">{error}</p>
+                        <div className="mb-6 p-4 rounded-lg border border-red-200 bg-red-50 flex items-start gap-3">
+                            <span className="material-symbols-outlined text-red-600 text-xl ds-icon-w300">error</span>
+                            <p className="ds-label normal-case font-bold text-red-800">{error}</p>
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        <div className="space-y-2">
-                            <label className="block text-sm font-medium text-slate-700">Nome Completo</label>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="space-y-1.5">
+                            <label className="ds-label mb-1.5">Nome Completo</label>
                             <div className="relative">
-                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">person</span>
+                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg ds-icon-w300">person</span>
                                 <input
                                     type="text"
                                     name="name"
                                     required
                                     value={formData.name}
                                     onChange={handleChange}
-                                    className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-slate-200 text-slate-900 text-sm placeholder:text-slate-400 focus:border-petroleum/60 focus:ring-0 outline-none transition-all"
+                                    className="ds-input pl-10 h-10"
                                     placeholder="Seu nome"
                                 />
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="block text-sm font-medium text-slate-700">Email corporativo</label>
+                        <div className="space-y-1.5">
+                            <label className="ds-label mb-1.5">Email corporativo</label>
                             <div className="relative">
-                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">mail</span>
+                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg ds-icon-w300">mail</span>
                                 <input
                                     type="email"
                                     name="email"
                                     required
                                     value={formData.email}
                                     onChange={handleChange}
-                                    className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-slate-200 text-slate-900 text-sm placeholder:text-slate-400 focus:border-petroleum/60 focus:ring-0 outline-none transition-all"
+                                    className="ds-input pl-10 h-10"
                                     placeholder="nome@empresa.com"
                                 />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className="block text-sm font-medium text-slate-700">Senha</label>
-                                <div className="relative">
-                                    <input
-                                        type="password"
-                                        name="password"
-                                        required
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-slate-900 text-sm placeholder:text-slate-400 focus:border-petroleum/60 focus:ring-0 outline-none transition-all"
-                                        placeholder="Min. 8 chars"
-                                    />
-                                </div>
+                            <div className="space-y-1.5">
+                                <label className="ds-label mb-1.5">Senha</label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    required
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    className="ds-input h-10"
+                                    placeholder="Min. 8 chars"
+                                />
                             </div>
-                            <div className="space-y-2">
-                                <label className="block text-sm font-medium text-slate-700">Confirmar</label>
-                                <div className="relative">
-                                    <input
-                                        type="password"
-                                        name="confirmPassword"
-                                        required
-                                        value={formData.confirmPassword}
-                                        onChange={handleChange}
-                                        className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-slate-900 text-sm placeholder:text-slate-400 focus:border-petroleum/60 focus:ring-0 outline-none transition-all"
-                                        placeholder="Repetir senha"
-                                    />
-                                </div>
+                            <div className="space-y-1.5">
+                                <label className="ds-label mb-1.5">Confirmar</label>
+                                <input
+                                    type="password"
+                                    name="confirmPassword"
+                                    required
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
+                                    className="ds-input h-10"
+                                    placeholder="Repetir senha"
+                                />
                             </div>
                         </div>
 
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-solar hover:bg-solar/90 text-white font-bold py-3 rounded-lg shadow-sm hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-4 outline-none focus:border-solar"
+                            className="w-full bg-solar hover:bg-amber-600 text-petroleum font-bold h-12 rounded-full shadow-none transition-all flex items-center justify-center mt-6 active:scale-[0.98]"
                         >
                             {loading ? (
-                                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
+                                <div className="w-5 h-5 border-2 border-petroleum/20 border-t-petroleum rounded-full animate-spin" />
                             ) : (
-                                <span>Criar Conta</span>
+                                <span className="text-[17px]">CRIAR MINHA CONTA</span>
                             )}
                         </button>
                     </form>
 
-                    <p className="mt-8 text-center text-sm text-slate-500">
+                    <p className="mt-8 text-center ds-body !text-slate-500">
                         Já tem acesso?{' '}
-                        <Link to="/login" className="font-semibold text-petroleum hover:underline">
+                        <Link to="/login" className="font-bold text-petroleum hover:underline">
                             Fazer login
                         </Link>
                     </p>
 
-                    {/* Footer - Integrated like Login */}
-                    <div className="mt-8 pt-6 border-t border-slate-200">
-                        <p className="text-center text-xs text-slate-500">
-                            © 2026 Quarks OS • Enterprise Edition
+                    <div className="mt-12 pt-6 border-t border-slate-100">
+                        <p className="text-center ds-meta !text-slate-300 opacity-60">
+                            QUARKS OS • ENTERPRISE EDITION 2026
                         </p>
                     </div>
                 </div>

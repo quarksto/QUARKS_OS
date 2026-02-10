@@ -26,6 +26,14 @@ module.exports = [
         },
     },
     {
-        ignores: ["node_modules/", "dist/", "coverage/"],
+        files: ["**/__tests__/**/*.js", "**/*.test.js"],
+        languageOptions: {
+            globals: {
+                ...require("globals").jest,
+            },
+        },
+    },
+    {
+        ignores: ["node_modules/", "dist/", "coverage/", "**/temp_route_snippet.js"],
     },
 ];

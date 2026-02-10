@@ -55,7 +55,7 @@ export function HybridSidebar({ collapsed, onToggle, leadCount }) {
               <span className="material-symbols-outlined shrink-0 relative" style={{ fontSize: '20px' }}>
                 {icon}
                 {collapsed && count != null && count > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-solar-500 text-white text-[10px] font-bold">
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-solar text-white text-[10px] font-bold">
                     {count > 99 ? '99+' : count}
                   </span>
                 )}

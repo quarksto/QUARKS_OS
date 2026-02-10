@@ -33,7 +33,7 @@ export const LeadModalSolarInsights = ({ lead, onDimensionar }) => {
             <section className="technical-card p-5">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="ds-title flex items-center gap-2 text-slate-900">
-                        <span className="material-symbols-outlined text-slate-400 text-[18px]">wb_twilight</span>
+                        <span className="material-symbols-outlined text-slate-400 text-[18px] ds-icon-w300">wb_twilight</span>
                         Potencial Solar (Google)
                     </h3>
                 </div>
@@ -46,10 +46,10 @@ export const LeadModalSolarInsights = ({ lead, onDimensionar }) => {
 
     if (hasInsights) {
         return (
-            <section className="technical-card p-5 border-l-4 border-l-solar-500">
+            <section className="technical-card p-5 border-l-4 border-l-solar">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="ds-title flex items-center gap-2 text-slate-900">
-                        <span className="material-symbols-outlined text-solar-500 text-[18px]">wb_twilight</span>
+                        <span className="material-symbols-outlined text-solar text-[18px] ds-icon-w300">wb_twilight</span>
                         Potencial Solar (Google)
                     </h3>
                     <span className="badge-kanban-origin text-[10px]">Solar API</span>
@@ -91,7 +91,7 @@ export const LeadModalSolarInsights = ({ lead, onDimensionar }) => {
         <section className="technical-card p-5 border border-dashed border-slate-200">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="ds-title flex items-center gap-2 text-slate-900">
-                    <span className="material-symbols-outlined text-slate-400 text-[18px]">wb_twilight</span>
+                    <span className="material-symbols-outlined text-slate-400 text-[18px] ds-icon-w300">wb_twilight</span>
                     Potencial Solar (Google)
                 </h3>
             </div>
@@ -103,7 +103,7 @@ export const LeadModalSolarInsights = ({ lead, onDimensionar }) => {
                 onClick={() => onDimensionar?.()}
                 className="btn-pill text-petroleum hover:bg-petroleum/5 hover:border-petroleum/40 px-4 py-2 flex items-center gap-2"
             >
-                <span className="material-symbols-outlined text-[18px]">sunny</span>
+                <span className="material-symbols-outlined text-[18px] ds-icon-w300">sunny</span>
                 Dimensionar via Engenharia
             </button>
         </section>

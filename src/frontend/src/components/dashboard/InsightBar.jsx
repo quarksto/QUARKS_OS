@@ -12,13 +12,14 @@ export const InsightBar = ({ onViewDetails, insight }) => {
                     <span>
                         {insight != null && typeof insight === 'string'
                             ? insight
-                            : <>Sua taxa de conversão subiu <span className="text-emerald-600 font-bold">+12%</span> esta semana! Foco nos leads de &quot;Industrial&quot; hoje. <span className="text-slate-400 text-[11px]">(exemplo)</span></>}
+                            : 'Converta leads em propostas para impulsionar a receita!'}
                     </span>
                 </div>
             </div>
 
             <button
-                onClick={onViewDetails}
+                type="button"
+                onClick={() => onViewDetails?.()}
                 className="text-[11px] font-bold uppercase tracking-wide text-petroleum-600 hover:text-petroleum-800 hover:underline flex items-center gap-1"
             >
                 VER DETALHES

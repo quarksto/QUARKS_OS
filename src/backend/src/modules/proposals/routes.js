@@ -54,6 +54,26 @@ router.get('/public/:slug', async (req, res) => {
     }
 });
 
+// GET /api/proposals/public/:slug/document - Get proposal HTML content
+router.get('/public/:slug/document', async (req, res) => {
+    try {
+        const proposal = await prisma.proposal.findFirst({
+            where: { publicSlug: req.params.slug }
+        });
+        if (!proposal) return res.status(404).json({ error: 'Proposal not found' });
+
+        const filePath = proposalDocumentPath(proposal.id);
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ error: 'Document not generated yet' });
+        }
+
+        res.sendFile(filePath);
+    } catch (error) {
+        console.error('[Proposals] Error get public document:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // POST /api/proposals/public/:slug/view - Mark as viewed
 router.post('/public/:slug/view', async (req, res) => {
     try {
@@ -239,7 +259,6 @@ router.get('/:id', authenticate, async (req, res) => {
 router.patch('/:id', authenticate, async (req, res) => {
     try {
         const allowed = [
-            'title', 'totalPrice', 'discountPercent', 'discountAbsolute',
             'title', 'totalPrice', 'discountPercent', 'discountAbsolute',
             'notes', 'expiresAt', 'status', 'introduction', 'paymentTerms'
         ];
@@ -444,10 +463,6 @@ router.post('/:id/generate-pdf', authenticate, async (req, res) => {
                 roi_percentage: 0,
                 vpl: 0,
                 irr: 0
-            },
-            tariff: {
-                distributor: proposal.lead.distributor || 'Distribuidora',
-                total_rate_with_taxes: 0.95
             },
             tariff: {
                 distributor: proposal.lead.distributor || 'Distribuidora',

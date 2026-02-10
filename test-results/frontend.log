@@ -1,0 +1,15 @@
+
+> frontend@0.0.0 test
+> vitest run
+
+
+ RUN  v4.0.18 D:/QUARKS_OS/src/frontend
+
+ ✓ src/components/ui/StandardAvatar.test.jsx (4 tests) 54ms
+ ✓ src/components/common/PageHeader.test.jsx (3 tests) 321ms
+
+ Test Files  2 passed (2)
+      Tests  7 passed (7)
+   Start at  20:20:23
+   Duration  4.60s (transform 99ms, setup 339ms, import 2.58s, tests 374ms, environment 3.04s)
+

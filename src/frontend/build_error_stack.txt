@@ -1,0 +1,98 @@
+﻿
+> frontend@0.0.0 build
+> vite build
+
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mÔ£ô[39m 10087 modules transformed.
+node.exe : [31mÔ£ù[39m 
+Build failed in 9.97s
+No linha:1 caractere:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: ([3  
+  1mÔ£ù[39m Build faile   
+ d in 9.97s:String) [],    
+ RemoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+[31merror during build:
+[31msrc/pages/ProposalPage
+.jsx (2:7): "default" is 
+not exported by "src/compon
+ents/dashboard/DashboardShe
+ll.jsx", imported by "src/p
+ages/ProposalPage.jsx".[31
+m
+file: [36mD:/QUARKS_OS/src
+/frontend/src/pages/Proposa
+lPage.jsx:2:7[31m
+[33m
+1: import React from 
+'react';
+2: import DashboardShell 
+from '../components/dashboa
+rd/DashboardShell';
+          ^
+3: import SalesWizard from 
+'../components/wizard/Sales
+Wizard';
+[31m
+    at getRollupError (file
+:///D:/QUARKS_OS/src/fronte
+nd/node_modules/rollup/dist
+/es/shared/parseAst.js:402:
+41)
+    at error (file:///D:/QU
+ARKS_OS/src/frontend/node_m
+odules/rollup/dist/es/share
+d/parseAst.js:398:42)
+    at Module.error (file:/
+//D:/QUARKS_OS/src/frontend
+/node_modules/rollup/dist/e
+s/shared/node-entry.js:1704
+0:16)
+    at 
+Module.traceVariable (file:
+///D:/QUARKS_OS/src/fronten
+d/node_modules/rollup/dist/
+es/shared/node-entry.js:174
+52:29)
+    at 
+ModuleScope.findVariable (f
+ile:///D:/QUARKS_OS/src/fro
+ntend/node_modules/rollup/d
+ist/es/shared/node-entry.js
+:15070:39)
+    at ReturnValueScope.fin
+dVariable (file:///D:/QUARK
+S_OS/src/frontend/node_modu
+les/rollup/dist/es/shared/n
+ode-entry.js:5673:38)
+    at FunctionBodyScope.fi
+ndVariable (file:///D:/QUAR
+KS_OS/src/frontend/node_mod
+ules/rollup/dist/es/shared/
+node-entry.js:5673:38)
+    at Identifier.bind (fil
+e:///D:/QUARKS_OS/src/front
+end/node_modules/rollup/dis
+t/es/shared/node-entry.js:5
+447:40)
+    at CallExpression.bind 
+(file:///D:/QUARKS_OS/src/f
+rontend/node_modules/rollup
+/dist/es/shared/node-entry.
+js:2825:28)
+    at CallExpression.bind 
+(file:///D:/QUARKS_OS/src/f
+rontend/node_modules/rollup
+/dist/es/shared/node-entry.
+js:12179:15)[39m

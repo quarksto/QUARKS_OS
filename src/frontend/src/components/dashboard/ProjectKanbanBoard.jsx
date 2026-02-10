@@ -1,29 +1,19 @@
 import React, { useState } from 'react';
 import { StandardAvatar } from '../ui/StandardAvatar';
-import { MdOutlineMoreVert, MdLocationOn, MdEngineering, MdArchive, MdBusiness, MdChevronRight } from 'react-icons/md';
 
+/* DS: marcador de coluna em modo outline; bordas slate-200 */
 const columns = [
-    { title: 'Planejamento', id: 'PLANNED', color: 'blue', accent: 'bg-blue-500', text: 'text-blue-700', border: 'border-blue-200' },
-    { title: 'Vistoria', id: 'SURVEYING', color: 'amber', accent: 'bg-amber-400', text: 'text-amber-700', border: 'border-amber-200' },
-    { title: 'Estudo Técnico', id: 'TECHNICAL_STUDY', color: 'cyan', accent: 'bg-cyan-500', text: 'text-cyan-700', border: 'border-cyan-200' },
-    { title: 'Aprovado', id: 'APPROVED', color: 'emerald', accent: 'bg-emerald-500', text: 'text-emerald-700', border: 'border-emerald-200' },
-    { title: 'Instalação', id: 'INSTALLING', color: 'orange', accent: 'bg-orange-500', text: 'text-orange-700', border: 'border-orange-200' },
-    { title: 'Concluído', id: 'COMPLETED', color: 'slate', accent: 'bg-slate-400', text: 'text-slate-700', border: 'border-slate-200' },
+    { title: 'Planejamento', id: 'PLANNED', borderDot: 'border-cyan-400' },
+    { title: 'Vistoria', id: 'SURVEYING', borderDot: 'border-amber-400' },
+    { title: 'Estudo Técnico', id: 'TECHNICAL_STUDY', borderDot: 'border-slate-300' },
+    { title: 'Aprovado', id: 'APPROVED', borderDot: 'border-emerald-400' },
+    { title: 'Instalação', id: 'INSTALLING', borderDot: 'border-orange-400' },
+    { title: 'Concluído', id: 'COMPLETED', borderDot: 'border-slate-300' },
 ];
 
 const ProjectCard = ({ project, onClick, onDragStart }) => {
-    // Determine avatar source (Technician or Lead/Client)
-    // Priority: Technician (since it's a project task usually assigned to someone) -> Client
     const technician = project.technician;
     const clientName = project.lead?.name || project.clientName || 'Cliente';
-
-    // If technician is assigned, show their avatar. If not, maybe show Client avatar?
-    // Actually, Projects are usually "Who is working on this?".
-    // Let's show Technician if exists, otherwise "Unassigned" avatar placeholder.
-    // Or we can show the Client avatar to identify WHICH project it is.
-    // Let's show Client Avatar as the main identifier, and Technician as a small tag/icon.
-    // This matches the Leads Kanban where the Card = The Customer/Deal.
-
     const avatarName = clientName;
     const avatarSrc = project.lead?.avatarUrl || project.lead?.photoUrl;
 
@@ -32,7 +22,7 @@ const ProjectCard = ({ project, onClick, onDragStart }) => {
             draggable
             onDragStart={(e) => onDragStart(e, project)}
             onClick={() => onClick(project)}
-            className="group bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-500/50 transition-all cursor-pointer relative overflow-hidden active:cursor-grabbing"
+            className="group bg-white p-4 rounded-lg border border-slate-200 shadow-none hover:border-slate-300 transition-all duration-200 cursor-pointer relative overflow-hidden active:scale-[0.98]"
         >
             <div className="flex justify-between items-start mb-3">
                 <div className="flex gap-3">
@@ -40,36 +30,36 @@ const ProjectCard = ({ project, onClick, onDragStart }) => {
                         name={avatarName}
                         src={avatarSrc}
                         size="md"
-                        className="bg-slate-100 text-slate-600"
+                        className="bg-slate-50 text-slate-500 border border-slate-100"
                     />
                     <div className="min-w-0">
-                        <h4 className="text-sm font-bold text-slate-900 leading-tight line-clamp-1">{project.name}</h4>
-                        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                        <h4 className="ds-label !text-petroleum normal-case font-bold leading-tight line-clamp-1 mb-0.5">{project.name}</h4>
+                        <span className="ds-meta !text-slate-400 font-bold tracking-tighter uppercase">
                             ID: {project.id?.substring(0, 8).toUpperCase() || 'N/A'}
                         </span>
                     </div>
                 </div>
-                <button className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-indigo-600 rounded-full p-1 hover:bg-slate-100">
-                    <MdOutlineMoreVert size={20} />
+                <button type="button" className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-slate-300 hover:text-petroleum rounded-full size-8 flex items-center justify-center hover:bg-slate-50 border border-transparent" aria-label="Mais ações">
+                    <span className="material-symbols-outlined text-[18px] ds-icon-w300">more_vert</span>
                 </button>
             </div>
 
-            <div className="flex items-center gap-2 mb-3 px-1">
-                <MdLocationOn size={16} className="text-slate-400" />
-                <span className="text-slate-600 text-xs font-medium truncate">
+            <div className="flex items-center gap-1.5 mb-4">
+                <span className="material-symbols-outlined text-[15px] text-slate-300 ds-icon-w300">location_on</span>
+                <span className="ds-body !text-slate-500 !text-[12px] truncate">
                     {project.lead?.location || project.location || 'Localização não definida'}
                 </span>
             </div>
 
-            <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-100">
-                <div className="flex items-center gap-1.5 text-slate-500">
-                    <MdEngineering size={16} />
-                    <span className="text-[11px] font-semibold truncate max-w-[120px]">
-                        {technician?.name || 'Sem técnico'}
+            <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-50">
+                <div className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-petroleum/40 ds-icon-w300">engineering</span>
+                    <span className="ds-meta !text-slate-500 font-bold truncate max-w-[110px] uppercase">
+                        {technician?.name || 'SEM TÉCNICO'}
                     </span>
                 </div>
                 {project.deadline && (
-                    <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
+                    <span className="ds-meta !text-slate-400 font-bold uppercase tabular-nums bg-slate-50 px-2.5 py-1 rounded-full border border-slate-100">
                         {new Date(project.deadline).toLocaleDateString('pt-BR')}
                     </span>
                 )}
@@ -109,7 +99,7 @@ export const ProjectKanbanBoard = ({ kanban, onProjectClick, onStatusChange }) =
     };
 
     return (
-        <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-custom h-full items-start px-1">
+        <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide h-full items-start">
             {columns.map((col) => {
                 const projects = kanban[col.id] || [];
                 const count = projects.length;
@@ -118,22 +108,22 @@ export const ProjectKanbanBoard = ({ kanban, onProjectClick, onStatusChange }) =
                 return (
                     <div
                         key={col.id}
-                        className={`flex flex-col w-[340px] shrink-0 h-full rounded-2xl transition-colors duration-200 ${isDragOver ? 'bg-slate-50 ring-2 ring-indigo-500/20' : ''}`}
+                        className={`flex flex-col w-[320px] shrink-0 h-full rounded-xl border border-slate-100/60 bg-slate-50/10 p-3 transition-colors duration-200 ${isDragOver ? 'bg-slate-100/50 ring-2 ring-solar/30 border-solar/20' : ''}`}
                         onDragOver={(e) => handleDragOver(e, col.id)}
                         onDragLeave={(e) => handleDragLeave(e)}
                         onDrop={(e) => handleDrop(e, col.id)}
                     >
-                        <div className="flex items-center justify-between mb-4 px-1">
-                            <div className="flex items-center gap-2">
-                                <div className={`size-3 rounded-full ${col.accent.replace('bg-', 'bg-')} shadow-sm`}></div>
-                                <h3 className="text-sm font-bold text-slate-900">{col.title}</h3>
-                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full bg-white border ${col.border} ${col.text} shadow-sm`}>
-                                    {count}
-                                </span>
+                        <div className="flex items-center justify-between mb-5 px-1 pt-1">
+                            <div className="flex items-center gap-2.5">
+                                <div className={`size-2.5 rounded-full border-2 bg-transparent ${col.borderDot || 'border-slate-200'}`} aria-hidden="true" />
+                                <h3 className="ds-meta !text-petroleum font-black uppercase tracking-[0.1em]">{col.title}</h3>
                             </div>
+                            <span className="ds-meta !text-slate-400 font-black bg-white border border-slate-100 size-6 flex items-center justify-center rounded-full tabular-nums">
+                                {count}
+                            </span>
                         </div>
 
-                        <div className="flex-1 flex flex-col gap-3 px-1 pb-4 overflow-y-auto custom-scrollbar">
+                        <div className="flex-1 flex flex-col gap-3 px-0.5 pb-4 overflow-y-auto scrollbar-hide">
                             {projects.map((project) => (
                                 <ProjectCard
                                     key={project.id}
@@ -143,9 +133,9 @@ export const ProjectKanbanBoard = ({ kanban, onProjectClick, onStatusChange }) =
                                 />
                             ))}
                             {projects.length === 0 && (
-                                <div className="h-32 rounded-xl border-2 border-dashed border-slate-100 flex flex-col items-center justify-center text-slate-300 gap-2 bg-slate-50/30">
-                                    <MdBusiness size={24} className="opacity-50" />
-                                    <span className="text-xs font-medium">Sem projetos</span>
+                                <div className="h-28 rounded-xl border border-dashed border-slate-200/60 flex flex-col items-center justify-center text-slate-400 gap-2 bg-slate-50/20">
+                                    <span className="material-symbols-outlined text-[20px] text-slate-200 ds-icon-w300">work_outline</span>
+                                    <span className="ds-meta !text-slate-300 font-bold uppercase tracking-widest">Sem projetos</span>
                                 </div>
                             )}
                         </div>

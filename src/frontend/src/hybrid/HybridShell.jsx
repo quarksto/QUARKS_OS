@@ -311,7 +311,7 @@ export function HybridShell() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCreateLeadOpen(true)}
-                className="rounded-full bg-solar-500 hover:bg-solar-600 text-white px-3 py-1.5 font-bold text-[10px] flex items-center gap-1 transition-all"
+                className="rounded-full bg-solar hover:bg-amber-600 text-white px-3 py-1.5 font-bold text-[10px] flex items-center gap-1 transition-all"
               >
                 <span className="material-symbols-outlined text-[14px]">add</span>
                 NOVO LEAD

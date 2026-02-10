@@ -19,6 +19,8 @@ class ProductDomainAgent extends BaseDomainAgent {
                 return await this.getProduct(payload.id);
             case 'FIND_BEST_KIT':
                 return await this.findBestKit(payload);
+            case 'QUERY_CATALOG':
+                return await this.queryCatalog(payload);
             default:
                 throw new Error(`Unknown action: ${action}`);
         }
@@ -104,6 +106,43 @@ class ProductDomainAgent extends BaseDomainAgent {
         const best = validKits[0];
         console.log(`[ProductDomain] Selected Kit: ${best.name} (${best.powerKwp} kWp)`);
         return best;
+    }
+
+    /**
+     * Returns product catalog summary for RAG-style questions (warranty, specs, etc.).
+     * @param {Object} payload
+     * @param {string} [payload.query] - Optional search term to filter products (e.g. "inversor", "garantia")
+     */
+    async queryCatalog({ query } = {}) {
+        const products = await prisma.product.findMany({
+            where: { active: true },
+            include: { _count: { select: { kitItems: true } } }
+        });
+
+        const q = (query || '').toLowerCase();
+        let filtered = products;
+        if (q) {
+            filtered = products.filter(p =>
+                (p.name && p.name.toLowerCase().includes(q)) ||
+                (p.description && p.description.toLowerCase().includes(q)) ||
+                (p.type && p.type.toLowerCase().includes(q)) ||
+                (JSON.stringify(p.specs || {}).toLowerCase().includes(q))
+            );
+        }
+
+        const items = (filtered.length > 0 ? filtered : products)
+            .slice(0, 20)
+            .map(p => ({
+                id: p.id,
+                sku: p.sku,
+                name: p.name,
+                type: p.type,
+                description: p.description,
+                specs: p.specs,
+                supplier: p.supplier
+            }));
+
+        return { products: items, total: products.length };
     }
 }
 

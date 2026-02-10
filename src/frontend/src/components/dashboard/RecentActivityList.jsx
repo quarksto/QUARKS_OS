@@ -21,7 +21,7 @@ const ActivityItem = ({ title, user, time, type, onClick }) => {
 
     if (type === 'proposal') {
         icon = 'description';
-        iconColor = 'bg-solar-100 text-solar-600';
+        iconColor = 'bg-solar-100 text-solar';
     } else if (type === 'message') {
         icon = 'chat';
         iconColor = 'bg-blue-50 text-blue-500';

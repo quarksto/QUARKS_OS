@@ -1,10 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useRealtime } from '../providers/RealtimeProvider';
+import { useMode } from '../providers/ModeProvider';
 
 const CopilotContext = createContext();
 
 export const CopilotProvider = ({ children }) => {
     const { socket, connected } = useRealtime();
+    const navigate = useNavigate();
+    const { setMode } = useMode();
     // ONE Source of Truth for State
     const [viewMode, setViewMode] = useState('closed'); // 'closed' | 'standard' | 'expanded'
 
@@ -26,6 +30,13 @@ export const CopilotProvider = ({ children }) => {
         if (sessionId) {
             socket.emit('subscribe:copilot', { sessionId });
         }
+
+        const handleSession = ({ sessionId: newSessionId }) => {
+            if (newSessionId) {
+                localStorage.setItem('copilot_session_id', newSessionId);
+                socket.emit('subscribe:copilot', { sessionId: newSessionId });
+            }
+        };
 
         const handleChunk = ({ sessionId: chunkSessionId, chunk, index }) => {
             setMessages(prev => {
@@ -54,12 +65,19 @@ export const CopilotProvider = ({ children }) => {
         const handleError = ({ message }) => {
             console.error('Copilot Stream Error:', message);
             setIsThinking(false);
+            setMessages(prev => [...prev, {
+                id: Date.now(),
+                type: 'ai',
+                text: `Erro: ${message || 'Ocorreu um problema ao processar sua mensagem.'}`
+            }]);
         };
 
+        socket.on('copilot:session', handleSession);
         socket.on('copilot:stream_chunk', handleChunk);
         socket.on('copilot:error', handleError);
 
         return () => {
+            socket.off('copilot:session', handleSession);
             socket.off('copilot:stream_chunk', handleChunk);
             socket.off('copilot:error', handleError);
         };
@@ -87,8 +105,11 @@ export const CopilotProvider = ({ children }) => {
         setViewMode(prev => prev === 'expanded' ? 'standard' : 'expanded');
     };
 
-    const sendMessage = async (text, file) => {
+    const sendMessage = async (text, file, contextOverride = null) => {
         if (viewMode === 'closed') setViewMode('standard');
+
+        const ctx = contextOverride != null ? contextOverride : activeContext;
+        if (contextOverride != null) setActiveContext(contextOverride);
 
         const userMsg = { id: Date.now(), type: 'user', text };
         if (file) userMsg.file = { name: file.name, type: file.type };
@@ -107,7 +128,8 @@ export const CopilotProvider = ({ children }) => {
                     message: text,
                     file: file,
                     sessionId,
-                    userId: 'user-123'
+                    userId: 'user-123',
+                    context: ctx
                 });
 
                 if (response.sessionId) {
@@ -134,7 +156,8 @@ export const CopilotProvider = ({ children }) => {
 
                 socket.emit('copilot:message', {
                     sessionId,
-                    message: text
+                    message: text,
+                    context: ctx
                 });
 
                 // A atualização virá via 'copilot:stream_chunk'
@@ -153,14 +176,61 @@ export const CopilotProvider = ({ children }) => {
         }
     };
 
-    const triggerAction = (actionType, payload) => {
+    const triggerAction = async (actionType, payload = {}) => {
         if (viewMode === 'closed') setViewMode('standard');
-        setMessages(prev => [...prev, {
-            id: Date.now(),
-            type: 'ai',
-            text: `Iniciando ação: ${actionType}...`,
-            action: { type: actionType, payload, status: 'pending' }
-        }]);
+
+        const normalized = String(actionType).toLowerCase();
+        const leadId = payload.leadId ?? activeContext?.leadId ?? activeContext?.lead?.id ?? activeContext?.id;
+
+        switch (normalized) {
+            case 'generate_proposal': {
+                if (leadId) {
+                    navigate(`/proposals/new?leadId=${leadId}`);
+                    setMessages(prev => [...prev, {
+                        id: Date.now(),
+                        type: 'ai',
+                        text: 'Abrindo criação de proposta para este lead.'
+                    }]);
+                } else {
+                    sendMessage('Gere uma proposta para o lead atual. Qual lead devo usar?');
+                }
+                break;
+            }
+            case 'schedule_visit': {
+                if (leadId) {
+                    navigate(`/leads/${leadId}`);
+                    setMessages(prev => [...prev, {
+                        id: Date.now(),
+                        type: 'ai',
+                        text: 'Abrindo detalhes do lead para agendar visita.'
+                    }]);
+                } else {
+                    sendMessage('Quero agendar uma visita. Qual lead?');
+                }
+                break;
+            }
+            case 'switch_mode': {
+                const mode = payload.mode || 'manage';
+                if (['sales', 'manage', 'projects'].includes(mode)) {
+                    setMode(mode);
+                    setMessages(prev => [...prev, {
+                        id: Date.now(),
+                        type: 'ai',
+                        text: `Modo alterado para ${mode}.`
+                    }]);
+                } else {
+                    sendMessage(`Mude para o modo ${mode}.`);
+                }
+                break;
+            }
+            default:
+                setMessages(prev => [...prev, {
+                    id: Date.now(),
+                    type: 'ai',
+                    text: `Iniciando ação: ${actionType}...`,
+                    action: { type: actionType, payload, status: 'pending' }
+                }]);
+        }
     };
 
     return (
@@ -191,3 +261,5 @@ export const useCopilot = () => {
     }
     return context;
 };
+
+export default CopilotProvider;

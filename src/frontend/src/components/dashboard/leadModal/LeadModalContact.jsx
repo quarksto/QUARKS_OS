@@ -10,7 +10,7 @@ export const LeadModalContact = ({ lead }) => {
         <section className="technical-card p-5">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="ds-title flex items-center gap-2 text-slate-900">
-                    <span className="material-symbols-outlined text-slate-400 text-[18px]">person</span>
+                    <span className="material-symbols-outlined text-slate-400 text-[18px] ds-icon-w300">person</span>
                     Dados de Contato
                 </h3>
             </div>
@@ -21,7 +21,7 @@ export const LeadModalContact = ({ lead }) => {
                         <span className="ds-data text-slate-800">{phone}</span>
                         {lead?.phone && (
                             <a href={`https://wa.me/55${lead.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-emerald-600 transition-colors">
-                                <span className="material-symbols-outlined text-[14px]">chat</span>
+                                <span className="material-symbols-outlined text-[14px] ds-icon-w300">chat</span>
                             </a>
                         )}
                     </div>
@@ -32,7 +32,7 @@ export const LeadModalContact = ({ lead }) => {
                         <span className="ds-data text-slate-800 truncate">{email}</span>
                         {lead?.email && (
                             <a href={`mailto:${lead.email}`} className="text-slate-400 hover:text-petroleum transition-colors shrink-0">
-                                <span className="material-symbols-outlined text-[14px]">mail</span>
+                                <span className="material-symbols-outlined text-[14px] ds-icon-w300">mail</span>
                             </a>
                         )}
                     </div>

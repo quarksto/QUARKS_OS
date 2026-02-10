@@ -73,7 +73,7 @@ const MentionInput = ({ value, onChange, onKeyDown, placeholder, disabled }) => 
             />
 
             {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute bottom-full mb-2 left-0 w-64 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-fadeIn">
+                <div className="absolute bottom-full mb-2 left-0 w-64 bg-white border border-slate-200 rounded-lg shadow-sm z-50 overflow-hidden animate-fadeIn">
                     <div className="p-2 border-b border-slate-100 bg-slate-50">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Mencionar Usuário</span>
                     </div>

@@ -46,7 +46,7 @@ export const LeadModalMap = ({ address }) => {
                     rel="noopener noreferrer"
                     className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100"
                 >
-                    <span className="bg-white/95 backdrop-blur px-3 py-1.5 rounded-full text-xs font-bold text-slate-800 shadow-lg flex items-center gap-1">
+                    <span className="bg-white border border-slate-200 px-3 py-1.5 rounded-full text-xs font-bold text-slate-800 shadow-sm flex items-center gap-1">
                         <span className="material-symbols-outlined text-[14px]">open_in_new</span>
                         Ver no Google Maps
                     </span>
@@ -63,7 +63,7 @@ export const LeadModalMap = ({ address }) => {
             className="relative w-full h-32 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center group cursor-pointer hover:border-petroleum/40 transition-colors"
         >
             <div className="absolute inset-0 flex items-center justify-center">
-                <span className="bg-white/95 backdrop-blur px-3 py-1.5 rounded-full text-xs font-bold text-slate-800 shadow-lg flex items-center gap-1 group-hover:bg-petroleum group-hover:text-white transition-colors">
+                <span className="bg-white border border-slate-200 px-3 py-1.5 rounded-full text-xs font-bold text-slate-800 shadow-sm flex items-center gap-1 group-hover:bg-petroleum group-hover:text-white transition-colors">
                     <span className="material-symbols-outlined text-[14px]">map</span>
                     Ver no Google Maps
                 </span>

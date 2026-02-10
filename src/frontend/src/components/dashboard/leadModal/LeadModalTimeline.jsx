@@ -12,7 +12,7 @@ const activityLabels = {
 const activityColors = {
     gray: 'bg-slate-400',
     blue: 'bg-blue-500',
-    solar: 'bg-solar-500',
+    solar: 'bg-solar',
     green: 'bg-emerald-500',
 };
 
@@ -21,7 +21,7 @@ export const LeadModalTimeline = ({ activities = [], loading }) => {
         <div className="technical-card p-5 flex-1 min-h-0 flex flex-col">
             <div className="flex items-center justify-between mb-5 shrink-0">
                 <h3 className="ds-title flex items-center gap-2 text-slate-900">
-                    <span className="material-symbols-outlined text-slate-400 text-[18px]">history</span>
+                    <span className="material-symbols-outlined text-slate-400 text-[18px] ds-icon-w300">history</span>
                     Histórico
                 </h3>
             </div>

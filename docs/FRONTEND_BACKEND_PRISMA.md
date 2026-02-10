@@ -45,11 +45,37 @@ Sem `.env`, o default é `http://localhost:3001`.
 
 ---
 
+## Conectar ao banco (backend)
+
+O backend usa **Prisma** com **PostgreSQL**. A URL do banco vem do `.env`:
+
+- **Variável obrigatória:** `DATABASE_URL`
+- **Exemplo local:** `postgresql://postgres:postgres@localhost:5432/quarks?schema=public`
+- **Exemplo Supabase:** `postgresql://postgres:SENHA@db.xxx.supabase.co:5432/postgres`
+
+O schema Prisma (`prisma/schema.prisma`) está configurado com `url = env("DATABASE_URL")`, então o valor do `.env` é sempre usado.
+
+**Passos para conectar:**
+
+1. Copiar `src/backend/.env.example` para `src/backend/.env` e definir `DATABASE_URL`.
+2. Na pasta do backend: `npx prisma generate` (gera o client).
+3. Aplicar migrações: `npx prisma migrate deploy` (ou em dev `npx prisma migrate dev`).
+4. (Opcional) Dados iniciais: `node seed_data.js` ou outros scripts em `src/backend/`.
+
+**Verificar se o banco está conectado:**
+
+- Endpoint: `GET /api/health/db`  
+- Resposta OK: `{ "status": "ok", "database": "connected" }`  
+- Se falhar: 503 com `database: "disconnected"` e mensagem de erro (credenciais, rede, etc.).
+
+---
+
 ## Como testar a conexão
 
 1. **Backend:** `cd src/backend && npm run start` (ou `node start.js`) — sobe na porta 3001.
-2. **Banco:** PostgreSQL com `DATABASE_URL` do Prisma (schema em `src/backend/prisma/schema.prisma`). Rodar `npx prisma migrate deploy` e, se quiser dados iniciais, `node seed_data.js` (ou scripts de seed).
-3. **Frontend:** `cd src/frontend && npm run dev` — usa `VITE_API_BASE` ou default `http://localhost:3001`.
+2. **Banco:** PostgreSQL com `DATABASE_URL` no `.env`. Rodar `npx prisma migrate deploy` e, se quiser dados iniciais, `node seed_data.js` (ou scripts de seed).
+3. **Frontend:** `cd src/frontend && npm run dev` — proxy envia `/api` para `http://localhost:3001`.
 4. Abrir o Dashboard: KPIs e pipeline vêm de `GET /api/analytics/dashboard` e `GET /api/leads/pipeline`, que leem no Prisma (Lead, Proposal).
+5. Conferir banco: `curl http://localhost:3001/api/health/db` → deve retornar `database: "connected"`.
 
 Se o backend ou o banco estiverem fora do ar, o frontend mostrará erro nas chamadas (ex.: Dashboard com dados zerados ou mensagem de falha).

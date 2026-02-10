@@ -21,11 +21,11 @@
 
 **Goal**: Componentes reutilizáveis alinhados ao DS e referência Stitch.
 
-- [x] T002 [P] Criar `DashboardSidebar.jsx`: sidebar colapsável (petroleum), logo, busca, menu Operacional/Engenharia, rodapé. Props: collapsed, onToggle, navItemClass. Ref.: DS v1 + docs/DASHBOARD_STITCH_MCP.md
-- [x] T003 [P] Criar `DashboardHeader.jsx`: header h-16, título Dashboard, subtítulo, indicador Live Data/Syncing, botão + NOVO NEGÓCIO. Props: loading, onNewDeal. Ref.: DS v1
-- [x] T004 [P] Criar `InsightBar.jsx`: barra de insight IA (petroleum/[0.02]), mensagem contextual, CTA "Ver detalhes". Props: onViewDetails. Ref.: DS v1
-- [x] T005 [P] Criar `KpiGrid.jsx`: grid 4 cards (Leads Gerados, Conversão, Pipeline Ativo, Automações). Props: metrics. Classes: technical-card, kpi-title, kpi-value, badge-ultra-compact. Ref.: DS v1
-- [x] T006 [P] Criar `KanbanBoard.jsx`: secção Fluxo Comercial, 4 colunas (Triagem, Qualificação, Proposta, Negociação), cards de lead. Props: pipeline, columnTitles. Classes: section-title, technical-card, support-text-sm. Ref.: DS v1
+- [x] T002 [P] Criar `DashboardSidebar.jsx`: sidebar colapsável (petroleum), logo, busca, menu Operacional/Engenharia, rodapé. Props: collapsed, onToggle, navItemClass. Ref.: DS v1.4 + docs/DASHBOARD_STITCH_MCP.md
+- [x] T003 [P] Criar `DashboardHeader.jsx`: header h-16, título Dashboard, subtítulo, indicador Live Data/Syncing, botão + NOVO NEGÓCIO. Props: loading, onNewDeal. Ref.: DS v1.4
+- [x] T004 [P] Criar `InsightBar.jsx`: barra de insight IA (petroleum/[0.02]), mensagem contextual, CTA "Ver detalhes". Props: onViewDetails. Ref.: DS v1.4
+- [x] T005 [P] Criar `KpiGrid.jsx`: grid 4 cards (Leads Gerados, Conversão, Pipeline Ativo, Automações). Props: metrics. Classes: technical-card, kpi-title, kpi-value, badge-ultra-compact. Ref.: DS v1.4
+- [x] T006 [P] Criar `KanbanBoard.jsx`: secção Fluxo Comercial, 4 colunas (Triagem, Qualificação, Proposta, Negociação), cards de lead. Props: pipeline, columnTitles. Classes: section-title, technical-card, support-text-sm. Ref.: DS v1.4
 
 ---
 

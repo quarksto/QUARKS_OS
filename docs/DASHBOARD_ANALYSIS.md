@@ -26,7 +26,7 @@ O Dashboard é a **única tela 100% alinhada ao DS de referência** e funciona c
 
 ---
 
-## 3. Consistência com o Design System (DS v1)
+## 3. Consistência com o Design System (DS v1.4)
 
 | Item DS | Uso no Dashboard | Status |
 |---------|------------------|--------|

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
+import api from '../services/api';
 import { DashboardShell } from '../components/dashboard/DashboardShell';
-import { User, Phone, Mail, MapPin, ArrowLeft, Briefcase, FileText } from 'lucide-react';
+import { StandardAvatar } from '../components/ui/StandardAvatar';
 
 const ClientDetailPage = () => {
     const { id } = useParams();
@@ -16,7 +16,6 @@ const ClientDetailPage = () => {
 
     const loadClient = async () => {
         try {
-            // Need API endpoint: GET /api/clients/:id
             const res = await api.get(`/clients/${id}`);
             setClient(res.data);
         } catch (error) {
@@ -38,102 +37,139 @@ const ClientDetailPage = () => {
         }
     };
 
-    if (loading) return <DashboardShell>Loading...</DashboardShell>;
-    if (!client) return <DashboardShell>Cliente não encontrado.</DashboardShell>;
+    const headerRight = (
+        <button className="h-8 px-4 rounded-full border border-petroleum text-petroleum hover:bg-petroleum hover:text-white font-bold text-[11px] transition-all active:scale-95 uppercase tracking-wider">
+            Editar Perfil
+        </button>
+    );
+
+    if (loading) return <DashboardShell loading title="Carregando..." />;
+    if (!client) return <DashboardShell title="Erro" subtitle="Cliente não encontrado" />;
 
     return (
-        <DashboardShell>
-            <button onClick={() => navigate('/clients')} className="mb-6 flex items-center gap-2 text-slate-500 hover:text-petroleum transition-colors">
-                <ArrowLeft size={18} /> Voltar para Clientes
-            </button>
-
-            {/* Profile Header */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
-                <div className="flex items-start justify-between">
-                    <div className="flex gap-6">
-                        <div className={`w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold ${client.type === 'PJ' ? 'bg-indigo-500' : 'bg-emerald-500'}`}>
-                            {client.name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                            <h1 className="ds-display-l text-petroleum mb-2">{client.name}</h1>
-                            <div className="flex flex-wrap gap-4 text-slate-600">
+        <DashboardShell
+            title={client.name}
+            subtitle={`Perfil do Cliente - ${client.type}`}
+            headerIcon="person"
+            headerRight={headerRight}
+            breadcrumbs={[
+                { label: 'Clientes', path: '/clients' },
+                { label: client.name, active: true }
+            ]}
+        >
+            <div className="flex-1 flex flex-col min-h-0 bg-canvas overflow-y-auto p-4 md:p-6 lg:p-8 gap-8 text-slate-800">
+                <div className="max-w-[1600px] mx-auto w-full space-y-8">
+                    {/* Profile Summary Card */}
+                    <div className="bg-white rounded-lg border border-slate-100 p-6 flex items-start gap-8 shadow-none">
+                        <StandardAvatar name={client.name} size="xl" />
+                        <div className="flex-1">
+                            <h1 className="ds-title-page text-petroleum mb-4">{client.name}</h1>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 {client.email && (
-                                    <div className="flex items-center gap-2 ds-body-s">
-                                        <Mail size={16} className="text-slate-400" /> {client.email}
+                                    <div className="flex items-center gap-3 text-slate-600 text-[13px]">
+                                        <span className="material-symbols-outlined text-slate-400 text-[20px] ds-icon-w300">mail</span>
+                                        {client.email}
                                     </div>
                                 )}
                                 {client.phone && (
-                                    <div className="flex items-center gap-2 ds-body-s">
-                                        <Phone size={16} className="text-slate-400" /> {client.phone}
+                                    <div className="flex items-center gap-3 text-slate-600 text-[13px]">
+                                        <span className="material-symbols-outlined text-slate-400 text-[20px] ds-icon-w300">call</span>
+                                        {client.phone}
                                     </div>
                                 )}
                                 {client.address && (
-                                    <div className="flex items-center gap-2 ds-body-s">
-                                        <MapPin size={16} className="text-slate-400" /> {client.address}
+                                    <div className="flex items-center gap-3 text-slate-600 text-[13px]">
+                                        <span className="material-symbols-outlined text-slate-400 text-[20px] ds-icon-w300">location_on</span>
+                                        {client.address}
                                     </div>
                                 )}
                             </div>
                         </div>
                     </div>
-                    <button className="ds-button-secondary">Editar Perfil</button>
-                </div>
-            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left Column: Projects & Activity */}
-                <div className="lg:col-span-2 space-y-6">
-                    {/* Projects Section */}
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                        <h2 className="ds-title-card mb-4 flex items-center gap-2">
-                            <Briefcase size={20} className="text-solar-500" />
-                            Projetos Ativos
-                        </h2>
-                        <div className="space-y-4">
-                            {client.projects && client.projects.map(p => (
-                                <div key={p.id} className="p-4 border border-slate-100 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer flex justify-between items-center">
-                                    <div>
-                                        <h3 className="font-bold text-petroleum">{p.name}</h3>
-                                        <span className="text-sm text-slate-500">Status: {p.status}</span>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Projects & History */}
+                        <div className="lg:col-span-2 space-y-8">
+                            {/* Active Projects */}
+                            <div className="bg-white rounded-lg border border-slate-100 p-6 shadow-none">
+                                <h2 className="ds-title-section text-slate-700 mb-6 flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-solar ds-icon-w300">inventory_2</span>
+                                    Projetos Ativos
+                                </h2>
+                                <div className="space-y-4">
+                                    {client.projects && client.projects.map(p => (
+                                        <div key={p.id} className="p-4 border border-slate-50 rounded-lg hover:bg-slate-50/50 transition-colors cursor-pointer flex justify-between items-center group">
+                                            <div>
+                                                <h3 className="font-semibold text-slate-800 text-[13px]">{p.name}</h3>
+                                                <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-slate-500 mt-1">
+                                                    {p.status}
+                                                </span>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="font-semibold text-slate-700 text-[13px]">
+                                                    {p.value ? `R$ ${p.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'}
+                                                </div>
+                                                <span className="material-symbols-outlined text-slate-300 group-hover:text-petroleum transition-colors text-[20px] ds-icon-w300">chevron_right</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {(!client.projects || client.projects.length === 0) && (
+                                        <div className="py-8 text-center text-slate-400">
+                                            <span className="material-symbols-outlined text-4xl block mb-2 font-light">folder_off</span>
+                                            <p className="text-[13px]">Nenhum projeto ativo</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Lead History */}
+                            <div className="bg-white rounded-lg border border-slate-100 p-6 shadow-none">
+                                <h2 className="ds-title-section text-slate-700 mb-6 flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-slate-400 ds-icon-w300">history</span>
+                                    Histórico de Oportunidades
+                                </h2>
+                                <div className="space-y-3">
+                                    {client.leads && client.leads.map(l => (
+                                        <div key={l.id} className="flex justify-between items-center py-3 border-b border-slate-50 last:border-0 text-[13px]">
+                                            <div className="flex items-center gap-3">
+                                                <span className="material-symbols-outlined text-slate-300 text-[18px] ds-icon-w300">ads_click</span>
+                                                <span className="text-slate-600">Lead criado em {new Date(l.createdAt).toLocaleDateString('pt-BR')}</span>
+                                            </div>
+                                            <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${l.status === 'CLOSED_WON'
+                                                ? 'border-emerald-100 text-emerald-700 bg-emerald-50/20'
+                                                : 'border-slate-100 text-slate-500'
+                                                }`}>
+                                                {l.status}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Summary Side Card */}
+                        <div className="space-y-8">
+                            <div className="bg-white rounded-lg border border-slate-100 p-6 shadow-none h-fit">
+                                <h2 className="ds-title-section text-slate-700 mb-6">Resumo Financeiro</h2>
+                                <div className="space-y-6">
+                                    <div className="flex flex-col gap-1">
+                                        <span className="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Total Investido</span>
+                                        <span className="text-[24px] font-bold text-petroleum tabular-nums">
+                                            R$ {client.projects?.reduce((acc, p) => acc + (p.value || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                        </span>
                                     </div>
-                                    <span className="font-mono font-medium text-slate-700">
-                                        {p.value ? `R$ ${p.value.toLocaleString()}` : '-'}
-                                    </span>
+                                    <div className="flex flex-col gap-1">
+                                        <span className="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Economia Mensal Est.</span>
+                                        <span className="text-[18px] font-bold text-emerald-600 tabular-nums">R$ 1.250,00</span>
+                                    </div>
+                                    <div className="pt-4 border-t border-slate-50">
+                                        <div className="flex justify-between items-center text-[12px]">
+                                            <span className="text-slate-500">Projetos Ativos</span>
+                                            <span className="font-bold text-slate-700">{client.projects?.length || 0}</span>
+                                        </div>
+                                    </div>
                                 </div>
-                            ))}
-                            {(!client.projects || client.projects.length === 0) && (
-                                <p className="text-slate-400 text-sm">Nenhum projeto ativo.</p>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Histórico de Leads */}
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                        <h2 className="ds-title-card mb-4 flex items-center gap-2">
-                            <FileText size={20} className="text-slate-400" />
-                            Histórico de Oportunidades
-                        </h2>
-                        <div className="space-y-2">
-                            {client.leads && client.leads.map(l => (
-                                <div key={l.id} className="flex justify-between py-2 border-b border-slate-50 text-sm">
-                                    <span>Lead criado em {new Date(l.createdAt).toLocaleDateString()}</span>
-                                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${l.status === 'CLOSED_WON' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>{l.status}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Right Column: Stats / Notes */}
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 h-fit">
-                    <h2 className="ds-title-card mb-4">Resumo</h2>
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                            <span className="text-slate-500 text-sm">Total Investido</span>
-                            <span className="font-bold text-petroleum">R$ {client.projects?.reduce((acc, p) => acc + (p.value || 0), 0).toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-slate-500 text-sm">Economy Mensal Est.</span>
-                            <span className="font-bold text-emerald-600">R$ 1.250,00</span>
+                            </div>
                         </div>
                     </div>
                 </div>

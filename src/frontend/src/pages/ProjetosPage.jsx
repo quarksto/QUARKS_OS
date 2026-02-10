@@ -3,7 +3,6 @@ import { DashboardShell } from '../components/dashboard/DashboardShell';
 import { ProjectKanbanBoard } from '../components/dashboard/ProjectKanbanBoard';
 import { ProjectDetailModal } from '../components/dashboard/ProjectDetailModal';
 import { useProjectData } from '../hooks/useProjectData';
-import { Text, Badge, Button, Group, ActionIcon, Tooltip } from '@mantine/core';
 
 export default function ProjetosPage() {
     const { kanban, loading, updateProjectStatus, refresh } = useProjectData();
@@ -17,39 +16,34 @@ export default function ProjetosPage() {
     };
 
     const headerRight = (
-        <Group gap="sm">
+        <div className="flex items-center gap-3">
             <div className="relative hidden md:block group">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-petroleum transition-colors text-[20px]">search</span>
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-petroleum transition-colors text-[18px] ds-icon-w300">search</span>
                 <input
                     type="text"
-                    placeholder="Buscar projetos..."
+                    placeholder="BUSCAR PROJETOS..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-64 pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-[12px] text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-petroleum/60 transition-all font-sans"
+                    className="w-64 pl-9 pr-4 h-8 bg-white border border-slate-200 rounded-lg ds-meta !text-petroleum placeholder:text-slate-400 focus:outline-none focus:border-petroleum/60 transition-all font-sans font-bold uppercase"
                 />
             </div>
 
-            <Tooltip label="Recarregar dados">
-                <ActionIcon
-                    variant="subtle"
-                    color="gray"
-                    onClick={refresh}
-                    loading={loading}
-                    className="rounded-lg"
-                >
-                    <span className="material-symbols-outlined text-[20px]">refresh</span>
-                </ActionIcon>
-            </Tooltip>
-
-            <Button
-                variant="filled"
-                color="petroleum"
-                leftSection={<span className="material-symbols-outlined text-[18px]">add_circle</span>}
-                className="rounded-lg font-bold text-[11px] uppercase tracking-wider h-9"
+            <button
+                onClick={refresh}
+                disabled={loading}
+                className="size-8 rounded-full flex items-center justify-center hover:bg-slate-100 text-slate-500 transition-all disabled:opacity-50"
+                title="Recarregar dados"
             >
-                Novo Projeto
-            </Button>
-        </Group>
+                <span className={`material-symbols-outlined text-[20px] ds-icon-w300 ${loading ? 'animate-spin' : ''}`}>refresh</span>
+            </button>
+
+            <button
+                className="bg-solar hover:bg-amber-600 text-petroleum px-4 h-8 rounded-full ds-meta font-black transition-all flex items-center gap-2 uppercase tracking-widest shadow-none"
+            >
+                <span className="material-symbols-outlined text-[18px] ds-icon-w300">add_circle</span>
+                NOVO PROJETO
+            </button>
+        </div>
     );
 
     return (
@@ -61,23 +55,32 @@ export default function ProjetosPage() {
             headerRight={headerRight}
             breadcrumbs={[{ label: 'Engenharia' }, { label: 'Projetos' }]}
         >
-            <div className="flex-1 flex flex-col min-h-0 bg-[#F1F5F9]/50">
-                <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 custom-scrollbar">
+            <div className="flex-1 flex flex-col min-h-0 bg-[#F1F5F9]/30 p-6 gap-6">
+                <div className="flex-1 overflow-y-auto w-full">
                     <div className="max-w-[1600px] mx-auto">
-                        <div className="mb-6 flex items-center justify-between">
+                        <div className="mb-8 flex items-end justify-between">
                             <div>
-                                <Text size="sm" fw={700} className="text-petroleum-900 uppercase tracking-widest flex items-center gap-2">
-                                    <span className="w-2 h-2 bg-solar-500 rounded-full animate-pulse" />
+                                <h3 className="ds-label !text-petroleum mb-1 flex items-center gap-2 font-black uppercase tracking-widest">
+                                    <span className="w-2.5 h-2.5 bg-solar rounded-full border border-solar shadow-[0_0_8px_rgba(255,182,0,0.4)]" />
                                     Fluxo de Execução
-                                </Text>
-                                <Text size="xs" className="text-slate-500 font-medium">Arraste os cards para atualizar a fase da obra</Text>
+                                </h3>
+                                <p className="ds-body !text-slate-500 !text-xs font-medium">Gestão de fases e cronograma técnico</p>
                             </div>
 
-                            <Group gap="xs">
-                                <Badge variant="dot" color="blue" size="sm">Planejamento</Badge>
-                                <Badge variant="dot" color="orange" size="sm">Em Execução</Badge>
-                                <Badge variant="dot" color="green" size="sm">Finalizado</Badge>
-                            </Group>
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                                    <span className="ds-meta !text-slate-500 font-bold uppercase">Planejamento</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400" />
+                                    <span className="ds-meta !text-slate-500 font-bold uppercase">Execução</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                                    <span className="ds-meta !text-slate-500 font-bold uppercase">Concluído</span>
+                                </div>
+                            </div>
                         </div>
 
                         <ProjectKanbanBoard

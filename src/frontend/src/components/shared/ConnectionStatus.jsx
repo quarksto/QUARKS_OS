@@ -16,13 +16,7 @@ export const ConnectionStatus = () => {
         return (
             <Tooltip label="Conectado ao Real-time Gateway">
                 <Group gap={4}>
-                    <div style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        backgroundColor: 'var(--mantine-color-green-6)',
-                        boxShadow: '0 0 8px var(--mantine-color-green-4)'
-                    }} />
+                    <div className="size-2 rounded-full bg-emerald-500" aria-hidden />
                     <Text size="xs" c="dimmed" fw={500}>Live</Text>
                 </Group>
             </Tooltip>
@@ -32,13 +26,7 @@ export const ConnectionStatus = () => {
     return (
         <Tooltip label={error ? `Erro: ${error}` : 'Desconectado'}>
             <Group gap={4} style={{ cursor: 'pointer' }} onClick={handleReconnect}>
-                <div style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    backgroundColor: 'var(--mantine-color-red-6)',
-                    animation: 'pulse 2s infinite'
-                }} />
+<div className="size-2 rounded-full bg-red-500 animate-pulse" aria-hidden />
                 <Text size="xs" c="red" fw={500}>Offline</Text>
             </Group>
         </Tooltip>
